@@ -1,0 +1,18 @@
+# 农业 Agent MVP - 依赖
+
+# MCP Server / tool bridge
+mcp>=1.0.0
+httpx>=0.27.0
+pydantic>=2.0.0
+
+# DeepSeek / OpenAI-compatible API client
+openai>=1.0.0
+
+# Vision MCP: Swin/ViT image classification via HuggingFace
+transformers>=4.40.0
+torch>=2.2.0
+pillow>=10.0.0
+numpy>=1.26.0
+
+# Sensor anomaly baseline / v3 experiments
+scikit-learn>=1.4.0

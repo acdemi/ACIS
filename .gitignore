@@ -1,0 +1,39 @@
+# Python caches
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual environments
+.venv/
+venv/
+env/
+
+# Environment and local secrets
+.env
+.env.*
+!.env.example
+*.key
+*.pem
+*.p12
+*.pfx
+
+# Local runtime artifacts
+*.log
+*.tmp
+_test_image.jpg
+
+# Model/data caches and large artifacts
+.cache/
+models/
+checkpoints/
+*.onnx
+*.pt
+*.pth
+*.safetensors
+*.gguf
+
+# OS/editor files
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
