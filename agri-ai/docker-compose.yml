@@ -1,0 +1,55 @@
+services:
+  api:
+    image: python:3.11-slim
+    working_dir: /app
+    volumes:
+      - .:/app
+    command: sh -c "pip install -r requirements.txt && uvicorn gateway.app:app --host 0.0.0.0 --port 8000"
+    ports:
+      - "8000:8000"
+    environment:
+      PYTHONIOENCODING: utf-8
+      PYTHONPATH: /app
+      NEO4J_URI: bolt://neo4j:7687
+      NEO4J_USER: neo4j
+      NEO4J_PASSWORD: agriai2026
+      AGRI_AI_KG_BACKEND: auto
+    depends_on:
+      neo4j:
+        condition: service_healthy
+
+  qdrant:
+    image: qdrant/qdrant:latest
+    ports:
+      - "6333:6333"
+    volumes:
+      - qdrant_storage:/qdrant/storage
+
+  neo4j:
+    image: neo4j:community
+    container_name: agri-neo4j
+    restart: unless-stopped
+    ports:
+      - "17474:7474"
+      - "7687:7687"
+    volumes:
+      - neo4j_data:/data
+      - ./neo4j/logs:/logs
+      - ./neo4j/import:/var/lib/neo4j/import
+      - ./neo4j/plugins:/plugins
+    environment:
+      - NEO4J_AUTH=neo4j/agriai2026
+      - NEO4J_PLUGINS=["apoc"]
+      - NEO4J_dbms_memory_pagecache_size=512M
+      - NEO4J_dbms_memory_heap_max__size=1G
+      - apoc.export.file.enabled=true
+      - apoc.import.file.enabled=true
+    healthcheck:
+      test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://localhost:7474 || exit 1"]
+      interval: 15s
+      timeout: 10s
+      retries: 5
+
+volumes:
+  qdrant_storage:
+  neo4j_data:
