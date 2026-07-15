@@ -4,7 +4,6 @@
 单文件、零额外配置：自动加载 DeepSeek Key 与 Neo4j 连接，离线可跑。
 
 启动：
-    cd agri-ai
     python -m ui.tui
 """
 

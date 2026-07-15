@@ -1,7 +1,7 @@
 # agri-ai 项目审计报告 v2
 
 > 审计日期：2026-07-11
-> 代码位置：`E:\knowledge_database\agent协作模式初探\agri-ai\`
+> 代码位置：`E:\knowledge_database\agent协作模式初探\`
 
 ---
 
