@@ -1,6 +1,6 @@
 """Lightweight smoke evaluation for the Agri AI orchestrator.
 
-Run from agri-ai/:
+Run from repo root:
     python evals/smoke_eval.py
 """
 

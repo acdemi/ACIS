@@ -4,7 +4,7 @@
 置信度 + 是否正确(1/0)。病理 Agent 额外把"次选诊断(反事实)"作为负样本，使校准
 数据同时包含正负两类，IsotonicRegression 才能学到有意义的映射。
 
-Run from agri-ai/:
+Run from repo root:
     python utils/generate_calibration.py
 """
 from __future__ import annotations

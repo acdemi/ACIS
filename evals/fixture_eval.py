@@ -1,6 +1,6 @@
 """Run the fixed fixture set through the orchestrator and assert invariants.
 
-Run from agri-ai/:
+Run from repo root:
     python evals/fixture_eval.py
 """
 
