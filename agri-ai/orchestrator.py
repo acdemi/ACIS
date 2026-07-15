@@ -30,9 +30,12 @@ from agents.vision_agent import VisionAgent
 from agents.rag_memory_agent import RagMemoryAgent
 from agents.kg_agent import KnowledgeGraphAgent
 from agents.case_memory_agent import CaseMemoryAgent
+from agents.outcome_agent import OutcomeAgent
 from agents.pathology_agent import PathologyAgent
 from agents.meteorology_agent import MeteorologyExpertAgent
 from agents.cultivation_agent import CultivationAgent
+from agents.economic_agent import EconomicAgent
+from agents.ecology_agent import EcologyAgent
 from agents.judge_agent import JudgeAgent
 from debate.engine import DebateEngine
 
@@ -86,9 +89,12 @@ class AgentOrchestrator:
         self.rag_agent = RagMemoryAgent()
         self.knowledge_graph_agent = KnowledgeGraphAgent()
         self.case_memory_agent = CaseMemoryAgent()
+        self.outcome_agent = OutcomeAgent()
         self.pathology_agent = PathologyAgent()
         self.meteorology_agent = MeteorologyExpertAgent()
         self.cultivation_agent = CultivationAgent()
+        self.economic_agent = EconomicAgent()
+        self.ecology_agent = EcologyAgent()
         self.debate_engine = DebateEngine()
         from debate.critic import CriticEngine
         self.critic_engine = CriticEngine(use_llm=use_llm_critic)
@@ -139,6 +145,7 @@ class AgentOrchestrator:
             self.rag_agent.run(context),
             self.knowledge_graph_agent.run(context),
             self.case_memory_agent.run(context),
+            self.outcome_agent.run(context),
         ]
 
         expert_outputs = [
@@ -146,6 +153,10 @@ class AgentOrchestrator:
             self.meteorology_agent.run(context),
             self.cultivation_agent.run(context, sensor_output),
         ]
+        # ACIS 2.0: 经济 & 生态 Agent 依据技术专家意见做成本/生态评估（可降级）
+        if os.environ.get("AGRI_AI_EXTRA_EXPERTS", "1") not in {"0", "false", "False"}:
+            expert_outputs.append(self.economic_agent.run(context, expert_outputs[0], expert_outputs[2]))
+            expert_outputs.append(self.ecology_agent.run(context, expert_outputs))
 
         outputs = perception_outputs + memory_outputs + expert_outputs
         debate = self.debate_engine.run(outputs, context)

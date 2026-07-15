@@ -4,6 +4,8 @@
 # Python
 __pycache__/
 *.py[cod]
+*.pyc
+.venv/
 
 # Neo4j 运行时挂载目录
 neo4j/logs/
@@ -13,4 +15,15 @@ neo4j/plugins/
 # 编辑器
 .vscode/
 .idea/
+
+# 运行时数据库
 data/
+
+# 文件系统锁文件（挂载残留）
+.fuse_hidden*
+
+# Cowork 会话上下文
+.context/
+
+# 临时推送计划草稿（非项目内容，不纳入版本库）
+PUSH_PLAN.md

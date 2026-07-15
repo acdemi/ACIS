@@ -4,6 +4,30 @@
 `orchestrator.py` 默认使用 LangGraph 主图执行，LangGraph 不可用或执行失败时自动回退到规则编排。
 主图流程：context → perception → memory → experts → debate → critic → judge。
 
+## 版本演进
+
+### ACIS 2.0 认知进化版（2026-07）
+
+在不破坏现有稳定功能与回归测试的前提下，分阶段升级认知深度：
+
+**阶段一（P0）认知深度升级**
+
+- 反事实推理：所有专家 Agent（病理/栽培/气象/经济/生态）在 `AgentOutput.counterfactual` 中给出最可能的替代诊断及排除理由；Judge 增加集体忽略检测--若 KG 中存在某病害但所有专家（含反事实）均未提及，争议分 +0.2 并下调置信度（首选诊断已与 KG 完全匹配时不惩罚）。
+- 多轮辩论：`workflow.py` 主图增加条件循环。Judge 置信度落在 0.6~0.85、辩论轮次 <2 且存在冲突/缺失证据时进入 `rebuttal` 节点，收集关键冲突重新调用相关专家给出第二轮意见，再次 debate->critic->judge；第二轮 Judge 注明“第二轮辩论后裁决”并比较两轮意见。`debate/engine.py` 新增 `multi_round`/`history` 参数。`AGRI_AI_MULTI_ROUND_DEBATE=0` 可关闭。
+- 经济 Agent 与生态 Agent：新增 `agents/economic_agent.py`（内置价格常量表，做成本-收益分析）与 `agents/ecology_agent.py`（内置农药-天敌对照表，高毒农药触发“生态 vs 效率”冲突）。两者加入专家节点，与病理/栽培/气象并行；DebateEngine 新增“经济 vs 技术”“生态 vs 效率”冲突检测。
+- 置信度校准：`evals/fixtures.py` 为每个 case 增加 `ground_truth`；新增 `utils/confidence_calibration.py` 的 `Calibrator`（`sklearn.isotonic.IsotonicRegression`，不可用时回退手写 Platt Scaling），基于 fixture 快照 `utils/calibration_data.json` 训练，在 Judge 融合前对各专家置信度做映射。`AGRI_AI_CALIBRATION=0` 可关闭。
+
+**阶段二（P1）记忆进化**
+
+- 知识图谱进化：`kg_adapter.py` 新增 `propose_triple()`（幂等写入 `data/kg_drafts.json`）与 `load_draft_triples()`；Judge 发现专家证据充分但 KG 缺失关系时自动提议三元组；启用 `AGRI_AI_KG_DRAFTS_LOAD=1` 引用草稿时推理链注明“基于未审核知识”并略降置信度。
+- 经验回放闭环：`decisions` 表新增 `outcome` 列；`gateway/app.py` 新增 `POST /decisions/{id}/outcome`（接收 `有效/无效/部分有效`）；新增 `agents/outcome_agent.py` 召回同作物 `outcome='有效'` 的历史案例行动建议，与 RAG、KG 并列于记忆层节点。
+
+**阶段三（P2，远期）预测增强**（未实施）
+
+- Chronos/statsmodels 时序预测集成、传感器异常检测第三层真实化、`prediction_uncertainty` 字段。
+
+新增环境变量：`AGRI_AI_MULTI_ROUND_DEBATE`、`AGRI_AI_CALIBRATION`、`AGRI_AI_CALIB_ALPHA`、`AGRI_AI_KG_DRAFTS_PROPOSE`、`AGRI_AI_KG_DRAFTS_LOAD`、`AGRI_AI_KG_DRAFTS_PATH`。回归：`python evals/smoke_eval.py` 与 `python evals/fixture_eval.py`（12 场景）保持全绿。
+
 ## 目录
 
 - `gateway/`：FastAPI 路由入口

@@ -18,6 +18,9 @@ class AgentOutput:
     evidence: dict[str, Any] = field(default_factory=dict)
     warnings: list[str] = field(default_factory=list)
     recommendations: list[str] = field(default_factory=list)
+    # ACIS 2.0: counterfactual reasoning - alternative diagnosis an expert
+    # considered but rejected. Format: {alternative, rejection_reason}.
+    counterfactual: dict[str, Any] = field(default_factory=dict)
 
 
 @dataclass

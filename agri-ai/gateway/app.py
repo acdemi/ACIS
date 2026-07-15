@@ -69,3 +69,20 @@ def set_feedback(decision_id: int, request: FeedbackRequest) -> dict:
     if d is None:
         raise HTTPException(status_code=404, detail="decision not found")
     return d
+
+
+class OutcomeRequest(BaseModel):
+    outcome: str  # 有效 | 无效 | 部分有效
+    note: str = ""
+
+
+@app.post("/decisions/{decision_id}/outcome")
+def set_outcome(decision_id: int, request: OutcomeRequest) -> dict:
+    """ACIS 2.0: 记录决策实际结果（有效/无效/部分有效），供经验回放 Agent 召回。"""
+    if request.outcome not in {"有效", "无效", "部分有效"}:
+        raise HTTPException(status_code=400, detail="outcome 必须为 有效/无效/部分有效")
+    from storage.repository import set_outcome as _set
+    d = _set(decision_id, request.outcome, request.note)
+    if d is None:
+        raise HTTPException(status_code=404, detail="decision not found")
+    return d
