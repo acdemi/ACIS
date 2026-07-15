@@ -16,8 +16,14 @@ class DebateEngine:
         try: return float(v) if v is not None else None
         except: return None
 
-    def run(self, outputs: list[AgentOutput], context: RequestContext | None = None) -> DebateResult:
+    def run(self, outputs: list[AgentOutput], context: RequestContext | None = None, multi_round: bool = False, history: list[DebateResult] | None = None) -> DebateResult:
         consensus, conflicts, missing_evidence = [], [], []
+        if multi_round and history:
+            consensus.append(f"【多轮辩论·第{len(history) + 1}轮】已携带前{len(history)}轮辩论上下文")
+            for prev in history:
+                for c in getattr(prev, "conflicts", []):
+                    if c not in conflicts:
+                        conflicts.append(c)
         pathology = next((o for o in outputs if o.agent == "病理Agent"), None)
         meteorology = next((o for o in outputs if o.agent == "气象Agent"), None)
         disease_claimed = bool(pathology and self.DISEASE_CLAIM_PREFIX in pathology.claim and self.DISEASE_INSUFFICIENT not in pathology.claim)
@@ -44,6 +50,15 @@ class DebateEngine:
             conflicts.append("传感器检测到环境异常，但病理Agent未能确认病害，需补充图像与现场复核")
         if any(o.agent == "视觉Agent" and o.confidence == 0 for o in outputs):
             missing_evidence.append("缺少有效图像证据，视觉 Agent 未参与确认")
+        # ACIS 2.0: 经济 vs 技术 / 生态 vs 效率
+        economic = next((o for o in outputs if o.agent == "经济Agent"), None)
+        ecology = next((o for o in outputs if o.agent == "生态Agent"), None)
+        if economic and economic.evidence.get("economic_conflict"):
+            conflicts.append("经济 vs 技术：经济学建议暂缓高成本防治，与病理/栽培的及时防治建议存在张力")
+        if ecology and ecology.evidence.get("ecological_conflict"):
+            conflicts.append("生态 vs 效率：推荐化学农药对天敌毒性高，生态Agent建议换用低毒替代方案")
+        if economic and ecology and economic.evidence.get("economic_conflict") and ecology.evidence.get("ecological_conflict"):
+            consensus.append("经济与生态视角均提示需调整防治策略，建议综合低毒低成本方案")
         if not consensus:
             consensus.append("各 Agent 暂无强冲突，建议按风险优先级执行")
 

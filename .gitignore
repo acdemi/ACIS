@@ -37,3 +37,7 @@ checkpoints/
 Thumbs.db
 .idea/
 .vscode/
+
+# Large data / old MVP
+agri-agent-mvp/
+data/

@@ -24,8 +24,11 @@ Env:
 
 from __future__ import annotations
 
+import json
 import os
 import re
+from datetime import datetime
+from pathlib import Path
 from typing import Any
 
 from rag.knowledge_base import CROP_MAP, DISEASE_DB, _DISEASE_KEYWORDS
@@ -437,6 +440,56 @@ def query_kg(crop: str = "", query: str = "", top_k: int = 3) -> dict[str, Any]:
     merged["neo4j_connected"] = True
     merged["neo4j_hits"] = neo.get("neo4j_hits", 0)
     return merged
+
+
+# ============================================================
+# ACIS 2.0: 知识图谱进化机制（草稿三元组）
+# ============================================================
+
+_DRAFTS_PATH = Path(os.environ.get("AGRI_AI_KG_DRAFTS_PATH", "data/kg_drafts.json"))
+
+
+def propose_triple(subject: str, relation: str, object: str, confidence: float, evidence: str = "") -> dict[str, Any] | None:
+    """提议一个新三元组，追加到 ``data/kg_drafts.json``（每行一个 JSON）。
+
+    幂等：若 (subject, relation, object) 已存在则跳过。返回写入的记录或 None。
+    受环境变量 ``AGRI_AI_KG_DRAFTS_PROPOSE`` 控制（默认开启）。
+    """
+    if os.environ.get("AGRI_AI_KG_DRAFTS_PROPOSE", "1") in {"0", "false", "False"}:
+        return None
+    try:
+        _DRAFTS_PATH.parent.mkdir(parents=True, exist_ok=True)
+        for t in load_draft_triples():
+            if t.get("subject") == subject and t.get("relation") == relation and t.get("object") == object:
+                return None  # 已存在，幂等跳过
+        record = {
+            "subject": subject,
+            "relation": relation,
+            "object": object,
+            "confidence": round(float(confidence), 3),
+            "evidence": evidence,
+            "created_at": datetime.now().isoformat(timespec="seconds"),
+        }
+        with open(_DRAFTS_PATH, "a", encoding="utf-8") as fh:
+            fh.write(json.dumps(record, ensure_ascii=False) + "\n")
+        return record
+    except Exception:
+        return None
+
+
+def load_draft_triples() -> list[dict[str, Any]]:
+    """读取未审核的草稿三元组列表。"""
+    if not _DRAFTS_PATH.exists():
+        return []
+    try:
+        drafts: list[dict[str, Any]] = []
+        for line in _DRAFTS_PATH.read_text(encoding="utf-8").splitlines():
+            line = line.strip()
+            if line:
+                drafts.append(json.loads(line))
+        return drafts
+    except Exception:
+        return []
 
 
 def kg_status() -> dict[str, Any]:

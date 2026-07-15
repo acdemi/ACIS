@@ -95,3 +95,39 @@ def search_confirmed_cases(crop: str, query: str, limit: int = 3) -> list[dict]:
     ).fetchall()
     conn.close()
     return [dict(r) for r in rows]
+
+def set_outcome(decision_id: int, outcome: str, note: str = "") -> dict | None:
+    """ACIS 2.0: 记录决策的实际结果（有效/无效/部分有效），用于经验回放。"""
+    conn = get_connection()
+    conn.execute(
+        "UPDATE decisions SET outcome=?, feedback_note=COALESCE(NULLIF(?, ''), feedback_note), feedback_at=? WHERE id=?",
+        (outcome, note, datetime.now().isoformat(timespec="seconds"), decision_id),
+    )
+    conn.commit()
+    conn.close()
+    return get_decision(decision_id)
+
+
+def search_outcome_cases(crop: str, query: str, limit: int = 3) -> list[dict]:
+    """ACIS 2.0: 返回同作物且 outcome='有效' 的历史案例（含解析后的 action_plan）。"""
+    conn = get_connection()
+    rows = conn.execute(
+        """SELECT id, created_at, crop, intent, query, decision, confidence,
+                  risk_level, action_plan, outcome
+           FROM decisions
+           WHERE outcome='有效' AND crop=?
+           ORDER BY id DESC LIMIT ?""",
+        (crop, limit),
+    ).fetchall()
+    conn.close()
+    results = []
+    for r in rows:
+        d = dict(r)
+        ap = d.get("action_plan")
+        if ap:
+            try:
+                d["action_plan"] = json.loads(ap)
+            except (ValueError, TypeError):
+                pass
+        results.append(d)
+    return results

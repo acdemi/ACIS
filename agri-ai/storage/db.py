@@ -31,7 +31,8 @@ CREATE TABLE IF NOT EXISTS decisions (
     judge_analysis     TEXT,
     feedback           TEXT,
     feedback_note      TEXT,
-    feedback_at        TEXT
+    feedback_at        TEXT,
+    outcome            TEXT
 );
 CREATE INDEX IF NOT EXISTS idx_decisions_created ON decisions(created_at DESC);
 """
@@ -39,7 +40,7 @@ CREATE INDEX IF NOT EXISTS idx_decisions_created ON decisions(created_at DESC);
 def _ensure_columns(conn: sqlite3.Connection) -> None:
     """Add feedback columns to pre-existing databases (idempotent)."""
     cols = {row[1] for row in conn.execute("PRAGMA table_info(decisions)").fetchall()}
-    for col, decl in [("feedback", "TEXT"), ("feedback_note", "TEXT"), ("feedback_at", "TEXT")]:
+    for col, decl in [("feedback", "TEXT"), ("feedback_note", "TEXT"), ("feedback_at", "TEXT"), ("outcome", "TEXT")]:
         if col not in cols:
             conn.execute(f"ALTER TABLE decisions ADD COLUMN {col} {decl}")
 
