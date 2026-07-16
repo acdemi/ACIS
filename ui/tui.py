@@ -170,7 +170,7 @@ def _render_banner() -> None:
             Align.center(
                 Group(
                     Text("🌱 农业 Agent v4 — 多智能体决策系统", style="bold green"),
-                    Text("面试演示 · 感知 → 记忆 → 专家 → 辩论 → Critic → Judge", style="cyan"),
+                    Text("感知 → 记忆 → 专家 → 辩论 → Critic → Judge", style="cyan"),
                 )
             ),
             border_style="green",
