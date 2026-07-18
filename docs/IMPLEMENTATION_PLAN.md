@@ -7,13 +7,14 @@ based_on:
   - ACIS.md
   - architecture.md
   - roadmap.md
-  - RFC-000 ~ RFC-010
-last_updated: 2026-07-10
+  - RFC-000 ~ RFC-014
+last_updated: 2026-07-16
 ---
 
 # ACIS Implementation Plan
 
-> 本文档基于 RFC-000 ~ RFC-010 及 ACIS.md / architecture.md / roadmap.md 综合分析生成。
+> 本文档基于 RFC-000 ~ RFC-014 及 ACIS.md / architecture.md / roadmap.md 综合分析生成。
+> RFC-011 ~ RFC-014 为面向 ACIS 4.x/5.x 的前瞻性规格（认知循环 / 自我模型 / 目标动机 / 智能体生态），超出当前 roadmap（至 3.0）范围，仅在 §4.3 标注归属，不在近期实施计划内落地。
 > 本文档不引入 RFC 之外的任何新架构，不增加未经定义的模块。
 > 如实现与 RFC 冲突，以 RFC 与 ACIS.md 为准。
 
@@ -74,7 +75,7 @@ Evidence First、Explainability、Memory Never Rewrites History、Debate Before 
 ```mermaid
 graph TD
   ACIS[ACIS.md 宪法]
-  R001["RFC-001 System Architecture<br/>⚠ 空文件，内容在 architecture.md"]
+  R001["RFC-001 System Architecture<br/>Accepted v2.1.0（architecture.md 已 Superseded）"]
   R002[RFC-002 Workflow State]
   R003[RFC-003 Agent Protocol]
   R004[RFC-004 Memory System]
@@ -187,7 +188,7 @@ graph TD
 | Phase 1 | Planner 全功能、Tool MCP 标准化、Workflow 调度 | RFC-008/005 | ACIS 2.1 |
 | Phase 2 | 完整 Learning Pipeline、Procedural Memory、Experience Ranking、Confidence Optimization | RFC-007 | ACIS 2.2 |
 | Phase 3 | World Model、Digital Twin、IoT Execution、完整 Executive Agent、Decision Simulation | RFC-010/009 | ACIS 3.0 |
-| Phase 4+ | 多农场协同、具身智能、群智、农业基础模型 | 架构 §16 | ACIS 4.x/5.x |
+| Phase 4+ | 多农场协同、具身智能、群智、农业基础模型、认知循环 / 自我模型 / 目标动机 / 智能体生态 | 架构 §16 / RFC-011~014 | ACIS 4.x/5.x |
 
 ---
 
@@ -239,14 +240,14 @@ graph TD
 # 6. RFC 冲突与问题清单
 
 > 以下为阅读中发现的问题，按严重程度排序。本计划不擅自修改，仅指出。
+>
+> **状态更新（2026-07-16）**：C1 已解决；C2~C6 后续由 ADR-002~004 处理（详见 `docs/audit/IMPLEMENTATION_ARCHITECTURE.md` §18 合规性检查）；C7~C9 仍为待办。
 
 ## 🔴 严重
 
-**C1 - RFC-001 为空文件**
-- `RFC001-System Architecture.md` 为 0 字节，但 RFC-002/003/004/005 均声明 `Depends On: RFC-001`。
-- 实际架构内容在非 RFC 文档 `architecture.md`。
-- 影响：依赖链根部断裂，"唯一架构源"分裂为空 RFC + 非 RFC 文档。
-- 建议：将 architecture.md 正式纳入 RFC-001，或填充 RFC-001 内容。
+**C1 - RFC-001 为空文件** ✅ 已解决（2026-07）
+- `RFC001-System Architecture.md` 已重写为 `status: Accepted`、`version: 2.1.0`，成为唯一权威架构源；原 `architecture.md` 已标记 `Superseded` 并降为指引入口。
+- 下游 RFC-002/003/004/005 的 `Depends On: RFC-001` 现已有效。
 
 **C2 - RFC-010 自身依赖顺序自相矛盾**
 - RFC-010 §摘要/结论称 World Model 是"核心基础"，§12 称 Planner 使用 World Model。
@@ -300,12 +301,12 @@ graph TD
 # 7. 风险与建议
 
 **风险**
-- C1（RFC-001 空）导致架构源头不稳，所有下游 RFC"依赖"一个空文件，需优先补齐。
+- ~~C1（RFC-001 空）~~ 已解决：RFC-001 现为 Accepted v2.1.0。
 - C2/C3 使 World Model 实现顺序不定，直接影响 Phase 1 Planner 是否能依赖 World Model。
 - C4/C5 的状态机/边界不清，会在实现 Orchestrator 时产生归位争议。
 
 **建议（不修改文件，仅供决策）**
-1. 优先补全 RFC-001（将 architecture.md 升格为 RFC-001）。
+1. ~~优先补全 RFC-001~~ 已完成（RFC-001 现为 Accepted v2.1.0，architecture.md 已 Superseded）。
 2. 修订 RFC-010 §19 依赖顺序，使 World Model 先于 Planner（与 §12 一致）。
 3. 明确 World Model 在 MVP 提供轻量 State/Entity 表示，完整预测/仿真留 3.0。
 4. 增补一节"状态机组合规约"，统一 RFC-002/006/008/009 生命周期映射。

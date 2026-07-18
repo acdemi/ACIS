@@ -206,6 +206,8 @@ Open-source ecosystem evolution
 
 Agricultural industry needs
 
+前瞻性探索规格见 RFC-011（认知循环）/ RFC-012（自我模型与身份）/ RFC-013（目标与动机）/ RFC-014（智能体生态与市场），对应 ACIS 4.x/5.x 愿景，暂不在本 roadmap 版本计划内。
+
 The roadmap is intentionally conservative.
 
 Predictability is preferred over ambitious planning.
