@@ -1,90 +1,116 @@
 # CURRENT SPRINT
 
 Phase: 2.1E  
-Sprint: 04.5A  
-Goal: Capability Framework — 定义 ACIS 认知能力模型，建立覆盖度评估体系
+Sprint: 04.5B  
+Goal: Capability Annotation & Targeted Enrichment — 完成现有案例的显式能力标注，定向补充覆盖不足的能力案例
 
 ## Read Order
 1. `docs/architecture/architecture.md`
 2. `docs/architecture/principles.md`
 3. `context/ARCHITECTURE_STATE.md`
 4. `context/KNOWN_DEBT.md`
-5. `benchmarks/schema.py`
-6. `benchmarks/loader.py`
-7. `benchmarks/metadata.py` (existing, will be enhanced)
-8. `benchmarks/capability_matrix.py` (existing, will be enhanced)
+5. `benchmarks/capabilities.py`
+6. `benchmarks/metadata.py`
+7. `benchmarks/capability_matrix.py`
+8. `benchmarks/CAPABILITY_ANNOTATION_SUGGESTIONS.md` (Sprint 04.5A 产出)
+9. `benchmarks/datasets/enriched.json` (现有 15 个案例)
 
 ## Scope
 
 ### Allowed Files
-- `benchmarks/capabilities.py` (新建)  
-  定义 ACIS 认知能力枚举（Capability enum），包含以下稳定能力类别：
-  - `information_gathering` — 主动请求缺失信息（温度、湿度、近期用药等）
-  - `knowledge_retrieval` — 从长尾/罕见知识库（KG/RAG）中检索相关证据
-  - `conflict_resolution` — 在多源矛盾（文本 vs 传感器、视觉 vs 环境）中消解冲突
-  - `counterfactual_reasoning` — 生成并评估替代诊断，抑制集体遗漏
-  - `uncertainty_quantification` — 在证据不足时主动降低置信度或拒绝回答
-  - `multi_step_planning` — 将复杂问题分解为子任务并依次调用工具
-  - `sensor_cross_validation` — 交叉验证多模态传感器读数，检测异常
+- `benchmarks/datasets/enriched.json` (修改)  
+  对现有 15 个 enriched 案例，根据 Sprint 04.5A 的标注建议进行显式能力标注（在 `metadata.capabilities` 字段中），并补充 `observable_evidence` 字段（若 case 需要）。
+  新增 3+ 个案例，重点补充 `information_gathering` 能力覆盖。
 
-- `benchmarks/capability_matrix.py` (增强)  
-  增加功能：
-  - 扫描所有现有数据集（easy/medium/hard/planning/memory/debate/counterfactual/adversarial/enriched）中的每个 case
-  - 自动推断或读取每个 case 的 `capabilities` 字段，生成能力覆盖矩阵
-  - 输出 `benchmarks/CAPABILITY_COVERAGE.md`，展示每种能力的案例数、覆盖缺口
-  - 若某个 case 缺少能力标注，自动根据 `expected_reasoning_features` 或 `design_intent` 给出推荐标注（仅提示，不自动写入数据文件）
-  - 保留原有的能力套件矩阵与挑战类型矩阵
+- `benchmarks/datasets/planning.json` (修改)  
+  对 4 个 planning 案例进行显式能力标注（仅添加 `metadata.capabilities`，不修改其他内容）。
 
-- `benchmarks/metadata.py` (微调)  
-  - `BenchmarkMetadata` 中新增 `capabilities` 字段（Capability 列表），替代或补充 `expected_reasoning_features`
-  - 保留 `challenge_type`，但不再作为主分类维度
-  - 更新 `validate_metadata` 要求至少包含一个 capability
+- `benchmarks/datasets/memory.json` (修改)  
+  对 4 个 memory 案例进行显式能力标注。
 
-- `benchmarks/CAPABILITY_COVERAGE.md` (自动生成，勿手写)
-- `tests/test_capabilities.py` (新建)  
-  测试能力枚举完整性、覆盖矩阵生成、元数据验证
+- `benchmarks/datasets/debate.json` (修改)  
+  对 4 个 debate 案例进行显式能力标注。
+
+- `benchmarks/datasets/counterfactual.json` (修改)  
+  对 3 个 counterfactual 案例进行显式能力标注。
+
+- `benchmarks/datasets/adversarial.json` (修改)  
+  对 3 个 adversarial 案例进行显式能力标注。
+
+- `benchmarks/datasets/easy.json` (修改，可选但推荐)  
+  对 12 个 easy 案例中有明确推理特征的进行能力标注（至少标注 uncertainty_quantification 和 multi_step_planning 相关的案例），不作为强制要求，但标注越多越好。
+
+- `benchmarks/datasets/medium.json` (修改，可选)  
+  同上，至少标注具有冲突/多步规划特征的案例。
+
+- `benchmarks/datasets/hard.json` (修改，可选)  
+  同上，优先标注具有 sensor_cross_validation / conflict_resolution 的案例。
+
+- `benchmarks/capability_matrix.py` (微调)  
+  更新覆盖统计逻辑，支持从 `metadata.capabilities` 字段读取已标注数据；更新报告输出以区分“已标注”和“推断”。
+
+- `benchmarks/CAPABILITY_COVERAGE.md` (自动生成，更新)
+- `benchmarks/CAPABILITY_ANNOTATION_SUGGESTIONS.md` (自动更新，已标注的应从待标注列表中移除)
+- `tests/test_capabilities.py` (扩展)  
+  新增测试：验证标注后案例的 `capabilities` 字段有效、覆盖矩阵中标注计数正确、新增 enriched 案例的合理性。
+- `context/KNOWN_DEBT.md` (更新)  
+  添加关于 Capability Annotation 的数据治理债务条目（如已记录则更新状态）。
 
 ### Forbidden Files
-- 所有冻结模块：`agents/`、`planner/`、`debate/`、`rag/`、`rule_engine/`、`storage/`、`gateway/`、`ui/`
+- 所有冻结模块：`agents/`, `planner/`, `debate/`, `rag/`, `rule_engine/`, `storage/`, `gateway/`, `ui/`
 - `orchestrator.py`, `workflow.py`, `kg_adapter.py`
-- 所有现有 JSON 数据集文件（只读，不修改内容）
-- `evals/runner.py`、`evals/ablation.py` 的业务逻辑（只读）
+- `evals/runner.py`, `evals/ablation.py` 的业务逻辑（只读，但可通过标准 CLI 运行验证）
+- `benchmarks/schema.py`, `benchmarks/capabilities.py`（只读）
 
 ## Deliverables
 
-1. **能力枚举 (Capability enum)**  
-   `benchmarks/capabilities.py` 中定义稳定的能力枚举，每个能力附带中文说明和典型触发场景。
+1. **显式能力标注**  
+   - 对 `enriched.json` (15)、`planning.json` (4)、`memory.json` (4)、`debate.json` (4)、`counterfactual.json` (3)、`adversarial.json` (3) 共 33 个案例，完成 100% 显式 `capabilities` 标注（参照建议进行人工审查后写入）。
+   - 对 `easy/medium/hard` (共 28 个案例)，完成至少 50% 的显式标注（优先标注具有明确推理特征的案例，如包含 uncertainty、multi_step、sensor_conflict 的）。
+   - 所有标注需经 Maintainer 审查确认（本次 Sprint 由 Codex 执行建议标注，Maintainer 在合并前逐条审核）。
 
-2. **能力覆盖矩阵**  
-   自动生成 `benchmarks/CAPABILITY_COVERAGE.md`，包含：
-   - 每种能力的案例数（区分已标注/待标注）
-   - 每种能力的覆盖密度（百分比）
-   - 明显覆盖不足的能力标记（如案例数 <2）
+2. **能力补充案例**  
+   - 在 `enriched.json` 中新增至少 3 个案例，专门覆盖 `information_gathering` 能力（当前仅 3 个推断案例），确保 `information_gathering` 的显式标注案例数 ≥ 6。
+   - 新增案例必须包含完整的 `metadata`（含 `capabilities`, `observable_evidence`），遵循 `BenchmarkMetadata` 规范。
 
-3. **元数据增强**  
-   `BenchmarkMetadata` 新增 `capabilities` 字段，校验规则要求非空。
+3. **Observable Evidence 字段（可选升级）**  
+   - 为已标注的 enriched 案例（及部分其他案例）添加 `observable_evidence` 字段，描述该能力在系统行为中的可观测表现（例如 `uncertainty_quantification` → `confidence < 0.6 或 need_more_information`）。
+   - 此为非强制交付，但有助于为未来自动评估提供依据。
 
-4. **现有案例的能力标注建议**  
-   对尚未携带 `capabilities` 字段的案例，生成一份 `benchmarks/CAPABILITY_ANNOTATION_SUGGESTIONS.md`，列出推荐标注以供人工审查。**不自动修改任何数据集文件。**
+4. **更新覆盖矩阵**  
+   - 重新生成 `CAPABILITY_COVERAGE.md`，区分“已标注”与“推断”，展示标注完成度。`information_gathering` 覆盖密度应显著提升。
 
-5. **单元测试**  
-   - 测试能力枚举定义完整
-   - 测试覆盖矩阵生成逻辑
-   - 测试元数据验证（缺失 capabilities 会被拒绝）
+5. **消融验证报告**  
+   - 在已标注的新数据集上重新运行 `evals/ablation.py --dataset benchmarks.datasets.enriched`，生成消融报告，着重分析 `information_gathering` 等能力关闭 Planner 后的指标变化。
+   - 不要求 accuracy 必须下降，但需观察 `planner_usage`, `tool_usage`, `counterfactual_count` 等过程指标的差异，并给出结构化统计。
 
 ## Acceptance Criteria
 
-1. `benchmarks/capabilities.py` 中至少定义 7 种能力，每种有清晰描述。
-2. 运行 `python -m benchmarks.capability_matrix` 生成最新的 `CAPABILITY_COVERAGE.md`，报告覆盖情况。
-3. 现有所有数据集（共 9 个文件，约 60+ 案例）的覆盖矩阵中，至少 5 种能力有案例覆盖。
-4. 新案例元数据若缺少 `capabilities` 字段，`validate_metadata` 会报错。
-5. `pytest tests/test_capabilities.py` 全绿，没有破坏已有 150 个测试。
-6. `ruff`、`mypy` 对新文件零错误。
+1. **标注完成率**  
+   - 33 个能力套件案例 (planning/memory/debate/counterfactual/adversarial/enriched) 的 `capabilities` 字段显式标注率为 100%。  
+   - easy/medium/hard 中至少 14 个案例（50%）具备显式能力标注。  
+   - 所有显式标注均通过 `validate_metadata` 校验（`capabilities` 非空且取自合法枚举）。
+
+2. **案例补充**  
+   - `enriched.json` 新增 ≥3 个 `information_gathering` 专项案例，所有新案例携带 `capabilities` 和 `observable_evidence`（若实现）。
+
+3. **文档更新**  
+   - `CAPABILITY_COVERAGE.md` 显示 `information_gathering` 的已标注案例数 ≥6，总覆盖案例数 ≥9。  
+   - `CAPABILITY_ANNOTATION_SUGGESTIONS.md` 中已标注案例不再出现。
+
+4. **消融报告**  
+   - 执行 `python evals/ablation.py --dataset benchmarks.datasets.enriched`，产出按能力分组的贡献统计。  
+   - 至少出现 1 种能力在消融时呈现过程指标差异（如 `information_gathering` 关闭 Planner 后 `planner_usage` 降至 0 等），并在报告中注明。
+
+5. **测试与质量**  
+   - `pytest tests/test_capabilities.py` 及全套测试（当前 167 个）全部通过。  
+   - ruff, mypy 对修改文件零新增错误。
 
 ## Stop Conditions
-- 完成上述验收项，输出 `Sprint 04.5A Complete. Awaiting review.` 并停止。
-- **绝不进入 Sprint 04.5B。** 等待 Chief Architect 审查能力覆盖模型后再决定下一步。
+- 全部验收标准达成。
+- 提交 PR 并附上消融报告摘要与标注清单，等待 Chief Maintainer 审核。
+- 输出 `Sprint 04.5B Complete. Awaiting annotation review.` 后停止。**绝不自动进入 Sprint 05。**
 
 ## Design Principle
-**能力抽象化，测量标准化**。  
-定义系统“应该具备什么认知能力”，而非“当前版本有哪些模块”。能力模型稳定，模块可重构。基准的科研价值来源于它测量了**可复现的认知维度**，而非特定代码路径。
+**先标注，后扩充；先定性，后定量。**  
+显式能力标注是将 Benchmark 从“推断”提升为“科学基准”的关键一步。只有基于人工审查的标注数据，后续的消融分析和模块贡献研究才具有可复现的信任基础。扩充案例严格遵循能力覆盖缺口，避免无目的堆砌。

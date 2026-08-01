@@ -1,49 +1,86 @@
-# Agri AI
+# Agri AI（ACIS）
 
-分层农业智能 Agent 原型，当前由 v3 多模型能力和 v4 Orchestrator / Debate / Judge 架构组成。
-`orchestrator.py` 默认使用 LangGraph 主图执行，LangGraph 不可用或执行失败时自动回退到规则编排。
-主图流程：context → perception → memory → experts → debate → critic → judge。
+分层农业认知智能系统原型（Agricultural Cognitive Intelligence System，ACIS）。当前版本为 **ACIS 2.1E（Evidence Platform）**，
+由 Planner / Tool Router / 感知 / 记忆 / 专家 / Debate / Critic / Judge 分层协作组成，默认经 LangGraph 主图执行；
+LangGraph 不可用或执行失败时自动回退规则编排。
+
+主图流程：`context → perception → memory → experts → debate → critic → judge`（含多轮辩论条件循环 `rebuttal`）。
+
+## 当前状态（2026-08-01）
+
+| 项目 | 状态 |
+|---|---|
+| 版本 | ACIS 2.1E — Evidence Platform；Sprint 04.5A（Capability Framework）已完成，等待 Evidence Review Gate |
+| 模块冻结 | Planner / Judge / Debate / Critic / Tool Router / Memory / DecisionOutput / Unified Trace / Perception Agents 冻结 2.1（详见 `context/ARCHITECTURE_STATE.md`） |
+| 单元测试 | `pytest`：167 passed（11 个测试文件） |
+| 回归 | `evals/smoke_eval.py`（3 套 × 3 场景）、`evals/fixture_eval.py`（12 场景）全绿 |
+| 基准 | `benchmarks/` 9 个数据集 / 61 案例；enriched 15 例 accuracy 1.00（详见 `results/summary.md`） |
+| 消融 | 7 组合消融已产出（`results/ablation/`），各认知模块贡献可测量 |
+| 已知债务 | 61 个案例能力标注待人工审查；冻结模块 mypy 遗留错误（详见 `context/KNOWN_DEBT.md`） |
 
 ## 版本演进
 
+### ACIS 2.1E — Evidence Platform（2026-07-28 ~ 2026-08-01）
+
+- **Sprint 01 — Unified Trace**：`trace/` 统一追踪层（collector / exporter / types），全链路可观测。
+- **Sprint 02 — Evaluation Runner**：`evals/runner.py` + `metrics.py` + `report.py` + `config.py`，9 项指标（accuracy / average_confidence / average_runtime / planner_usage / tool_usage / memory_hits / debate_rounds / counterfactual_count / collective_omission_count）。
+- **Sprint 03 — Benchmark Framework**：`benchmarks/` 9 个数据集、61 个案例（easy/medium/hard 难度分层 + planning/memory/debate/counterfactual/adversarial 能力套件 + enriched 五类认知挑战集）。
+- **Sprint 04 — Ablation Framework**：`evals/ablation.py`，基线（all_on）对比关闭 Planner / Debate / Memory / Counterfactual / Tool Router / Critic 的模块贡献消融。
+- **Sprint 04.5A — Capability Framework**：`benchmarks/capabilities.py` 定义 7 种稳定认知能力枚举；`capability_matrix.py` 自动生成 `benchmarks/CAPABILITY_COVERAGE.md` 与 `benchmarks/CAPABILITY_ANNOTATION_SUGGESTIONS.md`（61 案例待人工标注）。
+
+### ACIS 2.1（2026-07-25）
+
+- Planner（`planner/`：任务分解、工具调用规划）
+- Tool Router（`tool_router/`：Agent → 工具统一路由与权限）
+- Meta-Critic（级联错误检测）
+- Procedural Memory（经验回放）
+- LangGraph 工作流扩展
+
 ### ACIS 2.0 认知进化版（2026-07）
 
-在不破坏现有稳定功能与回归测试的前提下，分阶段升级认知深度：
-
-**阶段一（P0）认知深度升级**
-
-- 反事实推理：所有专家 Agent（病理/栽培/气象/经济/生态）在 `AgentOutput.counterfactual` 中给出最可能的替代诊断及排除理由；Judge 增加集体忽略检测--若 KG 中存在某病害但所有专家（含反事实）均未提及，争议分 +0.2 并下调置信度（首选诊断已与 KG 完全匹配时不惩罚）。
-- 多轮辩论：`workflow.py` 主图增加条件循环。Judge 置信度落在 0.6~0.85、辩论轮次 <2 且存在冲突/缺失证据时进入 `rebuttal` 节点，收集关键冲突重新调用相关专家给出第二轮意见，再次 debate->critic->judge；第二轮 Judge 注明“第二轮辩论后裁决”并比较两轮意见。`debate/engine.py` 新增 `multi_round`/`history` 参数。`AGRI_AI_MULTI_ROUND_DEBATE=0` 可关闭。
-- 经济 Agent 与生态 Agent：新增 `agents/economic_agent.py`（内置价格常量表，做成本-收益分析）与 `agents/ecology_agent.py`（内置农药-天敌对照表，高毒农药触发“生态 vs 效率”冲突）。两者加入专家节点，与病理/栽培/气象并行；DebateEngine 新增“经济 vs 技术”“生态 vs 效率”冲突检测。
-- 置信度校准：`evals/fixtures.py` 为每个 case 增加 `ground_truth`；新增 `utils/confidence_calibration.py` 的 `Calibrator`（`sklearn.isotonic.IsotonicRegression`，不可用时回退手写 Platt Scaling），基于 fixture 快照 `utils/calibration_data.json` 训练，在 Judge 融合前对各专家置信度做映射。`AGRI_AI_CALIBRATION=0` 可关闭。
-
-**阶段二（P1）记忆进化**
-
-- 知识图谱进化：`kg_adapter.py` 新增 `propose_triple()`（幂等写入 `data/kg_drafts.json`）与 `load_draft_triples()`；Judge 发现专家证据充分但 KG 缺失关系时自动提议三元组；启用 `AGRI_AI_KG_DRAFTS_LOAD=1` 引用草稿时推理链注明“基于未审核知识”并略降置信度。
-- 经验回放闭环：`decisions` 表新增 `outcome` 列；`gateway/app.py` 新增 `POST /decisions/{id}/outcome`（接收 `有效/无效/部分有效`）；新增 `agents/outcome_agent.py` 召回同作物 `outcome='有效'` 的历史案例行动建议，与 RAG、KG 并列于记忆层节点。
-
-**阶段三（P2，远期）预测增强**（未实施）
-
-- Chronos/statsmodels 时序预测集成、传感器异常检测第三层真实化、`prediction_uncertainty` 字段。
-
-新增环境变量：`AGRI_AI_MULTI_ROUND_DEBATE`、`AGRI_AI_CALIBRATION`、`AGRI_AI_CALIB_ALPHA`、`AGRI_AI_KG_DRAFTS_PROPOSE`、`AGRI_AI_KG_DRAFTS_LOAD`、`AGRI_AI_KG_DRAFTS_PATH`。回归：`python evals/smoke_eval.py` 与 `python evals/fixture_eval.py`（12 场景）保持全绿。
+- 反事实推理 + Judge 集体忽略检测（争议分 +0.2、置信度下调）
+- 多轮辩论：`workflow.py` 主图 `rebuttal` 条件循环，`AGRI_AI_MULTI_ROUND_DEBATE=0` 可关闭
+- 经济 Agent / 生态 Agent（成本-收益、农药-天敌冲突检测）
+- 置信度校准（`utils/confidence_calibration.py`，Isotonic Regression / Platt Scaling，`AGRI_AI_CALIBRATION=0` 可关闭）
+- KG 进化（`propose_triple()` 幂等写入 `data/kg_drafts.json`）+ 经验回放闭环（`POST /decisions/{id}/outcome`）
+- 阶段三（P2，远期）预测增强未实施：Chronos/statsmodels 时序预测、传感器异常第三层、`prediction_uncertainty` 字段
 
 ## 目录
 
-- `gateway/`：FastAPI 路由入口
-- `agents/`：视觉、气象、病理、栽培、Judge Agent
-- `kg_adapter.py`：知识图谱适配器，为 Judge 提供 KG 三元组与硬约束
+- `orchestrator.py`：主编排入口（默认 LangGraph 主图，失败回退规则编排）
+- `workflow.py`：LangGraph 主图节点定义（含多轮辩论条件循环）
+- `planner/`：Planner（任务分解、工具编排）
+- `tool_router/`：Tool Router（工具注册与路由）
+- `trace/`：Unified Trace（统一追踪采集与导出）
+- `agents/`：感知（视觉/传感器/天气）、记忆（RAG/KG/案例/经验回放）、专家（病理/气象/栽培/经济/生态）、Judge
 - `debate/`：Debate 协调器 + Critic 反驳轮次
-- `kg/`：AgriKG 知识图谱 MCP Server
-- `scripts/`：AgriKG 导入脚本与集成指南
-- `rag/`：当前内存知识库，预留 Qdrant 检索接口
+- `rag/`：知识库（Qdrant 可选，默认内存回退）
+- `kg_adapter.py` + `kg/`：知识图谱适配器 + AgriKG MCP Server
 - `rule_engine/`：传感器模拟、异常检测、规则版 Router
-- `orchestrator.py`：当前主编排入口，默认 LangGraph 主图
-- `orchestrator_v3.py`：DeepSeek 工具调用版 v3
-- `workflow.py`：LangGraph 主图节点定义
-- `MODEL_AGENT_ORCHESTRATION.md`：小模型与 Agent 编排方案
-- `evals/`：回归评估脚本（smoke_eval + fixture_eval）
-- `ui/`：Streamlit UI + TUI 演示界面（`ui/tui.py`，面试演示）
+- `storage/`：SQLite 持久化（决策审计 + 反馈/结果回灌）
+- `gateway/`：FastAPI 路由入口
+- `ui/`：TUI + Web UI
+- `evals/`：smoke_eval / fixture_eval / runner / ablation / report
+- `benchmarks/`：基准数据集（61 案例）、能力枚举、覆盖矩阵（自动生成）
+- `context/`：Sprint 状态、路线图、架构状态、已知债务（实现入口，先读 `CURRENT_SPRINT.md`）
+- `docs/`：宪法（`ACIS.md`）、RFC、ADR、Sprint 报告
+- `results/`：评测产物（summary / suites / ablation / traces）
+- `utils/`：置信度校准、集体遗漏分析
+- `agri-ai/.venv`：项目 Python 3.13 虚拟环境（运行时依赖已装）
+
+## 环境准备
+
+```powershell
+# 推荐使用仓库自带 venv
+.\agri-ai\.venv\Scripts\Activate.ps1
+# 或直接指定解释器
+$env:PYTHONIOENCODING='utf-8'
+$env:PYTHONPATH='.'
+$py = 'E:\knowledge_database\ACIS\agri-ai\.venv\Scripts\python.exe'
+
+# 首次安装依赖（含开发工具）
+pip install -r requirements.txt pytest ruff mypy
+```
 
 ## 运行
 
@@ -51,6 +88,18 @@
 $env:PYTHONIOENCODING='utf-8'
 $env:PYTHONPATH='.'
 python orchestrator.py
+```
+
+自定义问题：
+
+```powershell
+python orchestrator.py "温室A番茄叶片黄斑，叶背有灰色霉层，如何处理？"
+```
+
+仅使用规则编排 fallback：
+
+```powershell
+python orchestrator.py --rules-only
 ```
 
 ## TUI 演示界面（面试演示）
@@ -69,12 +118,6 @@ python -m ui.tui
 - 未启动 Neo4j / Qdrant 时自动回退内存知识库，TUI 自动设置 `NEO4J_PASSWORD=agriai2026` 与 `HF_HUB_OFFLINE=1`（避免 Chronos 联网下载超时）。
 
 当前支持作物：番茄 / 甜菜 / 棉花（病害与农事指南已内置；黄瓜保留兼容）。
-
-仅使用规则编排 fallback：
-
-```powershell
-python orchestrator.py --rules-only
-```
 
 启用 DeepSeek 结构化 Judge（无 Key 或调用失败时自动回退规则裁决）：
 
@@ -95,20 +138,38 @@ python orchestrator.py --llm-judge --llm-critic "温室A甜菜叶片圆形褐色
 - `DEEPSEEK_BASE_URL`：默认 `https://api.deepseek.com`
 - `DEEPSEEK_MODEL` / `AGRI_AI_JUDGE_MODEL`：默认 `deepseek-chat`
 - `AGRI_AI_CRITIC_MODEL`：Critic 反驳所用模型，默认同上
+- `AGRI_AI_MULTI_ROUND_DEBATE`：多轮辩论开关（默认 1）
+- `AGRI_AI_EXTRA_EXPERTS`：经济/生态 Agent 开关（默认 1）
+- `AGRI_AI_CALIBRATION` / `AGRI_AI_CALIB_ALPHA`：置信度校准开关与参数
+- `AGRI_AI_KG_DRAFTS_PROPOSE` / `AGRI_AI_KG_DRAFTS_LOAD` / `AGRI_AI_KG_DRAFTS_PATH`：KG 草稿三元组提议/加载
+- `AGRI_AI_PERSIST`：SQLite 持久化开关（默认 1）
 
-运行轻量回归：
+## 测试与评估
 
 ```powershell
+# 单元测试（167 个，11 个测试文件）
+python -m pytest -q
+
+# 轻量回归：主图 / 规则 / LLM Judge 回退（3 套 × 3 场景）
 python evals/smoke_eval.py
-```
 
-固定场景回归（12 个确定性 crop/intent/病害 断言）：
-
-```powershell
+# 固定场景回归（12 个确定性 crop/intent/病害 断言）
 python evals/fixture_eval.py
+
+# Benchmark 评测（数据集与能力套件）
+python evals/runner.py --dataset benchmarks.datasets.enriched
+python evals/runner.py --suite all
+
+# 消融（7 组合，输出 results/ablation/）
+python evals/ablation.py --dataset benchmarks.datasets.enriched
+
+# 能力覆盖矩阵与标注建议（自动生成 benchmarks/CAPABILITY_COVERAGE.md）
+python -m benchmarks.capability_matrix
 ```
 
-RAG/Qdrant 记忆层（Qdrant 不可用时自动回退内存知识库）：
+## RAG/Qdrant 记忆层
+
+Qdrant 不可用时自动回退内存知识库：
 
 ```powershell
 # 可选：启动 Qdrant
@@ -128,7 +189,9 @@ RAG 环境变量：
 - `QDRANT_COLLECTION`：默认 `agri_knowledge_v1`
 - `AGRI_AI_RAG_TOP_K`：默认 `3`
 
-KG/Neo4j 知识图谱（Neo4j 不可用时自动回退内置病害库 DISEASE_DB）：
+## KG/Neo4j 知识图谱
+
+Neo4j 不可用时自动回退内置病害库 DISEASE_DB：
 
 ```powershell
 # 查看 KG 后端状态
@@ -146,15 +209,24 @@ KG 环境变量：
 
 > 真实 AgriKG 数据需先用 `scripts/import_agrikg.py` 导入 Neo4j；未导入或未启动时 Judge 自动使用 DISEASE_DB 合成的三元组与硬约束，离线可跑。
 
-自定义问题：
-
-```powershell
-python orchestrator.py "温室A番茄叶片黄斑，叶背有灰色霉层，如何处理？"
-```
-
-API：
+## API
 
 ```powershell
 uvicorn gateway.app:app --reload
 ```
 
+- `GET /health`
+- `POST /diagnose`
+- `GET /decisions` / `GET /decisions/{id}`
+- `POST /decisions/{id}/feedback`（人工复核标记）
+- `POST /decisions/{id}/outcome`（ACIS 2.0 经验回放：有效 / 无效 / 部分有效）
+
+## 相关文档
+
+- `context/ARCHITECTURE_STATE.md`：模块冻结状态（单一真相源）
+- `context/ROADMAP.md` / `context/CURRENT_SPRINT.md`：Sprint 路线图与当前 Sprint
+- `context/KNOWN_DEBT.md`：已知技术债务
+- `docs/ACIS.md`：项目宪法
+- `docs/rfc/RFC001-System Architecture.md`：架构权威文档（RFC-001）
+- `docs/architecture/`：架构、原则、愿景
+- `benchmarks/README.md`：基准框架说明

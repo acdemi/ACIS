@@ -4,7 +4,7 @@ project: ACIS
 version: 2.0
 status: Active
 priority: Reference
-last_updated: 2026-07
+last_updated: 2026-08-01
 depends_on:
   - ACIS.md
   - architecture.md
@@ -18,6 +18,10 @@ depends_on:
 >
 > Detailed implementation plans belong to RFCs and Phase documents.
 
+> **状态更新（2026-08-01）**：当前版本已推进至 **ACIS 2.1E（Evidence Platform）**。
+> 活跃的 Sprint 路线图以 `context/ROADMAP.md` 与 `context/CURRENT_SPRINT.md` 为准；
+> 本文档保留 ACIS 2.0 / 2.1 / 3.0 的版本愿景参考。
+
 ---
 
 # Vision
@@ -30,35 +34,12 @@ Development follows incremental evolution rather than large rewrites.
 
 # Current Status
 
-Current Version
-
-ACIS 2.0
-
-Status
-
-Stable Development
-
-Current Focus
-
-Multi-Agent Cognitive Decision Making
-
-Completed
-
-✓ Multi-Agent Workflow
-
-✓ Debate Engine
-
-✓ Judge
-
-✓ Meta-Critic
-
-✓ Memory Layer
-
-✓ Knowledge Evolution
-
-✓ Outcome Replay
-
-✓ Confidence Calibration
+| 项 | 值 |
+|---|---|
+| Current Version | ACIS 2.1E（Evidence Platform） |
+| Status | Stable Development |
+| Current Focus | Evidence Platform：评测、基准与能力覆盖（Unified Trace / Runner / Benchmark / Ablation / Capability Framework） |
+| Completed | ✓ Multi-Agent Workflow ✓ Debate Engine ✓ Judge ✓ Meta-Critic ✓ Memory Layer ✓ Knowledge Evolution ✓ Outcome Replay ✓ Confidence Calibration ✓ Planner ✓ Tool Router ✓ Unified Trace ✓ Evaluation Runner ✓ Benchmark Framework ✓ Ablation Framework ✓ Capability Framework |
 
 ---
 
@@ -137,20 +118,23 @@ Major Goals
 Success Criteria
 
 Support complete agricultural decision workflows.
+
 # Out of Scope
+
 The following capabilities are intentionally not planned in the near future.
 
-• Training proprietary LLMs
+- Training proprietary LLMs
 
-• Building custom databases
+- Building custom databases
 
-• Replacing existing AI frameworks
+- Replacing existing AI frameworks
 
-• Developing hardware platforms
+- Developing hardware platforms
 
 ACIS focuses on system integration and cognitive architecture.
 
 # Development Principles
+
 Development priorities:
 
 1. Stability
@@ -166,45 +150,33 @@ Development priorities:
 New features should only be introduced when they solve existing limitations.
 
 # Release Strategy
-Major Version
 
-Architecture evolution
+Major Version: Architecture evolution
 
-Minor Version
+Minor Version: New capabilities
 
-New capabilities
-
-Patch Version
-
-Bug fixes
+Patch Version: Bug fixes
 
 Documentation updates may occur independently of software releases.
-
 
 # Completion Criteria
 
 A roadmap item is considered complete only when:
 
-✓ RFC accepted
-
-✓ Implementation merged
-
-✓ Regression tests pass
-
-✓ Documentation updated
-
-✓ Interfaces remain compatible
+- RFC accepted
+- Implementation merged
+- Regression tests pass
+- Documentation updated
+- Interfaces remain compatible
 
 # Future
+
 Future directions will be evaluated according to:
 
-Community feedback
-
-Research progress
-
-Open-source ecosystem evolution
-
-Agricultural industry needs
+- Community feedback
+- Research progress
+- Open-source ecosystem evolution
+- Agricultural industry needs
 
 前瞻性探索规格见 RFC-011（认知循环）/ RFC-012（自我模型与身份）/ RFC-013（目标与动机）/ RFC-014（智能体生态与市场），对应 ACIS 4.x/5.x 愿景，暂不在本 roadmap 版本计划内。
 
