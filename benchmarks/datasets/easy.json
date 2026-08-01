@@ -1,0 +1,103 @@
+{
+  "name": "easy",
+  "difficulty": "easy",
+  "description": "Canonical single-signal greenhouse queries with unambiguous symptom descriptions.",
+  "cases": [
+    {
+      "id": "tomato_leaf_mold",
+      "query": "温室A番茄叶片出现黄斑，叶背有灰色霉层，如何处理？",
+      "ground_truth": "叶霉病",
+      "crop": "tomato",
+      "intent": "diagnose",
+      "disease": "叶霉病"
+    },
+    {
+      "id": "tomato_early_blight",
+      "query": "温室A番茄叶片同心轮纹状病斑，褐色边缘，怎么治？",
+      "ground_truth": "早疫病",
+      "crop": "tomato",
+      "intent": "diagnose",
+      "disease": "早疫病"
+    },
+    {
+      "id": "tomato_monitor",
+      "query": "温室A番茄今天状态怎么样",
+      "ground_truth": "证据不足",
+      "crop": "tomato",
+      "intent": "monitor",
+      "disease": null
+    },
+    {
+      "id": "tomato_irrigate",
+      "query": "温室A番茄今天需要浇水吗",
+      "ground_truth": "证据不足",
+      "crop": "tomato",
+      "intent": "irrigate",
+      "disease": null
+    },
+    {
+      "id": "cucumber_downy_mildew",
+      "query": "温室B黄瓜叶片出现多角形黄褐色病斑，叶背有灰黑色霉层，如何处理？",
+      "ground_truth": "霜霉病",
+      "crop": "cucumber",
+      "intent": "diagnose",
+      "disease": "霜霉病"
+    },
+    {
+      "id": "sugar_beet_leaf_spot",
+      "query": "温室A甜菜叶片圆形褐色病斑，中央灰白，如何处理？",
+      "ground_truth": "褐斑病",
+      "crop": "sugar_beet",
+      "intent": "diagnose",
+      "disease": "褐斑病"
+    },
+    {
+      "id": "sugar_beet_root_rot",
+      "query": "温室A甜菜植株萎蔫黄化，根部变褐腐烂，如何处理？",
+      "ground_truth": "根腐病",
+      "crop": "sugar_beet",
+      "intent": "diagnose",
+      "disease": "根腐病"
+    },
+    {
+      "id": "sugar_beet_alert",
+      "query": "温室A甜菜当前有什么风险，需要优先处理",
+      "ground_truth": "证据不足",
+      "crop": "sugar_beet",
+      "intent": "alert",
+      "disease": null
+    },
+    {
+      "id": "cotton_verticillium_wilt",
+      "query": "温室A棉花叶片黄绿斑驳，维管束变褐，如何处理？",
+      "ground_truth": "黄萎病",
+      "crop": "cotton",
+      "intent": "diagnose",
+      "disease": "黄萎病"
+    },
+    {
+      "id": "cotton_fusarium_wilt",
+      "query": "温室A棉花植株萎蔫，半边叶片发黄，如何诊断？",
+      "ground_truth": "枯萎病",
+      "crop": "cotton",
+      "intent": "diagnose",
+      "disease": "枯萎病"
+    },
+    {
+      "id": "cotton_irrigate",
+      "query": "温室A棉花花铃期需要浇水吗",
+      "ground_truth": "证据不足",
+      "crop": "cotton",
+      "intent": "irrigate",
+      "disease": null
+    },
+    {
+      "id": "tomato_consult",
+      "query": "温室A番茄结果期水肥怎么管理，需要注意什么？",
+      "ground_truth": "证据不足",
+      "crop": "tomato",
+      "intent": "consult",
+      "disease": null
+    }
+  ]
+}

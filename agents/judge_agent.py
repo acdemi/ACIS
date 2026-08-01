@@ -11,6 +11,7 @@ from dataclasses import asdict
 from typing import Any
 from agents.types import AgentOutput, RequestContext, DebateResult, DecisionOutput
 from kg_adapter import query_kg, propose_triple, load_draft_triples
+from utils.omission import apply_omission_penalty, omission_action, omission_reason, omission_score
 
 class JudgeAgent:
     def __init__(self, use_llm: bool = False):
@@ -97,10 +98,16 @@ class JudgeAgent:
         return [d for d in kg_diseases if d not in mentioned]
 
     def _omission_analysis(self, outputs, kg, consistency) -> dict[str, Any]:
-        """反事实一致性 + 集体忽略分析（规则版与 LLM 版共用）。"""
+        """反事实一致性 + 集体漏检分析（规则版与 LLM 版共用）。
+
+        Phase 7A Sprint 02：结构化集体漏检 (ignored_candidates / omission_score /
+        omission_reason)，按 omission_score 驱动置信度惩罚（>0.50 减 0.05，上限 0.10，不低于 0.50）。
+        """
         omitted = self._collective_omission(outputs, kg)
-        primary_match = consistency["agent_diagnoses"][0].get("kg_match") if consistency["agent_diagnoses"] else "无KG数据"
-        penalty_applied = bool(omitted) and primary_match != "完全匹配"
+        retrieved = list(kg.get("diseases", []))
+        score = omission_score(len(omitted), len(retrieved))
+        reason = omission_reason(omitted)
+        action = omission_action(score)
         counterfactuals = [
             {"agent": o.agent, "alternative": (o.counterfactual or {}).get("alternative", ""),
              "rejection_reason": (o.counterfactual or {}).get("rejection_reason", "")}
@@ -108,9 +115,15 @@ class JudgeAgent:
         ]
         return {
             "omitted_diseases": omitted,
-            "penalty_applied": penalty_applied,
-            "controversy_delta": 0.2 if penalty_applied else 0.0,
+            "penalty_applied": action["level"] == "penalize",
+            "controversy_delta": action["confidence_delta"],
             "counterfactuals": counterfactuals,
+            "ignored_candidates": omitted,
+            "retrieved_candidates": retrieved,
+            "omission_score": score,
+            "omission_reason": reason,
+            "omission_level": action["level"],
+            "append_warning": action["append_warning"],
         }
 
     def _kg_evolution(self, outputs, kg, context) -> dict[str, Any]:
@@ -158,8 +171,7 @@ class JudgeAgent:
             decision = "继续采集证据后再决策"
         if vetoed: confidence = round(min(confidence, 0.6), 2)
         omission = self._omission_analysis(outputs, kg, consistency)
-        if omission["penalty_applied"]:
-            confidence = round(max(0.25, confidence - omission["controversy_delta"]), 2)
+        confidence = apply_omission_penalty(confidence, omission["omission_score"])
         kg_evo = self._kg_evolution(outputs, kg, context)
         if kg_evo["used_drafts"]:
             confidence = round(max(0.25, confidence - 0.03), 2)
@@ -170,7 +182,7 @@ class JudgeAgent:
         if debate.missing_evidence: action_plan.append("补充叶片近景图像，提升视觉和病理交叉验证置信度")
         if debate.conflicts: action_plan.append("存在策略冲突时，以病害风险控制优先，再安排水肥作业")
         if consistency["rule_violations"]: action_plan.append("当前环境与首选诊断的KG硬约束冲突，建议复核传感器数据并人工确认")
-        if omission["penalty_applied"]: action_plan.append("存在集体忽略风险，建议补充检索KG中未覆盖病害并人工复核")
+        if omission["append_warning"]: action_plan.append("存在集体忽略风险，建议补充检索KG中未覆盖病害并人工复核")
         need_human_review = bool(vetoed or debate.conflicts or confidence < 0.5 or debate.critic.get("escalate"))
         kg_join = "、".join(consistency["kg_diseases"]) or "无"
         trace_parts = [f"KG参照疾病：{kg_join}"]
@@ -178,9 +190,10 @@ class JudgeAgent:
         else: trace_parts.append("未触发KG硬约束否决")
         trace_parts.append(f"风险等级={debate.risk_level}，置信度={confidence}")
         if debate.critic.get("triggered"): trace_parts.append("Critic反驳：" + debate.critic.get("resolution", ""))
-        if omission["penalty_applied"]:
-            omitted_join = "、".join(omission["omitted_diseases"])
-            trace_parts.append(f"集体忽略预警：KG存在但专家均未考虑的病害--{omitted_join}，争议分+0.2")
+        if omission["append_warning"]:
+            omitted_join = "、".join(omission["ignored_candidates"]) or "无"
+            score_pct = format(omission["omission_score"], ".0%")
+            trace_parts.append(f"集体漏检预警：KG中存在专家均未考虑的病害--{omitted_join}（漏检比例 {score_pct}）")
         if kg_evo["used_drafts"]:
             n_drafts = len(kg_evo["drafts"])
             trace_parts.append(f"基于未审核知识：引用{n_drafts}条草稿三元组，置信度略降")
@@ -226,7 +239,7 @@ class JudgeAgent:
 
     def _build_judge_payload(self, context, outputs, debate, kg):
         sr = self._sensor_readings(outputs)
-        return {"现场数据": {"作物": context.crop, "温室": context.greenhouse_id, "意图": context.intent, "症状描述": context.query, "环境参数": sr}, "专家Agent意见": [{"agent": o.agent, "layer": o.layer, "diagnosis": o.claim, "confidence": o.confidence, "evidence": o.evidence, "warnings": o.warnings, "action": o.recommendations, "counterfactual": o.counterfactual} for o in outputs], "知识图谱": {"kg_triples": kg.get("triple_strings", []), "kg_rules": kg.get("rules", []), "hard_constraints": kg.get("hard_constraints", [])}, "debate": asdict(debate), "output_schema": {"final_diagnosis": "最终疾病名称", "final_confidence": "0到1的数字", "need_human_review": "true/false", "summary": "一句中文总结", "risk_level": "low|medium|high", "action_plan": "最多6条可执行中文建议", "reasoning_trace": "300字内裁决逻辑", "consistency_analysis": {"agent_diagnoses": [{"agent": "", "claim": "", "kg_match": "完全匹配/部分匹配/冲突", "conflict_reason": ""}], "critical_conflicts": [], "rule_violations": [], "collective_omission": "KG中存在但所有专家(含反事实)均未提及的病害列表"}, "evidence_scores": {"agent_name": "1-10分数"}, "kg_contribution": "KG对置信度的提升/降低幅度，如+0.15"}}
+        return {"现场数据": {"作物": context.crop, "温室": context.greenhouse_id, "意图": context.intent, "症状描述": context.query, "环境参数": sr}, "专家Agent意见": [{"agent": o.agent, "layer": o.layer, "diagnosis": o.claim, "confidence": o.confidence, "evidence": o.evidence, "warnings": o.warnings, "action": o.recommendations, "counterfactual": o.counterfactual, "counterfactual_observations": o.counterfactual_observations} for o in outputs], "知识图谱": {"kg_triples": kg.get("triple_strings", []), "kg_rules": kg.get("rules", []), "hard_constraints": kg.get("hard_constraints", [])}, "debate": asdict(debate), "output_schema": {"final_diagnosis": "最终疾病名称", "final_confidence": "0到1的数字", "need_human_review": "true/false", "summary": "一句中文总结", "risk_level": "low|medium|high", "action_plan": "最多6条可执行中文建议", "reasoning_trace": "300字内裁决逻辑", "consistency_analysis": {"agent_diagnoses": [{"agent": "", "claim": "", "kg_match": "完全匹配/部分匹配/冲突", "conflict_reason": ""}], "critical_conflicts": [], "rule_violations": [], "collective_omission": "KG中存在但所有专家(含反事实)均未提及的病害列表"}, "evidence_scores": {"agent_name": "1-10分数"}, "kg_contribution": "KG对置信度的提升/降低幅度，如+0.15"}}
 
     @staticmethod
     def _judge_system_prompt() -> str:

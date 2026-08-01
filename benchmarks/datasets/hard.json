@@ -1,0 +1,70 @@
+{
+  "name": "hard",
+  "difficulty": "hard",
+  "description": "Adversarial cases: ambiguous symptoms, environment-disease contradictions, and irrigation decisions under disease pressure.",
+  "cases": [
+    {
+      "id": "tomato_ambiguous_mold_blight",
+      "query": "温室A番茄叶片既有黄斑霉层又有同心轮纹，优先怀疑哪种病？",
+      "ground_truth": "早疫病",
+      "crop": "tomato",
+      "intent": "diagnose",
+      "disease": "早疫病",
+      "expect_critic": true
+    },
+    {
+      "id": "tomato_mold_hot_dry",
+      "query": "温室A番茄叶背有灰色霉层，但棚内高温干燥，是否仍怀疑叶霉病？",
+      "ground_truth": "叶霉病",
+      "crop": "tomato",
+      "intent": "diagnose",
+      "disease": "叶霉病",
+      "expect_critic": true,
+      "sensor_override": {
+        "humidity_offset": -30.0,
+        "temp_offset": 6.0
+      }
+    },
+    {
+      "id": "cotton_wilt_anomaly",
+      "query": "温室A棉花叶片黄绿斑驳、维管束褐变，传感器提示异常，怎么处理？",
+      "ground_truth": "黄萎病",
+      "crop": "cotton",
+      "intent": "diagnose",
+      "disease": "黄萎病",
+      "sensor_override": {
+        "temp_offset": 8.0
+      }
+    },
+    {
+      "id": "sugar_beet_root_rot_overwatered",
+      "query": "温室A甜菜萎蔫黄化，根部腐烂，最近大水漫灌过，是否根腐病？",
+      "ground_truth": "根腐病",
+      "crop": "sugar_beet",
+      "intent": "diagnose",
+      "disease": "根腐病",
+      "expect_critic": true,
+      "sensor_override": {
+        "humidity_offset": 15.0
+      }
+    },
+    {
+      "id": "tomato_irrigate_after_rain",
+      "query": "温室A番茄昨天刚下过大雨，今天能浇水吗，叶片有黄斑霉层怎么办？",
+      "ground_truth": "叶霉病",
+      "crop": "tomato",
+      "intent": "irrigate",
+      "disease": "叶霉病",
+      "expect_critic": true
+    },
+    {
+      "id": "cucumber_mold_differentiation",
+      "query": "温室B黄瓜叶背霉层明显，与灰霉病相似，如何区分霜霉病？",
+      "ground_truth": "霜霉病",
+      "crop": "cucumber",
+      "intent": "diagnose",
+      "disease": "霜霉病"
+    }
+  ]
+}
+

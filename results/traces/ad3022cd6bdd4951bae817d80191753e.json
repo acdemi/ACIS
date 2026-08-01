@@ -1,0 +1,2526 @@
+{
+  "trace_id": "ad3022cd6bdd4951bae817d80191753e",
+  "timestamp": "2026-08-01T12:05:11.998487+00:00",
+  "request": [
+    {
+      "query": "温室A番茄叶片同心轮纹状病斑，褐色边缘，怎么治？",
+      "greenhouse_id": "gh-a",
+      "crop": "tomato",
+      "image_path": null,
+      "intent": "diagnose"
+    }
+  ],
+  "perception": [
+    {
+      "layer": "感知层",
+      "agent": "视觉Agent",
+      "claim": "未提供图像，视觉诊断跳过",
+      "confidence": 0.0,
+      "evidence": {},
+      "warnings": [
+        "缺少叶片图像，病害判断依赖症状与环境数据"
+      ],
+      "recommendations": [],
+      "counterfactual": {},
+      "counterfactual_observations": []
+    },
+    {
+      "layer": "感知层",
+      "agent": "传感器Agent",
+      "claim": "传感器读数整体正常",
+      "confidence": 0.65,
+      "evidence": {
+        "reading": {
+          "timestamp": "2026-08-01T20:05:11.984713",
+          "greenhouse_id": "gh-a",
+          "readings": {
+            "air_temperature": 24.1,
+            "air_humidity": 67.0,
+            "soil_moisture": 43.4,
+            "soil_temperature": 21.1,
+            "co2_concentration": 715.0,
+            "light_intensity": 0,
+            "soil_ph": 6.39
+          },
+          "anomaly_injected": {}
+        },
+        "anomaly": {
+          "greenhouse_id": "gh-a",
+          "greenhouse_name": "gh-a (tomato)",
+          "timestamp": "2026-08-01T20:05:11.984713",
+          "current_readings": {
+            "air_temperature": 23.4,
+            "air_humidity": 68.4,
+            "soil_moisture": 46.2,
+            "soil_temperature": 20.4,
+            "co2_concentration": 729.0,
+            "light_intensity": 0,
+            "soil_ph": 6.62
+          },
+          "detection_result": {
+            "combined_score": 0.027,
+            "is_anomalous": false,
+            "severity": "normal",
+            "anomaly_types": [],
+            "needs_human_review": false
+          },
+          "layer_details": {
+            "L1": {
+              "layer": "L1_isolation_forest",
+              "engine": "isolation_forest",
+              "score": 0.0,
+              "anomalous": false,
+              "anomalies": [],
+              "latency_ms": 3.64
+            },
+            "L2": {
+              "layer": "L2_lstm_ae",
+              "engine": "lstm_autoencoder",
+              "score": 0.0,
+              "anomalous": false,
+              "violations": [
+                {
+                  "feature": "soil_ph",
+                  "recon_error": 0.9722
+                },
+                {
+                  "feature": "soil_moisture",
+                  "recon_error": 0.9679
+                },
+                {
+                  "feature": "air_humidity",
+                  "recon_error": 0.9377
+                }
+              ],
+              "latency_ms": 0.71,
+              "recon_error": 0.8724
+            },
+            "L3": {
+              "layer": "L3_chronos",
+              "engine": "linear_regression_fallback",
+              "score": 0.089,
+              "anomalous": false,
+              "predictions": {
+                "air_temperature": 23.66,
+                "air_humidity": 68.4,
+                "soil_moisture": 45.33
+              },
+              "deviations": {
+                "air_temperature": 0.0111,
+                "air_humidity": 0.0,
+                "soil_moisture": 0.0193
+              },
+              "latency_ms": 0.03
+            }
+          },
+          "total_latency_ms": 4.38
+        }
+      },
+      "warnings": [],
+      "recommendations": [
+        "对异常传感器复测，并查看最近 24 小时趋势"
+      ],
+      "counterfactual": {},
+      "counterfactual_observations": []
+    },
+    {
+      "layer": "感知层",
+      "agent": "天气Agent",
+      "claim": "外部天气暂无明显预警",
+      "confidence": 0.7,
+      "evidence": {
+        "current_weather": {
+          "location": "华北平原",
+          "time": "2026-08-01T20:05:11.989720",
+          "condition": "多云转晴",
+          "temperature": 27.3,
+          "humidity": 62.3,
+          "wind_speed": 4.2,
+          "wind_direction": "西南",
+          "precipitation_mm": 0,
+          "rain_probability": 17,
+          "pressure_hpa": 1011.4,
+          "uv_index": 0,
+          "dew_point": 19.8
+        },
+        "alerts": [
+          {
+            "type": "无预警",
+            "description": "当前无生效的气象预警"
+          }
+        ]
+      },
+      "warnings": [],
+      "recommendations": [],
+      "counterfactual": {},
+      "counterfactual_observations": []
+    }
+  ],
+  "memory": [
+    {
+      "layer": "记忆层",
+      "agent": "RAG",
+      "claim": "症状最匹配：番茄早疫病",
+      "confidence": 0.85,
+      "evidence": {
+        "backend": "memory",
+        "matches": [
+          {
+            "id": "tomato_blight",
+            "title": "番茄早疫病",
+            "crop": "番茄",
+            "text": "番茄早疫病\n症状：叶片出现同心轮纹状病斑；病斑边缘呈褐色，中央灰白色；茎部出现椭圆形深褐色病斑；果实蒂部出现凹陷褐色病斑\n预防：选用抗病品种；轮作倒茬，避免连作；加强水肥管理，增强植株抗性；及时清除病残体\n处理：发病初期喷施 75% 百菌清可湿性粉剂 600 倍液；或 64% 杀毒矾可湿性粉剂 500 倍液；每 7 天喷一次，连喷 3-4 次",
+            "score": 7.0,
+            "source": "memory",
+            "metadata": {
+              "backend": "memory",
+              "matched_symptoms": [
+                "叶片出现同心轮纹状病斑",
+                "病斑边缘呈褐色，中央灰白色",
+                "茎部出现椭圆形深褐色病斑",
+                "果实蒂部出现凹陷褐色病斑"
+              ],
+              "match_score": 7.0,
+              "full_info": {
+                "name": "番茄早疫病",
+                "crop": "番茄",
+                "pathogen": "茄链格孢 (Alternaria solani)",
+                "symptoms": [
+                  "叶片出现同心轮纹状病斑",
+                  "病斑边缘呈褐色，中央灰白色",
+                  "茎部出现椭圆形深褐色病斑",
+                  "果实蒂部出现凹陷褐色病斑"
+                ],
+                "conditions": {
+                  "temperature": "25-30°C",
+                  "humidity": ">80%",
+                  "note": "高温高湿交替时最易发生"
+                },
+                "prevention": [
+                  "选用抗病品种",
+                  "轮作倒茬，避免连作",
+                  "加强水肥管理，增强植株抗性",
+                  "及时清除病残体"
+                ],
+                "treatment": [
+                  "发病初期喷施 75% 百菌清可湿性粉剂 600 倍液",
+                  "或 64% 杀毒矾可湿性粉剂 500 倍液",
+                  "每 7 天喷一次，连喷 3-4 次"
+                ],
+                "severity_indicators": {
+                  "high": [
+                    "病斑数量 > 20 个/株",
+                    "茎部出现病斑",
+                    "果实已感染"
+                  ],
+                  "medium": [
+                    "病斑数量 5-20 个/株",
+                    "仅叶片发病"
+                  ],
+                  "low": [
+                    "病斑数量 < 5 个/株",
+                    "仅个别叶片"
+                  ]
+                }
+              }
+            }
+          },
+          {
+            "id": "tomato_leaf_mold",
+            "title": "番茄叶霉病",
+            "crop": "番茄",
+            "text": "番茄叶霉病\n症状：叶片正面出现淡黄色不规则病斑；叶片背面生灰紫色至黑褐色绒状霉层；严重时叶片卷曲、干枯；通常从下部叶片开始向上蔓延\n预防：加强通风，降低温室湿度；合理密植，改善株间通风；避免大水漫灌，采用滴灌；及时摘除下部老叶、病叶\n处理：发病初期喷施 50% 多菌灵可湿性粉剂 500 倍液；或用 70% 甲基托布津可湿性粉剂 800 倍液；交替用药，每 7-10 天喷一次，连喷 2-3 次",
+            "score": 2.0,
+            "source": "memory",
+            "metadata": {
+              "backend": "memory",
+              "matched_symptoms": [
+                "叶片正面出现淡黄色不规则病斑",
+                "叶片背面生灰紫色至黑褐色绒状霉层"
+              ],
+              "match_score": 2.0,
+              "full_info": {
+                "name": "番茄叶霉病",
+                "crop": "番茄",
+                "pathogen": "黄枝孢霉 (Fulvia fulva)",
+                "symptoms": [
+                  "叶片正面出现淡黄色不规则病斑",
+                  "叶片背面生灰紫色至黑褐色绒状霉层",
+                  "严重时叶片卷曲、干枯",
+                  "通常从下部叶片开始向上蔓延"
+                ],
+                "conditions": {
+                  "temperature": "20-25°C",
+                  "humidity": ">85%",
+                  "ventilation": "通风不良时易发"
+                },
+                "prevention": [
+                  "加强通风，降低温室湿度",
+                  "合理密植，改善株间通风",
+                  "避免大水漫灌，采用滴灌",
+                  "及时摘除下部老叶、病叶"
+                ],
+                "treatment": [
+                  "发病初期喷施 50% 多菌灵可湿性粉剂 500 倍液",
+                  "或用 70% 甲基托布津可湿性粉剂 800 倍液",
+                  "交替用药，每 7-10 天喷一次，连喷 2-3 次"
+                ],
+                "severity_indicators": {
+                  "high": [
+                    "霉层覆盖面积 > 30%",
+                    "已蔓延至上部叶片",
+                    "叶片大面积卷曲"
+                  ],
+                  "medium": [
+                    "霉层可见但覆盖面积 < 30%",
+                    "仅下部叶片发病"
+                  ],
+                  "low": [
+                    "仅个别叶片出现病斑",
+                    "无霉层"
+                  ]
+                }
+              }
+            }
+          }
+        ],
+        "error": null
+      },
+      "warnings": [],
+      "recommendations": [
+        "围绕最高匹配病害核对关键症状"
+      ],
+      "counterfactual": {},
+      "counterfactual_observations": []
+    },
+    {
+      "layer": "记忆层",
+      "agent": "知识图谱",
+      "claim": "已提取作物最佳环境约束",
+      "confidence": 0.7,
+      "evidence": {
+        "crop": "tomato",
+        "optimal_conditions": {
+          "air_temp_day": "22-28°C",
+          "air_temp_night": "15-18°C",
+          "soil_moisture": "60-80% 田间持水量",
+          "soil_ph": "6.0-7.0",
+          "co2": "800-1200 ppm（温室补充 CO2 时）",
+          "light": "20000-40000 lux"
+        }
+      },
+      "warnings": [],
+      "recommendations": [],
+      "counterfactual": {},
+      "counterfactual_observations": []
+    },
+    {
+      "layer": "记忆层",
+      "agent": "历史案例库",
+      "claim": "历史确认案例匹配：病理判断首选：番茄叶霉病（人工复核确认）",
+      "confidence": 0.75,
+      "evidence": {
+        "case_id": "confirmed-24",
+        "source": "sqlite_confirmed",
+        "original_query": "温室A番茄叶背出现灰色霉层，如何处理？",
+        "original_confidence": 0.7,
+        "feedback_note": "现场确认番茄叶霉病，处置有效"
+      },
+      "warnings": [],
+      "recommendations": [
+        "参考已确认案例 #24 的处置经验，核对关键症状"
+      ],
+      "counterfactual": {},
+      "counterfactual_observations": []
+    },
+    {
+      "layer": "记忆层",
+      "agent": "经验回放Agent",
+      "claim": "无历史有效结果案例可回放",
+      "confidence": 0.3,
+      "evidence": {
+        "cases": [],
+        "backend": "sqlite"
+      },
+      "warnings": [],
+      "recommendations": [],
+      "counterfactual": {},
+      "counterfactual_observations": []
+    }
+  ],
+  "experts": [
+    {
+      "layer": "专家层",
+      "agent": "病理Agent",
+      "claim": "病理判断首选：番茄早疫病",
+      "confidence": 0.9,
+      "evidence": {
+        "possible_diseases": [
+          {
+            "disease_id": "tomato_blight",
+            "name": "番茄早疫病",
+            "crop": "番茄",
+            "match_score": 7.0,
+            "matched_symptoms": [
+              "叶片出现同心轮纹状病斑",
+              "病斑边缘呈褐色，中央灰白色",
+              "茎部出现椭圆形深褐色病斑",
+              "果实蒂部出现凹陷褐色病斑"
+            ],
+            "full_info": {
+              "name": "番茄早疫病",
+              "crop": "番茄",
+              "pathogen": "茄链格孢 (Alternaria solani)",
+              "symptoms": [
+                "叶片出现同心轮纹状病斑",
+                "病斑边缘呈褐色，中央灰白色",
+                "茎部出现椭圆形深褐色病斑",
+                "果实蒂部出现凹陷褐色病斑"
+              ],
+              "conditions": {
+                "temperature": "25-30°C",
+                "humidity": ">80%",
+                "note": "高温高湿交替时最易发生"
+              },
+              "prevention": [
+                "选用抗病品种",
+                "轮作倒茬，避免连作",
+                "加强水肥管理，增强植株抗性",
+                "及时清除病残体"
+              ],
+              "treatment": [
+                "发病初期喷施 75% 百菌清可湿性粉剂 600 倍液",
+                "或 64% 杀毒矾可湿性粉剂 500 倍液",
+                "每 7 天喷一次，连喷 3-4 次"
+              ],
+              "severity_indicators": {
+                "high": [
+                  "病斑数量 > 20 个/株",
+                  "茎部出现病斑",
+                  "果实已感染"
+                ],
+                "medium": [
+                  "病斑数量 5-20 个/株",
+                  "仅叶片发病"
+                ],
+                "low": [
+                  "病斑数量 < 5 个/株",
+                  "仅个别叶片"
+                ]
+              }
+            }
+          },
+          {
+            "disease_id": "tomato_leaf_mold",
+            "name": "番茄叶霉病",
+            "crop": "番茄",
+            "match_score": 2.0,
+            "matched_symptoms": [
+              "叶片正面出现淡黄色不规则病斑",
+              "叶片背面生灰紫色至黑褐色绒状霉层"
+            ],
+            "full_info": {
+              "name": "番茄叶霉病",
+              "crop": "番茄",
+              "pathogen": "黄枝孢霉 (Fulvia fulva)",
+              "symptoms": [
+                "叶片正面出现淡黄色不规则病斑",
+                "叶片背面生灰紫色至黑褐色绒状霉层",
+                "严重时叶片卷曲、干枯",
+                "通常从下部叶片开始向上蔓延"
+              ],
+              "conditions": {
+                "temperature": "20-25°C",
+                "humidity": ">85%",
+                "ventilation": "通风不良时易发"
+              },
+              "prevention": [
+                "加强通风，降低温室湿度",
+                "合理密植，改善株间通风",
+                "避免大水漫灌，采用滴灌",
+                "及时摘除下部老叶、病叶"
+              ],
+              "treatment": [
+                "发病初期喷施 50% 多菌灵可湿性粉剂 500 倍液",
+                "或用 70% 甲基托布津可湿性粉剂 800 倍液",
+                "交替用药，每 7-10 天喷一次，连喷 2-3 次"
+              ],
+              "severity_indicators": {
+                "high": [
+                  "霉层覆盖面积 > 30%",
+                  "已蔓延至上部叶片",
+                  "叶片大面积卷曲"
+                ],
+                "medium": [
+                  "霉层可见但覆盖面积 < 30%",
+                  "仅下部叶片发病"
+                ],
+                "low": [
+                  "仅个别叶片出现病斑",
+                  "无霉层"
+                ]
+              }
+            }
+          }
+        ],
+        "environment_issues": [],
+        "optimal_conditions": {
+          "air_temp_day": "22-28°C",
+          "air_temp_night": "15-18°C",
+          "soil_moisture": "60-80% 田间持水量",
+          "soil_ph": "6.0-7.0",
+          "co2": "800-1200 ppm（温室补充 CO2 时）",
+          "light": "20000-40000 lux"
+        },
+        "recommended_actions": [
+          "维持当前环境管理",
+          "密切观察症状变化，记录发展过程",
+          "如症状加重，建议取样送检确认病原"
+        ]
+      },
+      "warnings": [],
+      "recommendations": [
+        "维持当前环境管理",
+        "密切观察症状变化，记录发展过程",
+        "如症状加重，建议取样送检确认病原"
+      ],
+      "counterfactual": {
+        "alternative": "番茄叶霉病",
+        "rejection_reason": "匹配度2.0低于首选7.0，且番茄叶霉病的典型症状(叶片正面出现淡黄色不规则病斑、叶片背面生灰紫色至黑褐色绒状霉层)与现场描述重合度更低，故排除。"
+      },
+      "counterfactual_observations": []
+    },
+    {
+      "layer": "专家层",
+      "agent": "气象Agent",
+      "claim": "气象条件支持灌溉",
+      "confidence": 0.72,
+      "evidence": {
+        "irrigation": {
+          "summary": {
+            "total_rainfall_24h_mm": 0,
+            "rain_hours_count": 0,
+            "avg_temperature_24h": 32.5,
+            "max_temperature_24h": 38.7,
+            "avg_wind_speed_ms": 4.3
+          },
+          "irrigation_advice": {
+            "should_irrigate": true,
+            "reason": "未来24小时降雨不足且温度偏高，建议灌溉",
+            "recommended_time": "清晨 5:00-7:00",
+            "estimated_evaporation_mm": 14.3
+          }
+        },
+        "alerts": [
+          {
+            "type": "无预警",
+            "description": "当前无生效的气象预警"
+          }
+        ]
+      },
+      "warnings": [],
+      "recommendations": [
+        "未来24小时降雨不足且温度偏高，建议灌溉",
+        "建议作业时间：清晨 5:00-7:00"
+      ],
+      "counterfactual": {
+        "alternative": "暂缓灌溉并择机补灌",
+        "rejection_reason": "当前蒸发与土壤墒情支持灌溉，但若后续出现降雨或高湿预警，提前灌溉会叠加叶面湿度风险，故作为备选排除。"
+      },
+      "counterfactual_observations": []
+    },
+    {
+      "layer": "专家层",
+      "agent": "栽培Agent",
+      "claim": "已生成栽培管理建议",
+      "confidence": 0.68,
+      "evidence": {
+        "guide": {
+          "name": "番茄种植管理指南",
+          "optimal_conditions": {
+            "air_temp_day": "22-28°C",
+            "air_temp_night": "15-18°C",
+            "soil_moisture": "60-80% 田间持水量",
+            "soil_ph": "6.0-7.0",
+            "co2": "800-1200 ppm（温室补充 CO2 时）",
+            "light": "20000-40000 lux"
+          },
+          "growth_stages": {
+            "苗期": {
+              "duration": "30-40天",
+              "key_tasks": [
+                "控水蹲苗",
+                "适当降温炼苗",
+                "防治猝倒病"
+              ]
+            },
+            "开花期": {
+              "duration": "15-20天",
+              "key_tasks": [
+                "辅助授粉（振荡授粉）",
+                "控制氮肥",
+                "保持稳定温度"
+              ]
+            },
+            "结果期": {
+              "duration": "60-90天",
+              "key_tasks": [
+                "加强水肥",
+                "及时采收",
+                "预防早疫病和叶霉病"
+              ]
+            }
+          },
+          "irrigation": {
+            "method": "滴灌",
+            "frequency": "结果期每 2-3 天一次",
+            "amount": "每次 15-20 m³/亩",
+            "notes": "避免大水漫灌，保持土壤湿度稳定"
+          }
+        },
+        "current_readings": {
+          "air_temperature": 24.1,
+          "air_humidity": 67.0,
+          "soil_moisture": 43.4,
+          "soil_temperature": 21.1,
+          "co2_concentration": 715.0,
+          "light_intensity": 0,
+          "soil_ph": 6.39
+        }
+      },
+      "warnings": [],
+      "recommendations": [
+        "维持当前管理，继续监测温湿度和叶面状态"
+      ],
+      "counterfactual": {
+        "alternative": "直接采用化学药剂防治",
+        "rejection_reason": "综合防治(IPM)原则下优先环境调控与栽培措施，化学防治作为后备手段，可避免抗药性上升与生态副作用。"
+      },
+      "counterfactual_observations": []
+    },
+    {
+      "layer": "专家层",
+      "agent": "经济Agent",
+      "claim": "经济分析：番茄毛收益约12000元/亩，防治成本约100元/亩，净收益11900元/亩",
+      "confidence": 0.62,
+      "evidence": {
+        "price_table": {
+          "crop_price_per_kg": {
+            "番茄": 3.0,
+            "黄瓜": 2.5,
+            "甜菜": 1.2,
+            "棉花": 8.0
+          },
+          "pesticide_cost_per_mu": {
+            "多菌灵": 30,
+            "甲基托布津": 40,
+            "百菌清": 35,
+            "杀毒矾": 45,
+            "嘧霉胺": 50,
+            "吡虫啉": 25,
+            "印楝素": 60,
+            "枯草芽孢杆菌": 55
+          },
+          "labor_per_day": 100,
+          "yield_per_mu_kg": {
+            "番茄": 4000,
+            "黄瓜": 5000,
+            "甜菜": 3000,
+            "棉花": 250
+          }
+        },
+        "gross_revenue": 12000.0,
+        "treatment_cost": 100,
+        "cost_ratio": 0.008,
+        "mentioned_pesticides": [],
+        "economic_conflict": false
+      },
+      "warnings": [],
+      "recommendations": [
+        "防治投入占毛收益1%，性价比合理，建议及时防治以保产"
+      ],
+      "counterfactual": {
+        "alternative": "全面化学预防",
+        "rejection_reason": "全面化学预防会显著推高成本且增加抗药性风险，经济性劣于精准防治"
+      },
+      "counterfactual_observations": []
+    },
+    {
+      "layer": "专家层",
+      "agent": "生态Agent",
+      "claim": "生态评估：检测到化学农药使用建议，已给出天敌保护替代方案",
+      "confidence": 0.6,
+      "evidence": {
+        "pesticide_ecology": {
+          "吡虫啉": {
+            "toxicity": "高",
+            "affected": "瓢虫/蜜蜂等授粉与天敌昆虫",
+            "alternative": "印楝素或苦参碱"
+          },
+          "多菌灵": {
+            "toxicity": "中",
+            "affected": "广谱杀菌，对天敌影响中等",
+            "alternative": "枯草芽孢杆菌"
+          },
+          "嘧霉胺": {
+            "toxicity": "中",
+            "affected": "对捕食螨有一定影响",
+            "alternative": "枯草芽孢杆菌配合通风降湿"
+          },
+          "百菌清": {
+            "toxicity": "中",
+            "affected": "广谱保护性杀菌剂",
+            "alternative": "波尔多液"
+          },
+          "甲基托布津": {
+            "toxicity": "中",
+            "affected": "广谱杀菌剂",
+            "alternative": "木霉菌制剂"
+          },
+          "杀毒矾": {
+            "toxicity": "中",
+            "affected": "对水生生物有毒",
+            "alternative": "霜脲氰·锰锌"
+          }
+        },
+        "detected_pesticides": [
+          "多菌灵",
+          "百菌清",
+          "甲基托布津",
+          "杀毒矾"
+        ],
+        "ecological_conflict": false,
+        "max_toxicity": "中"
+      },
+      "warnings": [],
+      "recommendations": [
+        "多菌灵对广谱杀菌，对天敌影响中等影响中，建议轮换或配合枯草芽孢杆菌",
+        "百菌清对广谱保护性杀菌剂影响中，建议轮换或配合波尔多液",
+        "甲基托布津对广谱杀菌剂影响中，建议轮换或配合木霉菌制剂",
+        "杀毒矾对对水生生物有毒影响中，建议轮换或配合霜脲氰·锰锌"
+      ],
+      "counterfactual": {
+        "alternative": "坚持使用高毒化学农药快速控病",
+        "rejection_reason": "高毒农药虽短期见效，但会杀伤广谱杀菌，对天敌影响中等、广谱保护性杀菌剂、广谱杀菌剂、对水生生物有毒，破坏天敌-害虫平衡，导致再猖獗"
+      },
+      "counterfactual_observations": []
+    },
+    {
+      "layer": "专家层",
+      "agent": "病理Agent",
+      "claim": "病理判断首选：番茄早疫病",
+      "confidence": 0.9,
+      "evidence": {
+        "possible_diseases": [
+          {
+            "disease_id": "tomato_blight",
+            "name": "番茄早疫病",
+            "crop": "番茄",
+            "match_score": 7.0,
+            "matched_symptoms": [
+              "叶片出现同心轮纹状病斑",
+              "病斑边缘呈褐色，中央灰白色",
+              "茎部出现椭圆形深褐色病斑",
+              "果实蒂部出现凹陷褐色病斑"
+            ],
+            "full_info": {
+              "name": "番茄早疫病",
+              "crop": "番茄",
+              "pathogen": "茄链格孢 (Alternaria solani)",
+              "symptoms": [
+                "叶片出现同心轮纹状病斑",
+                "病斑边缘呈褐色，中央灰白色",
+                "茎部出现椭圆形深褐色病斑",
+                "果实蒂部出现凹陷褐色病斑"
+              ],
+              "conditions": {
+                "temperature": "25-30°C",
+                "humidity": ">80%",
+                "note": "高温高湿交替时最易发生"
+              },
+              "prevention": [
+                "选用抗病品种",
+                "轮作倒茬，避免连作",
+                "加强水肥管理，增强植株抗性",
+                "及时清除病残体"
+              ],
+              "treatment": [
+                "发病初期喷施 75% 百菌清可湿性粉剂 600 倍液",
+                "或 64% 杀毒矾可湿性粉剂 500 倍液",
+                "每 7 天喷一次，连喷 3-4 次"
+              ],
+              "severity_indicators": {
+                "high": [
+                  "病斑数量 > 20 个/株",
+                  "茎部出现病斑",
+                  "果实已感染"
+                ],
+                "medium": [
+                  "病斑数量 5-20 个/株",
+                  "仅叶片发病"
+                ],
+                "low": [
+                  "病斑数量 < 5 个/株",
+                  "仅个别叶片"
+                ]
+              }
+            }
+          },
+          {
+            "disease_id": "tomato_leaf_mold",
+            "name": "番茄叶霉病",
+            "crop": "番茄",
+            "match_score": 2.0,
+            "matched_symptoms": [
+              "叶片正面出现淡黄色不规则病斑",
+              "叶片背面生灰紫色至黑褐色绒状霉层"
+            ],
+            "full_info": {
+              "name": "番茄叶霉病",
+              "crop": "番茄",
+              "pathogen": "黄枝孢霉 (Fulvia fulva)",
+              "symptoms": [
+                "叶片正面出现淡黄色不规则病斑",
+                "叶片背面生灰紫色至黑褐色绒状霉层",
+                "严重时叶片卷曲、干枯",
+                "通常从下部叶片开始向上蔓延"
+              ],
+              "conditions": {
+                "temperature": "20-25°C",
+                "humidity": ">85%",
+                "ventilation": "通风不良时易发"
+              },
+              "prevention": [
+                "加强通风，降低温室湿度",
+                "合理密植，改善株间通风",
+                "避免大水漫灌，采用滴灌",
+                "及时摘除下部老叶、病叶"
+              ],
+              "treatment": [
+                "发病初期喷施 50% 多菌灵可湿性粉剂 500 倍液",
+                "或用 70% 甲基托布津可湿性粉剂 800 倍液",
+                "交替用药，每 7-10 天喷一次，连喷 2-3 次"
+              ],
+              "severity_indicators": {
+                "high": [
+                  "霉层覆盖面积 > 30%",
+                  "已蔓延至上部叶片",
+                  "叶片大面积卷曲"
+                ],
+                "medium": [
+                  "霉层可见但覆盖面积 < 30%",
+                  "仅下部叶片发病"
+                ],
+                "low": [
+                  "仅个别叶片出现病斑",
+                  "无霉层"
+                ]
+              }
+            }
+          }
+        ],
+        "environment_issues": [],
+        "optimal_conditions": {
+          "air_temp_day": "22-28°C",
+          "air_temp_night": "15-18°C",
+          "soil_moisture": "60-80% 田间持水量",
+          "soil_ph": "6.0-7.0",
+          "co2": "800-1200 ppm（温室补充 CO2 时）",
+          "light": "20000-40000 lux"
+        },
+        "recommended_actions": [
+          "维持当前环境管理",
+          "密切观察症状变化，记录发展过程",
+          "如症状加重，建议取样送检确认病原"
+        ],
+        "rebuttal_round": 2,
+        "rebuttal_doubts": "缺少有效图像证据，视觉 Agent 未参与确认"
+      },
+      "warnings": [],
+      "recommendations": [
+        "维持当前环境管理",
+        "密切观察症状变化，记录发展过程",
+        "如症状加重，建议取样送检确认病原"
+      ],
+      "counterfactual": {
+        "alternative": "番茄叶霉病",
+        "rejection_reason": "匹配度2.0低于首选7.0，且番茄叶霉病的典型症状(叶片正面出现淡黄色不规则病斑、叶片背面生灰紫色至黑褐色绒状霉层)与现场描述重合度更低，故排除。"
+      },
+      "counterfactual_observations": []
+    },
+    {
+      "layer": "专家层",
+      "agent": "气象Agent",
+      "claim": "气象条件支持灌溉",
+      "confidence": 0.72,
+      "evidence": {
+        "irrigation": {
+          "summary": {
+            "total_rainfall_24h_mm": 0,
+            "rain_hours_count": 0,
+            "avg_temperature_24h": 32.4,
+            "max_temperature_24h": 37.1,
+            "avg_wind_speed_ms": 3.9
+          },
+          "irrigation_advice": {
+            "should_irrigate": true,
+            "reason": "未来24小时降雨不足且温度偏高，建议灌溉",
+            "recommended_time": "清晨 5:00-7:00",
+            "estimated_evaporation_mm": 14.1
+          }
+        },
+        "alerts": [
+          {
+            "type": "无预警",
+            "description": "当前无生效的气象预警"
+          }
+        ],
+        "rebuttal_round": 2,
+        "rebuttal_doubts": "缺少有效图像证据，视觉 Agent 未参与确认"
+      },
+      "warnings": [],
+      "recommendations": [
+        "未来24小时降雨不足且温度偏高，建议灌溉",
+        "建议作业时间：清晨 5:00-7:00"
+      ],
+      "counterfactual": {
+        "alternative": "暂缓灌溉并择机补灌",
+        "rejection_reason": "当前蒸发与土壤墒情支持灌溉，但若后续出现降雨或高湿预警，提前灌溉会叠加叶面湿度风险，故作为备选排除。"
+      },
+      "counterfactual_observations": []
+    },
+    {
+      "layer": "专家层",
+      "agent": "栽培Agent",
+      "claim": "已生成栽培管理建议",
+      "confidence": 0.68,
+      "evidence": {
+        "guide": {
+          "name": "番茄种植管理指南",
+          "optimal_conditions": {
+            "air_temp_day": "22-28°C",
+            "air_temp_night": "15-18°C",
+            "soil_moisture": "60-80% 田间持水量",
+            "soil_ph": "6.0-7.0",
+            "co2": "800-1200 ppm（温室补充 CO2 时）",
+            "light": "20000-40000 lux"
+          },
+          "growth_stages": {
+            "苗期": {
+              "duration": "30-40天",
+              "key_tasks": [
+                "控水蹲苗",
+                "适当降温炼苗",
+                "防治猝倒病"
+              ]
+            },
+            "开花期": {
+              "duration": "15-20天",
+              "key_tasks": [
+                "辅助授粉（振荡授粉）",
+                "控制氮肥",
+                "保持稳定温度"
+              ]
+            },
+            "结果期": {
+              "duration": "60-90天",
+              "key_tasks": [
+                "加强水肥",
+                "及时采收",
+                "预防早疫病和叶霉病"
+              ]
+            }
+          },
+          "irrigation": {
+            "method": "滴灌",
+            "frequency": "结果期每 2-3 天一次",
+            "amount": "每次 15-20 m³/亩",
+            "notes": "避免大水漫灌，保持土壤湿度稳定"
+          }
+        },
+        "current_readings": {
+          "air_temperature": 24.1,
+          "air_humidity": 67.0,
+          "soil_moisture": 43.4,
+          "soil_temperature": 21.1,
+          "co2_concentration": 715.0,
+          "light_intensity": 0,
+          "soil_ph": 6.39
+        },
+        "rebuttal_round": 2,
+        "rebuttal_doubts": "缺少有效图像证据，视觉 Agent 未参与确认"
+      },
+      "warnings": [],
+      "recommendations": [
+        "维持当前管理，继续监测温湿度和叶面状态"
+      ],
+      "counterfactual": {
+        "alternative": "直接采用化学药剂防治",
+        "rejection_reason": "综合防治(IPM)原则下优先环境调控与栽培措施，化学防治作为后备手段，可避免抗药性上升与生态副作用。"
+      },
+      "counterfactual_observations": []
+    }
+  ],
+  "debate": [
+    {
+      "consensus": [
+        "【多轮辩论·第2轮】已携带前1轮辩论上下文",
+        "病理诊断与记忆层（RAG/历史案例）结论一致，诊断可信度升高"
+      ],
+      "conflicts": [],
+      "missing_evidence": [
+        "缺少有效图像证据，视觉 Agent 未参与确认"
+      ],
+      "risk_level": "low"
+    }
+  ],
+  "critic": [
+    {}
+  ],
+  "judge": [
+    {
+      "summary": "【第二轮辩论后裁决】Orchestrator 已完成 gh-a/tomato 的diagnose 工作流：病理判断首选：番茄早疫病。风险等级：low。",
+      "decision": "病理判断首选：番茄早疫病",
+      "confidence": 0.75,
+      "risk_level": "low",
+      "judge_mode": "rules",
+      "need_human_review": false,
+      "reasoning_trace": "KG参照疾病：番茄早疫病、番茄叶霉病；未触发KG硬约束否决；风险等级=low，置信度=0.75；第二轮辩论后裁决：第二轮病理意见与首轮一致",
+      "judge_analysis": {
+        "kg": {
+          "diseases": [
+            "番茄早疫病",
+            "番茄叶霉病"
+          ],
+          "rules": [
+            "番茄早疫病高发条件：湿度>80%，若棚内湿度明显偏低应降低该诊断置信度",
+            "番茄早疫病适宜温度25-30°C，环境温度偏离过大时该诊断证据减弱",
+            "番茄早疫病典型症状：叶片出现同心轮纹状病斑，需与视觉/症状描述核对",
+            "番茄叶霉病高发条件：湿度>85%，若棚内湿度明显偏低应降低该诊断置信度",
+            "番茄叶霉病适宜温度20-25°C，环境温度偏离过大时该诊断证据减弱",
+            "番茄叶霉病典型症状：叶片正面出现淡黄色不规则病斑，需与视觉/症状描述核对"
+          ],
+          "backend": "memory"
+        },
+        "consistency": {
+          "agent_diagnoses": [
+            {
+              "agent": "病理Agent",
+              "claim": "病理判断首选：番茄早疫病",
+              "kg_match": "完全匹配",
+              "conflict_reason": ""
+            }
+          ],
+          "rule_violations": [],
+          "vetoed": false,
+          "kg_diseases": [
+            "番茄早疫病",
+            "番茄叶霉病"
+          ]
+        },
+        "sensor_readings": {
+          "temperature": 24.1,
+          "humidity": 67.0,
+          "soil_moisture": 43.4
+        },
+        "critic": {},
+        "collective_omission": {
+          "omitted_diseases": [],
+          "penalty_applied": false,
+          "controversy_delta": 0.0,
+          "counterfactuals": [
+            {
+              "agent": "病理Agent",
+              "alternative": "番茄叶霉病",
+              "rejection_reason": "匹配度2.0低于首选7.0，且番茄叶霉病的典型症状(叶片正面出现淡黄色不规则病斑、叶片背面生灰紫色至黑褐色绒状霉层)与现场描述重合度更低，故排除。"
+            },
+            {
+              "agent": "气象Agent",
+              "alternative": "暂缓灌溉并择机补灌",
+              "rejection_reason": "当前蒸发与土壤墒情支持灌溉，但若后续出现降雨或高湿预警，提前灌溉会叠加叶面湿度风险，故作为备选排除。"
+            },
+            {
+              "agent": "栽培Agent",
+              "alternative": "直接采用化学药剂防治",
+              "rejection_reason": "综合防治(IPM)原则下优先环境调控与栽培措施，化学防治作为后备手段，可避免抗药性上升与生态副作用。"
+            },
+            {
+              "agent": "经济Agent",
+              "alternative": "全面化学预防",
+              "rejection_reason": "全面化学预防会显著推高成本且增加抗药性风险，经济性劣于精准防治"
+            },
+            {
+              "agent": "生态Agent",
+              "alternative": "坚持使用高毒化学农药快速控病",
+              "rejection_reason": "高毒农药虽短期见效，但会杀伤广谱杀菌，对天敌影响中等、广谱保护性杀菌剂、广谱杀菌剂、对水生生物有毒，破坏天敌-害虫平衡，导致再猖獗"
+            },
+            {
+              "agent": "病理Agent",
+              "alternative": "番茄叶霉病",
+              "rejection_reason": "匹配度2.0低于首选7.0，且番茄叶霉病的典型症状(叶片正面出现淡黄色不规则病斑、叶片背面生灰紫色至黑褐色绒状霉层)与现场描述重合度更低，故排除。"
+            },
+            {
+              "agent": "气象Agent",
+              "alternative": "暂缓灌溉并择机补灌",
+              "rejection_reason": "当前蒸发与土壤墒情支持灌溉，但若后续出现降雨或高湿预警，提前灌溉会叠加叶面湿度风险，故作为备选排除。"
+            },
+            {
+              "agent": "栽培Agent",
+              "alternative": "直接采用化学药剂防治",
+              "rejection_reason": "综合防治(IPM)原则下优先环境调控与栽培措施，化学防治作为后备手段，可避免抗药性上升与生态副作用。"
+            }
+          ],
+          "ignored_candidates": [],
+          "retrieved_candidates": [
+            "番茄早疫病",
+            "番茄叶霉病"
+          ],
+          "omission_score": 0.0,
+          "omission_reason": "所有 KG 候选病害均已被专家讨论，未发现集体漏检。",
+          "omission_level": "none",
+          "append_warning": false
+        },
+        "kg_evolution": {
+          "proposed": [],
+          "drafts": [],
+          "used_drafts": false
+        },
+        "calibration": {
+          "enabled": true,
+          "agents": {
+            "病理Agent": {
+              "kind": "isotonic",
+              "samples": 11
+            },
+            "气象Agent": {
+              "kind": "passthrough",
+              "samples": 12
+            },
+            "栽培Agent": {
+              "kind": "passthrough",
+              "samples": 12
+            },
+            "经济Agent": {
+              "kind": "passthrough",
+              "samples": 12
+            },
+            "生态Agent": {
+              "kind": "passthrough",
+              "samples": 12
+            }
+          }
+        }
+      },
+      "action_plan": [
+        "对异常传感器复测，并查看最近 24 小时趋势",
+        "围绕最高匹配病害核对关键症状",
+        "参考已确认案例 #24 的处置经验，核对关键症状",
+        "维持当前环境管理",
+        "密切观察症状变化，记录发展过程",
+        "如症状加重，建议取样送检确认病原"
+      ],
+      "decision_id": null
+    }
+  ],
+  "planner": [
+    {
+      "enabled": true,
+      "goal": "执行 Judge 裁决：病理判断首选：番茄早疫病",
+      "steps": [
+        "对异常传感器复测，并查看最近 24 小时趋势",
+        "围绕最高匹配病害核对关键症状",
+        "参考已确认案例 #24 的处置经验，核对关键症状",
+        "维持当前环境管理",
+        "密切观察症状变化，记录发展过程",
+        "如症状加重，建议取样送检确认病原",
+        "补充缺失证据并复评"
+      ],
+      "required_tools": [
+        "image_capture",
+        "spray_workorder",
+        "irrigation_control"
+      ],
+      "priority": "low",
+      "estimated_risk": "medium",
+      "estimated_cost": "high"
+    }
+  ],
+  "tool_router": [
+    {
+      "enabled": true,
+      "requests": [
+        {
+          "tool_name": "image_capture",
+          "parameters": {
+            "mode": "close_up",
+            "count": 1,
+            "goal": "执行 Judge 裁决：病理判断首选：番茄早疫病"
+          },
+          "priority": "low",
+          "timeout": 20.0,
+          "retry_policy": {
+            "max_attempts": 2,
+            "backoff_seconds": 1.0
+          }
+        },
+        {
+          "tool_name": "spray_workorder",
+          "parameters": {
+            "goal": "执行 Judge 裁决：病理判断首选：番茄早疫病"
+          },
+          "priority": "low",
+          "timeout": 15.0,
+          "retry_policy": {
+            "max_attempts": 1,
+            "backoff_seconds": 0.0
+          }
+        },
+        {
+          "tool_name": "irrigation_control",
+          "parameters": {
+            "action": "schedule",
+            "goal": "执行 Judge 裁决：病理判断首选：番茄早疫病"
+          },
+          "priority": "low",
+          "timeout": 30.0,
+          "retry_policy": {
+            "max_attempts": 2,
+            "backoff_seconds": 2.0
+          }
+        }
+      ],
+      "unresolved": []
+    }
+  ],
+  "metrics": [
+    {
+      "agent_counts": {
+        "perception": 3,
+        "memory": 4,
+        "experts": 8,
+        "total": 15
+      },
+      "debate": {
+        "consensus": 2,
+        "conflicts": 0,
+        "missing_evidence": 1,
+        "risk_level": "low"
+      },
+      "critic": {
+        "triggered": false
+      },
+      "judge": {
+        "confidence": 0.75,
+        "risk_level": "low",
+        "need_human_review": false,
+        "judge_mode": "rules"
+      },
+      "planner": {
+        "enabled": true,
+        "required_tools": 3
+      },
+      "tool_router": {
+        "enabled": true,
+        "requests": 3,
+        "unresolved": 0
+      },
+      "total_events": 22
+    }
+  ],
+  "events": [
+    {
+      "stage": "request",
+      "timestamp": "2026-08-01T12:05:11.998487+00:00",
+      "payload": {
+        "query": "温室A番茄叶片同心轮纹状病斑，褐色边缘，怎么治？",
+        "greenhouse_id": "gh-a",
+        "crop": "tomato",
+        "image_path": null,
+        "intent": "diagnose"
+      }
+    },
+    {
+      "stage": "perception",
+      "timestamp": "2026-08-01T12:05:11.998487+00:00",
+      "payload": {
+        "layer": "感知层",
+        "agent": "视觉Agent",
+        "claim": "未提供图像，视觉诊断跳过",
+        "confidence": 0.0,
+        "evidence": {},
+        "warnings": [
+          "缺少叶片图像，病害判断依赖症状与环境数据"
+        ],
+        "recommendations": [],
+        "counterfactual": {},
+        "counterfactual_observations": []
+      }
+    },
+    {
+      "stage": "perception",
+      "timestamp": "2026-08-01T12:05:11.998487+00:00",
+      "payload": {
+        "layer": "感知层",
+        "agent": "传感器Agent",
+        "claim": "传感器读数整体正常",
+        "confidence": 0.65,
+        "evidence": {
+          "reading": {
+            "timestamp": "2026-08-01T20:05:11.984713",
+            "greenhouse_id": "gh-a",
+            "readings": {
+              "air_temperature": 24.1,
+              "air_humidity": 67.0,
+              "soil_moisture": 43.4,
+              "soil_temperature": 21.1,
+              "co2_concentration": 715.0,
+              "light_intensity": 0,
+              "soil_ph": 6.39
+            },
+            "anomaly_injected": {}
+          },
+          "anomaly": {
+            "greenhouse_id": "gh-a",
+            "greenhouse_name": "gh-a (tomato)",
+            "timestamp": "2026-08-01T20:05:11.984713",
+            "current_readings": {
+              "air_temperature": 23.4,
+              "air_humidity": 68.4,
+              "soil_moisture": 46.2,
+              "soil_temperature": 20.4,
+              "co2_concentration": 729.0,
+              "light_intensity": 0,
+              "soil_ph": 6.62
+            },
+            "detection_result": {
+              "combined_score": 0.027,
+              "is_anomalous": false,
+              "severity": "normal",
+              "anomaly_types": [],
+              "needs_human_review": false
+            },
+            "layer_details": {
+              "L1": {
+                "layer": "L1_isolation_forest",
+                "engine": "isolation_forest",
+                "score": 0.0,
+                "anomalous": false,
+                "anomalies": [],
+                "latency_ms": 3.64
+              },
+              "L2": {
+                "layer": "L2_lstm_ae",
+                "engine": "lstm_autoencoder",
+                "score": 0.0,
+                "anomalous": false,
+                "violations": [
+                  {
+                    "feature": "soil_ph",
+                    "recon_error": 0.9722
+                  },
+                  {
+                    "feature": "soil_moisture",
+                    "recon_error": 0.9679
+                  },
+                  {
+                    "feature": "air_humidity",
+                    "recon_error": 0.9377
+                  }
+                ],
+                "latency_ms": 0.71,
+                "recon_error": 0.8724
+              },
+              "L3": {
+                "layer": "L3_chronos",
+                "engine": "linear_regression_fallback",
+                "score": 0.089,
+                "anomalous": false,
+                "predictions": {
+                  "air_temperature": 23.66,
+                  "air_humidity": 68.4,
+                  "soil_moisture": 45.33
+                },
+                "deviations": {
+                  "air_temperature": 0.0111,
+                  "air_humidity": 0.0,
+                  "soil_moisture": 0.0193
+                },
+                "latency_ms": 0.03
+              }
+            },
+            "total_latency_ms": 4.38
+          }
+        },
+        "warnings": [],
+        "recommendations": [
+          "对异常传感器复测，并查看最近 24 小时趋势"
+        ],
+        "counterfactual": {},
+        "counterfactual_observations": []
+      }
+    },
+    {
+      "stage": "perception",
+      "timestamp": "2026-08-01T12:05:11.998487+00:00",
+      "payload": {
+        "layer": "感知层",
+        "agent": "天气Agent",
+        "claim": "外部天气暂无明显预警",
+        "confidence": 0.7,
+        "evidence": {
+          "current_weather": {
+            "location": "华北平原",
+            "time": "2026-08-01T20:05:11.989720",
+            "condition": "多云转晴",
+            "temperature": 27.3,
+            "humidity": 62.3,
+            "wind_speed": 4.2,
+            "wind_direction": "西南",
+            "precipitation_mm": 0,
+            "rain_probability": 17,
+            "pressure_hpa": 1011.4,
+            "uv_index": 0,
+            "dew_point": 19.8
+          },
+          "alerts": [
+            {
+              "type": "无预警",
+              "description": "当前无生效的气象预警"
+            }
+          ]
+        },
+        "warnings": [],
+        "recommendations": [],
+        "counterfactual": {},
+        "counterfactual_observations": []
+      }
+    },
+    {
+      "stage": "memory",
+      "timestamp": "2026-08-01T12:05:11.998487+00:00",
+      "payload": {
+        "layer": "记忆层",
+        "agent": "RAG",
+        "claim": "症状最匹配：番茄早疫病",
+        "confidence": 0.85,
+        "evidence": {
+          "backend": "memory",
+          "matches": [
+            {
+              "id": "tomato_blight",
+              "title": "番茄早疫病",
+              "crop": "番茄",
+              "text": "番茄早疫病\n症状：叶片出现同心轮纹状病斑；病斑边缘呈褐色，中央灰白色；茎部出现椭圆形深褐色病斑；果实蒂部出现凹陷褐色病斑\n预防：选用抗病品种；轮作倒茬，避免连作；加强水肥管理，增强植株抗性；及时清除病残体\n处理：发病初期喷施 75% 百菌清可湿性粉剂 600 倍液；或 64% 杀毒矾可湿性粉剂 500 倍液；每 7 天喷一次，连喷 3-4 次",
+              "score": 7.0,
+              "source": "memory",
+              "metadata": {
+                "backend": "memory",
+                "matched_symptoms": [
+                  "叶片出现同心轮纹状病斑",
+                  "病斑边缘呈褐色，中央灰白色",
+                  "茎部出现椭圆形深褐色病斑",
+                  "果实蒂部出现凹陷褐色病斑"
+                ],
+                "match_score": 7.0,
+                "full_info": {
+                  "name": "番茄早疫病",
+                  "crop": "番茄",
+                  "pathogen": "茄链格孢 (Alternaria solani)",
+                  "symptoms": [
+                    "叶片出现同心轮纹状病斑",
+                    "病斑边缘呈褐色，中央灰白色",
+                    "茎部出现椭圆形深褐色病斑",
+                    "果实蒂部出现凹陷褐色病斑"
+                  ],
+                  "conditions": {
+                    "temperature": "25-30°C",
+                    "humidity": ">80%",
+                    "note": "高温高湿交替时最易发生"
+                  },
+                  "prevention": [
+                    "选用抗病品种",
+                    "轮作倒茬，避免连作",
+                    "加强水肥管理，增强植株抗性",
+                    "及时清除病残体"
+                  ],
+                  "treatment": [
+                    "发病初期喷施 75% 百菌清可湿性粉剂 600 倍液",
+                    "或 64% 杀毒矾可湿性粉剂 500 倍液",
+                    "每 7 天喷一次，连喷 3-4 次"
+                  ],
+                  "severity_indicators": {
+                    "high": [
+                      "病斑数量 > 20 个/株",
+                      "茎部出现病斑",
+                      "果实已感染"
+                    ],
+                    "medium": [
+                      "病斑数量 5-20 个/株",
+                      "仅叶片发病"
+                    ],
+                    "low": [
+                      "病斑数量 < 5 个/株",
+                      "仅个别叶片"
+                    ]
+                  }
+                }
+              }
+            },
+            {
+              "id": "tomato_leaf_mold",
+              "title": "番茄叶霉病",
+              "crop": "番茄",
+              "text": "番茄叶霉病\n症状：叶片正面出现淡黄色不规则病斑；叶片背面生灰紫色至黑褐色绒状霉层；严重时叶片卷曲、干枯；通常从下部叶片开始向上蔓延\n预防：加强通风，降低温室湿度；合理密植，改善株间通风；避免大水漫灌，采用滴灌；及时摘除下部老叶、病叶\n处理：发病初期喷施 50% 多菌灵可湿性粉剂 500 倍液；或用 70% 甲基托布津可湿性粉剂 800 倍液；交替用药，每 7-10 天喷一次，连喷 2-3 次",
+              "score": 2.0,
+              "source": "memory",
+              "metadata": {
+                "backend": "memory",
+                "matched_symptoms": [
+                  "叶片正面出现淡黄色不规则病斑",
+                  "叶片背面生灰紫色至黑褐色绒状霉层"
+                ],
+                "match_score": 2.0,
+                "full_info": {
+                  "name": "番茄叶霉病",
+                  "crop": "番茄",
+                  "pathogen": "黄枝孢霉 (Fulvia fulva)",
+                  "symptoms": [
+                    "叶片正面出现淡黄色不规则病斑",
+                    "叶片背面生灰紫色至黑褐色绒状霉层",
+                    "严重时叶片卷曲、干枯",
+                    "通常从下部叶片开始向上蔓延"
+                  ],
+                  "conditions": {
+                    "temperature": "20-25°C",
+                    "humidity": ">85%",
+                    "ventilation": "通风不良时易发"
+                  },
+                  "prevention": [
+                    "加强通风，降低温室湿度",
+                    "合理密植，改善株间通风",
+                    "避免大水漫灌，采用滴灌",
+                    "及时摘除下部老叶、病叶"
+                  ],
+                  "treatment": [
+                    "发病初期喷施 50% 多菌灵可湿性粉剂 500 倍液",
+                    "或用 70% 甲基托布津可湿性粉剂 800 倍液",
+                    "交替用药，每 7-10 天喷一次，连喷 2-3 次"
+                  ],
+                  "severity_indicators": {
+                    "high": [
+                      "霉层覆盖面积 > 30%",
+                      "已蔓延至上部叶片",
+                      "叶片大面积卷曲"
+                    ],
+                    "medium": [
+                      "霉层可见但覆盖面积 < 30%",
+                      "仅下部叶片发病"
+                    ],
+                    "low": [
+                      "仅个别叶片出现病斑",
+                      "无霉层"
+                    ]
+                  }
+                }
+              }
+            }
+          ],
+          "error": null
+        },
+        "warnings": [],
+        "recommendations": [
+          "围绕最高匹配病害核对关键症状"
+        ],
+        "counterfactual": {},
+        "counterfactual_observations": []
+      }
+    },
+    {
+      "stage": "memory",
+      "timestamp": "2026-08-01T12:05:11.998487+00:00",
+      "payload": {
+        "layer": "记忆层",
+        "agent": "知识图谱",
+        "claim": "已提取作物最佳环境约束",
+        "confidence": 0.7,
+        "evidence": {
+          "crop": "tomato",
+          "optimal_conditions": {
+            "air_temp_day": "22-28°C",
+            "air_temp_night": "15-18°C",
+            "soil_moisture": "60-80% 田间持水量",
+            "soil_ph": "6.0-7.0",
+            "co2": "800-1200 ppm（温室补充 CO2 时）",
+            "light": "20000-40000 lux"
+          }
+        },
+        "warnings": [],
+        "recommendations": [],
+        "counterfactual": {},
+        "counterfactual_observations": []
+      }
+    },
+    {
+      "stage": "memory",
+      "timestamp": "2026-08-01T12:05:11.998487+00:00",
+      "payload": {
+        "layer": "记忆层",
+        "agent": "历史案例库",
+        "claim": "历史确认案例匹配：病理判断首选：番茄叶霉病（人工复核确认）",
+        "confidence": 0.75,
+        "evidence": {
+          "case_id": "confirmed-24",
+          "source": "sqlite_confirmed",
+          "original_query": "温室A番茄叶背出现灰色霉层，如何处理？",
+          "original_confidence": 0.7,
+          "feedback_note": "现场确认番茄叶霉病，处置有效"
+        },
+        "warnings": [],
+        "recommendations": [
+          "参考已确认案例 #24 的处置经验，核对关键症状"
+        ],
+        "counterfactual": {},
+        "counterfactual_observations": []
+      }
+    },
+    {
+      "stage": "memory",
+      "timestamp": "2026-08-01T12:05:11.998487+00:00",
+      "payload": {
+        "layer": "记忆层",
+        "agent": "经验回放Agent",
+        "claim": "无历史有效结果案例可回放",
+        "confidence": 0.3,
+        "evidence": {
+          "cases": [],
+          "backend": "sqlite"
+        },
+        "warnings": [],
+        "recommendations": [],
+        "counterfactual": {},
+        "counterfactual_observations": []
+      }
+    },
+    {
+      "stage": "experts",
+      "timestamp": "2026-08-01T12:05:11.998487+00:00",
+      "payload": {
+        "layer": "专家层",
+        "agent": "病理Agent",
+        "claim": "病理判断首选：番茄早疫病",
+        "confidence": 0.9,
+        "evidence": {
+          "possible_diseases": [
+            {
+              "disease_id": "tomato_blight",
+              "name": "番茄早疫病",
+              "crop": "番茄",
+              "match_score": 7.0,
+              "matched_symptoms": [
+                "叶片出现同心轮纹状病斑",
+                "病斑边缘呈褐色，中央灰白色",
+                "茎部出现椭圆形深褐色病斑",
+                "果实蒂部出现凹陷褐色病斑"
+              ],
+              "full_info": {
+                "name": "番茄早疫病",
+                "crop": "番茄",
+                "pathogen": "茄链格孢 (Alternaria solani)",
+                "symptoms": [
+                  "叶片出现同心轮纹状病斑",
+                  "病斑边缘呈褐色，中央灰白色",
+                  "茎部出现椭圆形深褐色病斑",
+                  "果实蒂部出现凹陷褐色病斑"
+                ],
+                "conditions": {
+                  "temperature": "25-30°C",
+                  "humidity": ">80%",
+                  "note": "高温高湿交替时最易发生"
+                },
+                "prevention": [
+                  "选用抗病品种",
+                  "轮作倒茬，避免连作",
+                  "加强水肥管理，增强植株抗性",
+                  "及时清除病残体"
+                ],
+                "treatment": [
+                  "发病初期喷施 75% 百菌清可湿性粉剂 600 倍液",
+                  "或 64% 杀毒矾可湿性粉剂 500 倍液",
+                  "每 7 天喷一次，连喷 3-4 次"
+                ],
+                "severity_indicators": {
+                  "high": [
+                    "病斑数量 > 20 个/株",
+                    "茎部出现病斑",
+                    "果实已感染"
+                  ],
+                  "medium": [
+                    "病斑数量 5-20 个/株",
+                    "仅叶片发病"
+                  ],
+                  "low": [
+                    "病斑数量 < 5 个/株",
+                    "仅个别叶片"
+                  ]
+                }
+              }
+            },
+            {
+              "disease_id": "tomato_leaf_mold",
+              "name": "番茄叶霉病",
+              "crop": "番茄",
+              "match_score": 2.0,
+              "matched_symptoms": [
+                "叶片正面出现淡黄色不规则病斑",
+                "叶片背面生灰紫色至黑褐色绒状霉层"
+              ],
+              "full_info": {
+                "name": "番茄叶霉病",
+                "crop": "番茄",
+                "pathogen": "黄枝孢霉 (Fulvia fulva)",
+                "symptoms": [
+                  "叶片正面出现淡黄色不规则病斑",
+                  "叶片背面生灰紫色至黑褐色绒状霉层",
+                  "严重时叶片卷曲、干枯",
+                  "通常从下部叶片开始向上蔓延"
+                ],
+                "conditions": {
+                  "temperature": "20-25°C",
+                  "humidity": ">85%",
+                  "ventilation": "通风不良时易发"
+                },
+                "prevention": [
+                  "加强通风，降低温室湿度",
+                  "合理密植，改善株间通风",
+                  "避免大水漫灌，采用滴灌",
+                  "及时摘除下部老叶、病叶"
+                ],
+                "treatment": [
+                  "发病初期喷施 50% 多菌灵可湿性粉剂 500 倍液",
+                  "或用 70% 甲基托布津可湿性粉剂 800 倍液",
+                  "交替用药，每 7-10 天喷一次，连喷 2-3 次"
+                ],
+                "severity_indicators": {
+                  "high": [
+                    "霉层覆盖面积 > 30%",
+                    "已蔓延至上部叶片",
+                    "叶片大面积卷曲"
+                  ],
+                  "medium": [
+                    "霉层可见但覆盖面积 < 30%",
+                    "仅下部叶片发病"
+                  ],
+                  "low": [
+                    "仅个别叶片出现病斑",
+                    "无霉层"
+                  ]
+                }
+              }
+            }
+          ],
+          "environment_issues": [],
+          "optimal_conditions": {
+            "air_temp_day": "22-28°C",
+            "air_temp_night": "15-18°C",
+            "soil_moisture": "60-80% 田间持水量",
+            "soil_ph": "6.0-7.0",
+            "co2": "800-1200 ppm（温室补充 CO2 时）",
+            "light": "20000-40000 lux"
+          },
+          "recommended_actions": [
+            "维持当前环境管理",
+            "密切观察症状变化，记录发展过程",
+            "如症状加重，建议取样送检确认病原"
+          ]
+        },
+        "warnings": [],
+        "recommendations": [
+          "维持当前环境管理",
+          "密切观察症状变化，记录发展过程",
+          "如症状加重，建议取样送检确认病原"
+        ],
+        "counterfactual": {
+          "alternative": "番茄叶霉病",
+          "rejection_reason": "匹配度2.0低于首选7.0，且番茄叶霉病的典型症状(叶片正面出现淡黄色不规则病斑、叶片背面生灰紫色至黑褐色绒状霉层)与现场描述重合度更低，故排除。"
+        },
+        "counterfactual_observations": []
+      }
+    },
+    {
+      "stage": "experts",
+      "timestamp": "2026-08-01T12:05:11.999487+00:00",
+      "payload": {
+        "layer": "专家层",
+        "agent": "气象Agent",
+        "claim": "气象条件支持灌溉",
+        "confidence": 0.72,
+        "evidence": {
+          "irrigation": {
+            "summary": {
+              "total_rainfall_24h_mm": 0,
+              "rain_hours_count": 0,
+              "avg_temperature_24h": 32.5,
+              "max_temperature_24h": 38.7,
+              "avg_wind_speed_ms": 4.3
+            },
+            "irrigation_advice": {
+              "should_irrigate": true,
+              "reason": "未来24小时降雨不足且温度偏高，建议灌溉",
+              "recommended_time": "清晨 5:00-7:00",
+              "estimated_evaporation_mm": 14.3
+            }
+          },
+          "alerts": [
+            {
+              "type": "无预警",
+              "description": "当前无生效的气象预警"
+            }
+          ]
+        },
+        "warnings": [],
+        "recommendations": [
+          "未来24小时降雨不足且温度偏高，建议灌溉",
+          "建议作业时间：清晨 5:00-7:00"
+        ],
+        "counterfactual": {
+          "alternative": "暂缓灌溉并择机补灌",
+          "rejection_reason": "当前蒸发与土壤墒情支持灌溉，但若后续出现降雨或高湿预警，提前灌溉会叠加叶面湿度风险，故作为备选排除。"
+        },
+        "counterfactual_observations": []
+      }
+    },
+    {
+      "stage": "experts",
+      "timestamp": "2026-08-01T12:05:11.999487+00:00",
+      "payload": {
+        "layer": "专家层",
+        "agent": "栽培Agent",
+        "claim": "已生成栽培管理建议",
+        "confidence": 0.68,
+        "evidence": {
+          "guide": {
+            "name": "番茄种植管理指南",
+            "optimal_conditions": {
+              "air_temp_day": "22-28°C",
+              "air_temp_night": "15-18°C",
+              "soil_moisture": "60-80% 田间持水量",
+              "soil_ph": "6.0-7.0",
+              "co2": "800-1200 ppm（温室补充 CO2 时）",
+              "light": "20000-40000 lux"
+            },
+            "growth_stages": {
+              "苗期": {
+                "duration": "30-40天",
+                "key_tasks": [
+                  "控水蹲苗",
+                  "适当降温炼苗",
+                  "防治猝倒病"
+                ]
+              },
+              "开花期": {
+                "duration": "15-20天",
+                "key_tasks": [
+                  "辅助授粉（振荡授粉）",
+                  "控制氮肥",
+                  "保持稳定温度"
+                ]
+              },
+              "结果期": {
+                "duration": "60-90天",
+                "key_tasks": [
+                  "加强水肥",
+                  "及时采收",
+                  "预防早疫病和叶霉病"
+                ]
+              }
+            },
+            "irrigation": {
+              "method": "滴灌",
+              "frequency": "结果期每 2-3 天一次",
+              "amount": "每次 15-20 m³/亩",
+              "notes": "避免大水漫灌，保持土壤湿度稳定"
+            }
+          },
+          "current_readings": {
+            "air_temperature": 24.1,
+            "air_humidity": 67.0,
+            "soil_moisture": 43.4,
+            "soil_temperature": 21.1,
+            "co2_concentration": 715.0,
+            "light_intensity": 0,
+            "soil_ph": 6.39
+          }
+        },
+        "warnings": [],
+        "recommendations": [
+          "维持当前管理，继续监测温湿度和叶面状态"
+        ],
+        "counterfactual": {
+          "alternative": "直接采用化学药剂防治",
+          "rejection_reason": "综合防治(IPM)原则下优先环境调控与栽培措施，化学防治作为后备手段，可避免抗药性上升与生态副作用。"
+        },
+        "counterfactual_observations": []
+      }
+    },
+    {
+      "stage": "experts",
+      "timestamp": "2026-08-01T12:05:11.999487+00:00",
+      "payload": {
+        "layer": "专家层",
+        "agent": "经济Agent",
+        "claim": "经济分析：番茄毛收益约12000元/亩，防治成本约100元/亩，净收益11900元/亩",
+        "confidence": 0.62,
+        "evidence": {
+          "price_table": {
+            "crop_price_per_kg": {
+              "番茄": 3.0,
+              "黄瓜": 2.5,
+              "甜菜": 1.2,
+              "棉花": 8.0
+            },
+            "pesticide_cost_per_mu": {
+              "多菌灵": 30,
+              "甲基托布津": 40,
+              "百菌清": 35,
+              "杀毒矾": 45,
+              "嘧霉胺": 50,
+              "吡虫啉": 25,
+              "印楝素": 60,
+              "枯草芽孢杆菌": 55
+            },
+            "labor_per_day": 100,
+            "yield_per_mu_kg": {
+              "番茄": 4000,
+              "黄瓜": 5000,
+              "甜菜": 3000,
+              "棉花": 250
+            }
+          },
+          "gross_revenue": 12000.0,
+          "treatment_cost": 100,
+          "cost_ratio": 0.008,
+          "mentioned_pesticides": [],
+          "economic_conflict": false
+        },
+        "warnings": [],
+        "recommendations": [
+          "防治投入占毛收益1%，性价比合理，建议及时防治以保产"
+        ],
+        "counterfactual": {
+          "alternative": "全面化学预防",
+          "rejection_reason": "全面化学预防会显著推高成本且增加抗药性风险，经济性劣于精准防治"
+        },
+        "counterfactual_observations": []
+      }
+    },
+    {
+      "stage": "experts",
+      "timestamp": "2026-08-01T12:05:11.999487+00:00",
+      "payload": {
+        "layer": "专家层",
+        "agent": "生态Agent",
+        "claim": "生态评估：检测到化学农药使用建议，已给出天敌保护替代方案",
+        "confidence": 0.6,
+        "evidence": {
+          "pesticide_ecology": {
+            "吡虫啉": {
+              "toxicity": "高",
+              "affected": "瓢虫/蜜蜂等授粉与天敌昆虫",
+              "alternative": "印楝素或苦参碱"
+            },
+            "多菌灵": {
+              "toxicity": "中",
+              "affected": "广谱杀菌，对天敌影响中等",
+              "alternative": "枯草芽孢杆菌"
+            },
+            "嘧霉胺": {
+              "toxicity": "中",
+              "affected": "对捕食螨有一定影响",
+              "alternative": "枯草芽孢杆菌配合通风降湿"
+            },
+            "百菌清": {
+              "toxicity": "中",
+              "affected": "广谱保护性杀菌剂",
+              "alternative": "波尔多液"
+            },
+            "甲基托布津": {
+              "toxicity": "中",
+              "affected": "广谱杀菌剂",
+              "alternative": "木霉菌制剂"
+            },
+            "杀毒矾": {
+              "toxicity": "中",
+              "affected": "对水生生物有毒",
+              "alternative": "霜脲氰·锰锌"
+            }
+          },
+          "detected_pesticides": [
+            "多菌灵",
+            "百菌清",
+            "甲基托布津",
+            "杀毒矾"
+          ],
+          "ecological_conflict": false,
+          "max_toxicity": "中"
+        },
+        "warnings": [],
+        "recommendations": [
+          "多菌灵对广谱杀菌，对天敌影响中等影响中，建议轮换或配合枯草芽孢杆菌",
+          "百菌清对广谱保护性杀菌剂影响中，建议轮换或配合波尔多液",
+          "甲基托布津对广谱杀菌剂影响中，建议轮换或配合木霉菌制剂",
+          "杀毒矾对对水生生物有毒影响中，建议轮换或配合霜脲氰·锰锌"
+        ],
+        "counterfactual": {
+          "alternative": "坚持使用高毒化学农药快速控病",
+          "rejection_reason": "高毒农药虽短期见效，但会杀伤广谱杀菌，对天敌影响中等、广谱保护性杀菌剂、广谱杀菌剂、对水生生物有毒，破坏天敌-害虫平衡，导致再猖獗"
+        },
+        "counterfactual_observations": []
+      }
+    },
+    {
+      "stage": "experts",
+      "timestamp": "2026-08-01T12:05:11.999487+00:00",
+      "payload": {
+        "layer": "专家层",
+        "agent": "病理Agent",
+        "claim": "病理判断首选：番茄早疫病",
+        "confidence": 0.9,
+        "evidence": {
+          "possible_diseases": [
+            {
+              "disease_id": "tomato_blight",
+              "name": "番茄早疫病",
+              "crop": "番茄",
+              "match_score": 7.0,
+              "matched_symptoms": [
+                "叶片出现同心轮纹状病斑",
+                "病斑边缘呈褐色，中央灰白色",
+                "茎部出现椭圆形深褐色病斑",
+                "果实蒂部出现凹陷褐色病斑"
+              ],
+              "full_info": {
+                "name": "番茄早疫病",
+                "crop": "番茄",
+                "pathogen": "茄链格孢 (Alternaria solani)",
+                "symptoms": [
+                  "叶片出现同心轮纹状病斑",
+                  "病斑边缘呈褐色，中央灰白色",
+                  "茎部出现椭圆形深褐色病斑",
+                  "果实蒂部出现凹陷褐色病斑"
+                ],
+                "conditions": {
+                  "temperature": "25-30°C",
+                  "humidity": ">80%",
+                  "note": "高温高湿交替时最易发生"
+                },
+                "prevention": [
+                  "选用抗病品种",
+                  "轮作倒茬，避免连作",
+                  "加强水肥管理，增强植株抗性",
+                  "及时清除病残体"
+                ],
+                "treatment": [
+                  "发病初期喷施 75% 百菌清可湿性粉剂 600 倍液",
+                  "或 64% 杀毒矾可湿性粉剂 500 倍液",
+                  "每 7 天喷一次，连喷 3-4 次"
+                ],
+                "severity_indicators": {
+                  "high": [
+                    "病斑数量 > 20 个/株",
+                    "茎部出现病斑",
+                    "果实已感染"
+                  ],
+                  "medium": [
+                    "病斑数量 5-20 个/株",
+                    "仅叶片发病"
+                  ],
+                  "low": [
+                    "病斑数量 < 5 个/株",
+                    "仅个别叶片"
+                  ]
+                }
+              }
+            },
+            {
+              "disease_id": "tomato_leaf_mold",
+              "name": "番茄叶霉病",
+              "crop": "番茄",
+              "match_score": 2.0,
+              "matched_symptoms": [
+                "叶片正面出现淡黄色不规则病斑",
+                "叶片背面生灰紫色至黑褐色绒状霉层"
+              ],
+              "full_info": {
+                "name": "番茄叶霉病",
+                "crop": "番茄",
+                "pathogen": "黄枝孢霉 (Fulvia fulva)",
+                "symptoms": [
+                  "叶片正面出现淡黄色不规则病斑",
+                  "叶片背面生灰紫色至黑褐色绒状霉层",
+                  "严重时叶片卷曲、干枯",
+                  "通常从下部叶片开始向上蔓延"
+                ],
+                "conditions": {
+                  "temperature": "20-25°C",
+                  "humidity": ">85%",
+                  "ventilation": "通风不良时易发"
+                },
+                "prevention": [
+                  "加强通风，降低温室湿度",
+                  "合理密植，改善株间通风",
+                  "避免大水漫灌，采用滴灌",
+                  "及时摘除下部老叶、病叶"
+                ],
+                "treatment": [
+                  "发病初期喷施 50% 多菌灵可湿性粉剂 500 倍液",
+                  "或用 70% 甲基托布津可湿性粉剂 800 倍液",
+                  "交替用药，每 7-10 天喷一次，连喷 2-3 次"
+                ],
+                "severity_indicators": {
+                  "high": [
+                    "霉层覆盖面积 > 30%",
+                    "已蔓延至上部叶片",
+                    "叶片大面积卷曲"
+                  ],
+                  "medium": [
+                    "霉层可见但覆盖面积 < 30%",
+                    "仅下部叶片发病"
+                  ],
+                  "low": [
+                    "仅个别叶片出现病斑",
+                    "无霉层"
+                  ]
+                }
+              }
+            }
+          ],
+          "environment_issues": [],
+          "optimal_conditions": {
+            "air_temp_day": "22-28°C",
+            "air_temp_night": "15-18°C",
+            "soil_moisture": "60-80% 田间持水量",
+            "soil_ph": "6.0-7.0",
+            "co2": "800-1200 ppm（温室补充 CO2 时）",
+            "light": "20000-40000 lux"
+          },
+          "recommended_actions": [
+            "维持当前环境管理",
+            "密切观察症状变化，记录发展过程",
+            "如症状加重，建议取样送检确认病原"
+          ],
+          "rebuttal_round": 2,
+          "rebuttal_doubts": "缺少有效图像证据，视觉 Agent 未参与确认"
+        },
+        "warnings": [],
+        "recommendations": [
+          "维持当前环境管理",
+          "密切观察症状变化，记录发展过程",
+          "如症状加重，建议取样送检确认病原"
+        ],
+        "counterfactual": {
+          "alternative": "番茄叶霉病",
+          "rejection_reason": "匹配度2.0低于首选7.0，且番茄叶霉病的典型症状(叶片正面出现淡黄色不规则病斑、叶片背面生灰紫色至黑褐色绒状霉层)与现场描述重合度更低，故排除。"
+        },
+        "counterfactual_observations": []
+      }
+    },
+    {
+      "stage": "experts",
+      "timestamp": "2026-08-01T12:05:11.999487+00:00",
+      "payload": {
+        "layer": "专家层",
+        "agent": "气象Agent",
+        "claim": "气象条件支持灌溉",
+        "confidence": 0.72,
+        "evidence": {
+          "irrigation": {
+            "summary": {
+              "total_rainfall_24h_mm": 0,
+              "rain_hours_count": 0,
+              "avg_temperature_24h": 32.4,
+              "max_temperature_24h": 37.1,
+              "avg_wind_speed_ms": 3.9
+            },
+            "irrigation_advice": {
+              "should_irrigate": true,
+              "reason": "未来24小时降雨不足且温度偏高，建议灌溉",
+              "recommended_time": "清晨 5:00-7:00",
+              "estimated_evaporation_mm": 14.1
+            }
+          },
+          "alerts": [
+            {
+              "type": "无预警",
+              "description": "当前无生效的气象预警"
+            }
+          ],
+          "rebuttal_round": 2,
+          "rebuttal_doubts": "缺少有效图像证据，视觉 Agent 未参与确认"
+        },
+        "warnings": [],
+        "recommendations": [
+          "未来24小时降雨不足且温度偏高，建议灌溉",
+          "建议作业时间：清晨 5:00-7:00"
+        ],
+        "counterfactual": {
+          "alternative": "暂缓灌溉并择机补灌",
+          "rejection_reason": "当前蒸发与土壤墒情支持灌溉，但若后续出现降雨或高湿预警，提前灌溉会叠加叶面湿度风险，故作为备选排除。"
+        },
+        "counterfactual_observations": []
+      }
+    },
+    {
+      "stage": "experts",
+      "timestamp": "2026-08-01T12:05:11.999487+00:00",
+      "payload": {
+        "layer": "专家层",
+        "agent": "栽培Agent",
+        "claim": "已生成栽培管理建议",
+        "confidence": 0.68,
+        "evidence": {
+          "guide": {
+            "name": "番茄种植管理指南",
+            "optimal_conditions": {
+              "air_temp_day": "22-28°C",
+              "air_temp_night": "15-18°C",
+              "soil_moisture": "60-80% 田间持水量",
+              "soil_ph": "6.0-7.0",
+              "co2": "800-1200 ppm（温室补充 CO2 时）",
+              "light": "20000-40000 lux"
+            },
+            "growth_stages": {
+              "苗期": {
+                "duration": "30-40天",
+                "key_tasks": [
+                  "控水蹲苗",
+                  "适当降温炼苗",
+                  "防治猝倒病"
+                ]
+              },
+              "开花期": {
+                "duration": "15-20天",
+                "key_tasks": [
+                  "辅助授粉（振荡授粉）",
+                  "控制氮肥",
+                  "保持稳定温度"
+                ]
+              },
+              "结果期": {
+                "duration": "60-90天",
+                "key_tasks": [
+                  "加强水肥",
+                  "及时采收",
+                  "预防早疫病和叶霉病"
+                ]
+              }
+            },
+            "irrigation": {
+              "method": "滴灌",
+              "frequency": "结果期每 2-3 天一次",
+              "amount": "每次 15-20 m³/亩",
+              "notes": "避免大水漫灌，保持土壤湿度稳定"
+            }
+          },
+          "current_readings": {
+            "air_temperature": 24.1,
+            "air_humidity": 67.0,
+            "soil_moisture": 43.4,
+            "soil_temperature": 21.1,
+            "co2_concentration": 715.0,
+            "light_intensity": 0,
+            "soil_ph": 6.39
+          },
+          "rebuttal_round": 2,
+          "rebuttal_doubts": "缺少有效图像证据，视觉 Agent 未参与确认"
+        },
+        "warnings": [],
+        "recommendations": [
+          "维持当前管理，继续监测温湿度和叶面状态"
+        ],
+        "counterfactual": {
+          "alternative": "直接采用化学药剂防治",
+          "rejection_reason": "综合防治(IPM)原则下优先环境调控与栽培措施，化学防治作为后备手段，可避免抗药性上升与生态副作用。"
+        },
+        "counterfactual_observations": []
+      }
+    },
+    {
+      "stage": "debate",
+      "timestamp": "2026-08-01T12:05:11.999487+00:00",
+      "payload": {
+        "consensus": [
+          "【多轮辩论·第2轮】已携带前1轮辩论上下文",
+          "病理诊断与记忆层（RAG/历史案例）结论一致，诊断可信度升高"
+        ],
+        "conflicts": [],
+        "missing_evidence": [
+          "缺少有效图像证据，视觉 Agent 未参与确认"
+        ],
+        "risk_level": "low"
+      }
+    },
+    {
+      "stage": "critic",
+      "timestamp": "2026-08-01T12:05:11.999487+00:00",
+      "payload": {}
+    },
+    {
+      "stage": "judge",
+      "timestamp": "2026-08-01T12:05:11.999487+00:00",
+      "payload": {
+        "summary": "【第二轮辩论后裁决】Orchestrator 已完成 gh-a/tomato 的diagnose 工作流：病理判断首选：番茄早疫病。风险等级：low。",
+        "decision": "病理判断首选：番茄早疫病",
+        "confidence": 0.75,
+        "risk_level": "low",
+        "judge_mode": "rules",
+        "need_human_review": false,
+        "reasoning_trace": "KG参照疾病：番茄早疫病、番茄叶霉病；未触发KG硬约束否决；风险等级=low，置信度=0.75；第二轮辩论后裁决：第二轮病理意见与首轮一致",
+        "judge_analysis": {
+          "kg": {
+            "diseases": [
+              "番茄早疫病",
+              "番茄叶霉病"
+            ],
+            "rules": [
+              "番茄早疫病高发条件：湿度>80%，若棚内湿度明显偏低应降低该诊断置信度",
+              "番茄早疫病适宜温度25-30°C，环境温度偏离过大时该诊断证据减弱",
+              "番茄早疫病典型症状：叶片出现同心轮纹状病斑，需与视觉/症状描述核对",
+              "番茄叶霉病高发条件：湿度>85%，若棚内湿度明显偏低应降低该诊断置信度",
+              "番茄叶霉病适宜温度20-25°C，环境温度偏离过大时该诊断证据减弱",
+              "番茄叶霉病典型症状：叶片正面出现淡黄色不规则病斑，需与视觉/症状描述核对"
+            ],
+            "backend": "memory"
+          },
+          "consistency": {
+            "agent_diagnoses": [
+              {
+                "agent": "病理Agent",
+                "claim": "病理判断首选：番茄早疫病",
+                "kg_match": "完全匹配",
+                "conflict_reason": ""
+              }
+            ],
+            "rule_violations": [],
+            "vetoed": false,
+            "kg_diseases": [
+              "番茄早疫病",
+              "番茄叶霉病"
+            ]
+          },
+          "sensor_readings": {
+            "temperature": 24.1,
+            "humidity": 67.0,
+            "soil_moisture": 43.4
+          },
+          "critic": {},
+          "collective_omission": {
+            "omitted_diseases": [],
+            "penalty_applied": false,
+            "controversy_delta": 0.0,
+            "counterfactuals": [
+              {
+                "agent": "病理Agent",
+                "alternative": "番茄叶霉病",
+                "rejection_reason": "匹配度2.0低于首选7.0，且番茄叶霉病的典型症状(叶片正面出现淡黄色不规则病斑、叶片背面生灰紫色至黑褐色绒状霉层)与现场描述重合度更低，故排除。"
+              },
+              {
+                "agent": "气象Agent",
+                "alternative": "暂缓灌溉并择机补灌",
+                "rejection_reason": "当前蒸发与土壤墒情支持灌溉，但若后续出现降雨或高湿预警，提前灌溉会叠加叶面湿度风险，故作为备选排除。"
+              },
+              {
+                "agent": "栽培Agent",
+                "alternative": "直接采用化学药剂防治",
+                "rejection_reason": "综合防治(IPM)原则下优先环境调控与栽培措施，化学防治作为后备手段，可避免抗药性上升与生态副作用。"
+              },
+              {
+                "agent": "经济Agent",
+                "alternative": "全面化学预防",
+                "rejection_reason": "全面化学预防会显著推高成本且增加抗药性风险，经济性劣于精准防治"
+              },
+              {
+                "agent": "生态Agent",
+                "alternative": "坚持使用高毒化学农药快速控病",
+                "rejection_reason": "高毒农药虽短期见效，但会杀伤广谱杀菌，对天敌影响中等、广谱保护性杀菌剂、广谱杀菌剂、对水生生物有毒，破坏天敌-害虫平衡，导致再猖獗"
+              },
+              {
+                "agent": "病理Agent",
+                "alternative": "番茄叶霉病",
+                "rejection_reason": "匹配度2.0低于首选7.0，且番茄叶霉病的典型症状(叶片正面出现淡黄色不规则病斑、叶片背面生灰紫色至黑褐色绒状霉层)与现场描述重合度更低，故排除。"
+              },
+              {
+                "agent": "气象Agent",
+                "alternative": "暂缓灌溉并择机补灌",
+                "rejection_reason": "当前蒸发与土壤墒情支持灌溉，但若后续出现降雨或高湿预警，提前灌溉会叠加叶面湿度风险，故作为备选排除。"
+              },
+              {
+                "agent": "栽培Agent",
+                "alternative": "直接采用化学药剂防治",
+                "rejection_reason": "综合防治(IPM)原则下优先环境调控与栽培措施，化学防治作为后备手段，可避免抗药性上升与生态副作用。"
+              }
+            ],
+            "ignored_candidates": [],
+            "retrieved_candidates": [
+              "番茄早疫病",
+              "番茄叶霉病"
+            ],
+            "omission_score": 0.0,
+            "omission_reason": "所有 KG 候选病害均已被专家讨论，未发现集体漏检。",
+            "omission_level": "none",
+            "append_warning": false
+          },
+          "kg_evolution": {
+            "proposed": [],
+            "drafts": [],
+            "used_drafts": false
+          },
+          "calibration": {
+            "enabled": true,
+            "agents": {
+              "病理Agent": {
+                "kind": "isotonic",
+                "samples": 11
+              },
+              "气象Agent": {
+                "kind": "passthrough",
+                "samples": 12
+              },
+              "栽培Agent": {
+                "kind": "passthrough",
+                "samples": 12
+              },
+              "经济Agent": {
+                "kind": "passthrough",
+                "samples": 12
+              },
+              "生态Agent": {
+                "kind": "passthrough",
+                "samples": 12
+              }
+            }
+          }
+        },
+        "action_plan": [
+          "对异常传感器复测，并查看最近 24 小时趋势",
+          "围绕最高匹配病害核对关键症状",
+          "参考已确认案例 #24 的处置经验，核对关键症状",
+          "维持当前环境管理",
+          "密切观察症状变化，记录发展过程",
+          "如症状加重，建议取样送检确认病原"
+        ],
+        "decision_id": null
+      }
+    },
+    {
+      "stage": "planner",
+      "timestamp": "2026-08-01T12:05:11.999487+00:00",
+      "payload": {
+        "enabled": true,
+        "goal": "执行 Judge 裁决：病理判断首选：番茄早疫病",
+        "steps": [
+          "对异常传感器复测，并查看最近 24 小时趋势",
+          "围绕最高匹配病害核对关键症状",
+          "参考已确认案例 #24 的处置经验，核对关键症状",
+          "维持当前环境管理",
+          "密切观察症状变化，记录发展过程",
+          "如症状加重，建议取样送检确认病原",
+          "补充缺失证据并复评"
+        ],
+        "required_tools": [
+          "image_capture",
+          "spray_workorder",
+          "irrigation_control"
+        ],
+        "priority": "low",
+        "estimated_risk": "medium",
+        "estimated_cost": "high"
+      }
+    },
+    {
+      "stage": "tool_router",
+      "timestamp": "2026-08-01T12:05:11.999487+00:00",
+      "payload": {
+        "enabled": true,
+        "requests": [
+          {
+            "tool_name": "image_capture",
+            "parameters": {
+              "mode": "close_up",
+              "count": 1,
+              "goal": "执行 Judge 裁决：病理判断首选：番茄早疫病"
+            },
+            "priority": "low",
+            "timeout": 20.0,
+            "retry_policy": {
+              "max_attempts": 2,
+              "backoff_seconds": 1.0
+            }
+          },
+          {
+            "tool_name": "spray_workorder",
+            "parameters": {
+              "goal": "执行 Judge 裁决：病理判断首选：番茄早疫病"
+            },
+            "priority": "low",
+            "timeout": 15.0,
+            "retry_policy": {
+              "max_attempts": 1,
+              "backoff_seconds": 0.0
+            }
+          },
+          {
+            "tool_name": "irrigation_control",
+            "parameters": {
+              "action": "schedule",
+              "goal": "执行 Judge 裁决：病理判断首选：番茄早疫病"
+            },
+            "priority": "low",
+            "timeout": 30.0,
+            "retry_policy": {
+              "max_attempts": 2,
+              "backoff_seconds": 2.0
+            }
+          }
+        ],
+        "unresolved": []
+      }
+    },
+    {
+      "stage": "metrics",
+      "timestamp": "2026-08-01T12:05:11.999487+00:00",
+      "payload": {
+        "agent_counts": {
+          "perception": 3,
+          "memory": 4,
+          "experts": 8,
+          "total": 15
+        },
+        "debate": {
+          "consensus": 2,
+          "conflicts": 0,
+          "missing_evidence": 1,
+          "risk_level": "low"
+        },
+        "critic": {
+          "triggered": false
+        },
+        "judge": {
+          "confidence": 0.75,
+          "risk_level": "low",
+          "need_human_review": false,
+          "judge_mode": "rules"
+        },
+        "planner": {
+          "enabled": true,
+          "required_tools": 3
+        },
+        "tool_router": {
+          "enabled": true,
+          "requests": 3,
+          "unresolved": 0
+        },
+        "total_events": 22
+      }
+    }
+  ]
+}

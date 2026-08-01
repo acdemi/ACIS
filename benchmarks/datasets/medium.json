@@ -1,0 +1,99 @@
+{
+  "name": "medium",
+  "difficulty": "medium",
+  "description": "Cases with combined signals: irrigation vs disease conflicts, environmental context, and monitoring under conditions.",
+  "cases": [
+    {
+      "id": "tomato_irrigate_with_disease",
+      "query": "温室A番茄叶背有灰色霉层，今天需要浇水吗，要兼顾病害风险",
+      "ground_truth": "叶霉病",
+      "crop": "tomato",
+      "intent": "irrigate",
+      "disease": "叶霉病",
+      "expect_critic": true
+    },
+    {
+      "id": "tomato_leaf_mold_low_humidity",
+      "query": "温室A番茄叶背灰色霉层，环境是否适合发病",
+      "ground_truth": "叶霉病",
+      "crop": "tomato",
+      "intent": "diagnose",
+      "disease": "叶霉病",
+      "expect_critic": true,
+      "sensor_override": {
+        "humidity_offset": -25.0
+      }
+    },
+    {
+      "id": "tomato_early_blight_high_humidity",
+      "query": "温室A番茄出现同心轮纹病斑，棚内湿度大，怎么处理",
+      "ground_truth": "早疫病",
+      "crop": "tomato",
+      "intent": "diagnose",
+      "disease": "早疫病",
+      "sensor_override": {
+        "humidity_offset": 15.0
+      }
+    },
+    {
+      "id": "cucumber_downy_mildew_alert",
+      "query": "温室B黄瓜叶背灰黑色霉层、多角形病斑，需要预警吗",
+      "ground_truth": "霜霉病",
+      "crop": "cucumber",
+      "intent": "alert",
+      "disease": "霜霉病"
+    },
+    {
+      "id": "sugar_beet_leaf_spot_irrigate",
+      "query": "温室A甜菜叶片褐斑增多，近期还能浇水吗",
+      "ground_truth": "褐斑病",
+      "crop": "sugar_beet",
+      "intent": "irrigate",
+      "disease": "褐斑病",
+      "expect_critic": true
+    },
+    {
+      "id": "sugar_beet_root_rot_wet",
+      "query": "温室A甜菜根部腐烂、叶片萎蔫黄化，土壤偏湿，怎么救",
+      "ground_truth": "根腐病",
+      "crop": "sugar_beet",
+      "intent": "diagnose",
+      "disease": "根腐病",
+      "sensor_override": {
+        "humidity_offset": 12.0
+      }
+    },
+    {
+      "id": "cotton_verticillium_wilt_weather",
+      "query": "温室A棉花黄绿斑驳、维管束褐变，近期低温多雨，怎么防治",
+      "ground_truth": "黄萎病",
+      "crop": "cotton",
+      "intent": "diagnose",
+      "disease": "黄萎病"
+    },
+    {
+      "id": "cotton_fusarium_wilt_alert",
+      "query": "温室A棉花半边黄化萎蔫，有枯萎风险吗",
+      "ground_truth": "枯萎病",
+      "crop": "cotton",
+      "intent": "alert",
+      "disease": "枯萎病"
+    },
+    {
+      "id": "tomato_monitor_anomaly",
+      "query": "温室A番茄当前环境监测数据正常吗",
+      "ground_truth": "证据不足",
+      "crop": "tomato",
+      "intent": "monitor",
+      "disease": null
+    },
+    {
+      "id": "sugar_beet_consult",
+      "query": "温室A甜菜叶丛繁茂期水肥怎么安排",
+      "ground_truth": "证据不足",
+      "crop": "sugar_beet",
+      "intent": "irrigate",
+      "disease": null
+    }
+  ]
+}

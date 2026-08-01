@@ -22,6 +22,13 @@ class AgentOutput:
     # considered but rejected. Format: {alternative, rejection_reason}.
     counterfactual: dict[str, Any] = field(default_factory=dict)
 
+    # ACIS cognitive upgrade: hypothetical observations that would change
+    # this expert conclusion. Optional list[str], defaults to empty list.
+    # Each entry is a free-form statement, e.g. if leaf lesions had concentric
+    # rings, Alternaria would become the preferred diagnosis. Intended for
+    # later Judge robustness analysis.
+    counterfactual_observations: list[str] = field(default_factory=list)
+
 
 @dataclass
 class RequestContext:

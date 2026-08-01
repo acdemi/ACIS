@@ -20,10 +20,13 @@ import json
 import os
 
 from _env import load_env
+from planner import build_planner, ExecutionPlan
+from tool_router import ToolRouter, ToolRoutingResult
+from trace import Trace, collect_pipeline_trace
 
 load_env()  # 注入 .env（DEEPSEEK_API_KEY / NEO4J_PASSWORD）
 
-from agents.types import AgentOutput, RequestContext, DebateResult, DecisionOutput
+from agents.types import AgentOutput as AgentOutput, DebateResult as DebateResult, RequestContext, DecisionOutput
 from agents.sensor_agent import SensorAgent
 from agents.weather_agent import WeatherAgent
 from agents.vision_agent import VisionAgent
@@ -99,12 +102,39 @@ class AgentOrchestrator:
         from debate.critic import CriticEngine
         self.critic_engine = CriticEngine(use_llm=use_llm_critic)
         self.judge_agent = JudgeAgent(use_llm=use_llm_judge)
+        self.planner = build_planner()
+        self.last_execution_plan: ExecutionPlan | None = None
+        self.tool_router = ToolRouter() if self.planner is not None else None
+        self.last_tool_requests: ToolRoutingResult | None = None
+        self.last_trace: Trace | None = None
         self._compiled_graph = self._build_langgraph() if use_langgraph else None
 
     def run(self, query: str, image_path: str | None = None) -> DecisionOutput:
         decision = self._run_core(query, image_path)
         self._persist(decision, query, image_path)
+        if self.planner is not None:
+            self.last_execution_plan = self.planner.plan(decision)
+            if self.tool_router is not None:
+                self.last_tool_requests = self.tool_router.route(self.last_execution_plan)
+        self.last_trace = self._build_trace(decision, query, image_path)
         return decision
+
+    def _build_trace(self, decision: DecisionOutput, query: str, image_path: str | None) -> Trace:
+        """Build the unified Trace for this run (single source of truth).
+
+        Snapshots every pipeline stage from the run artifacts. Planner /
+        tool-router artifacts are optional, so Planner ON and OFF both yield
+        a valid trace. Observational only: no cognitive logic or API change.
+        """
+        context = build_context(query, image_path)
+        return collect_pipeline_trace(
+            context=context,
+            agent_outputs=decision.traces,
+            debate=decision.debate,
+            decision=decision,
+            plan=self.last_execution_plan,
+            tool_result=self.last_tool_requests,
+        )
 
     def _run_core(self, query: str, image_path: str | None = None) -> DecisionOutput:
         if self._compiled_graph is not None:

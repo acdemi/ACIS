@@ -1,0 +1,1478 @@
+{
+  "trace_id": "0cfa48b27b98467a875ab8b2e4761bc1",
+  "timestamp": "2026-08-01T12:05:12.286901+00:00",
+  "request": [
+    {
+      "query": "温室A甜菜当前有什么风险，需要优先处理",
+      "greenhouse_id": "gh-a",
+      "crop": "sugar_beet",
+      "image_path": null,
+      "intent": "alert"
+    }
+  ],
+  "perception": [
+    {
+      "layer": "感知层",
+      "agent": "视觉Agent",
+      "claim": "未提供图像，视觉诊断跳过",
+      "confidence": 0.0,
+      "evidence": {},
+      "warnings": [
+        "缺少叶片图像，病害判断依赖症状与环境数据"
+      ],
+      "recommendations": [],
+      "counterfactual": {},
+      "counterfactual_observations": []
+    },
+    {
+      "layer": "感知层",
+      "agent": "传感器Agent",
+      "claim": "传感器读数整体正常",
+      "confidence": 0.65,
+      "evidence": {
+        "reading": {
+          "timestamp": "2026-08-01T20:05:12.277300",
+          "greenhouse_id": "gh-a",
+          "readings": {
+            "air_temperature": 24.1,
+            "air_humidity": 67.0,
+            "soil_moisture": 43.4,
+            "soil_temperature": 21.1,
+            "co2_concentration": 715.0,
+            "light_intensity": 0,
+            "soil_ph": 6.39
+          },
+          "anomaly_injected": {}
+        },
+        "anomaly": {
+          "greenhouse_id": "gh-a",
+          "greenhouse_name": "gh-a (tomato)",
+          "timestamp": "2026-08-01T20:05:12.277300",
+          "current_readings": {
+            "air_temperature": 23.4,
+            "air_humidity": 68.4,
+            "soil_moisture": 46.2,
+            "soil_temperature": 20.4,
+            "co2_concentration": 729.0,
+            "light_intensity": 0,
+            "soil_ph": 6.62
+          },
+          "detection_result": {
+            "combined_score": 0.027,
+            "is_anomalous": false,
+            "severity": "normal",
+            "anomaly_types": [],
+            "needs_human_review": false
+          },
+          "layer_details": {
+            "L1": {
+              "layer": "L1_isolation_forest",
+              "engine": "isolation_forest",
+              "score": 0.0,
+              "anomalous": false,
+              "anomalies": [],
+              "latency_ms": 3.25
+            },
+            "L2": {
+              "layer": "L2_lstm_ae",
+              "engine": "lstm_autoencoder",
+              "score": 0.0,
+              "anomalous": false,
+              "violations": [
+                {
+                  "feature": "soil_ph",
+                  "recon_error": 0.9722
+                },
+                {
+                  "feature": "soil_moisture",
+                  "recon_error": 0.9679
+                },
+                {
+                  "feature": "air_humidity",
+                  "recon_error": 0.9377
+                }
+              ],
+              "latency_ms": 0.7,
+              "recon_error": 0.8724
+            },
+            "L3": {
+              "layer": "L3_chronos",
+              "engine": "linear_regression_fallback",
+              "score": 0.089,
+              "anomalous": false,
+              "predictions": {
+                "air_temperature": 23.66,
+                "air_humidity": 68.4,
+                "soil_moisture": 45.33
+              },
+              "deviations": {
+                "air_temperature": 0.0111,
+                "air_humidity": 0.0,
+                "soil_moisture": 0.0193
+              },
+              "latency_ms": 0.03
+            }
+          },
+          "total_latency_ms": 3.98
+        }
+      },
+      "warnings": [],
+      "recommendations": [
+        "对异常传感器复测，并查看最近 24 小时趋势"
+      ],
+      "counterfactual": {},
+      "counterfactual_observations": []
+    },
+    {
+      "layer": "感知层",
+      "agent": "天气Agent",
+      "claim": "外部天气暂无明显预警",
+      "confidence": 0.7,
+      "evidence": {
+        "current_weather": {
+          "location": "华北平原",
+          "time": "2026-08-01T20:05:12.281306",
+          "condition": "多云转晴",
+          "temperature": 27.3,
+          "humidity": 62.3,
+          "wind_speed": 4.2,
+          "wind_direction": "西南",
+          "precipitation_mm": 0,
+          "rain_probability": 17,
+          "pressure_hpa": 1011.4,
+          "uv_index": 0,
+          "dew_point": 19.8
+        },
+        "alerts": [
+          {
+            "type": "无预警",
+            "description": "当前无生效的气象预警"
+          }
+        ]
+      },
+      "warnings": [],
+      "recommendations": [],
+      "counterfactual": {},
+      "counterfactual_observations": []
+    }
+  ],
+  "memory": [
+    {
+      "layer": "记忆层",
+      "agent": "RAG",
+      "claim": "RAG 未检索到高匹配病害",
+      "confidence": 0.25,
+      "evidence": {
+        "backend": "memory",
+        "matches": [],
+        "error": null
+      },
+      "warnings": [
+        "症状描述不足或知识库覆盖不足"
+      ],
+      "recommendations": [],
+      "counterfactual": {},
+      "counterfactual_observations": []
+    },
+    {
+      "layer": "记忆层",
+      "agent": "知识图谱",
+      "claim": "已提取作物最佳环境约束",
+      "confidence": 0.7,
+      "evidence": {
+        "crop": "sugar_beet",
+        "optimal_conditions": {
+          "air_temp_day": "18-22°C",
+          "air_temp_night": "10-15°C",
+          "soil_moisture": "60-75% 田间持水量",
+          "soil_ph": "6.5-8.0",
+          "co2": "自然通风",
+          "light": "30000-50000 lux"
+        }
+      },
+      "warnings": [],
+      "recommendations": [],
+      "counterfactual": {},
+      "counterfactual_observations": []
+    },
+    {
+      "layer": "记忆层",
+      "agent": "历史案例库",
+      "claim": "历史案例库暂无强匹配案例",
+      "confidence": 0.3,
+      "evidence": {
+        "matched_case": null
+      },
+      "warnings": [],
+      "recommendations": [],
+      "counterfactual": {},
+      "counterfactual_observations": []
+    },
+    {
+      "layer": "记忆层",
+      "agent": "经验回放Agent",
+      "claim": "无历史有效结果案例可回放",
+      "confidence": 0.3,
+      "evidence": {
+        "cases": [],
+        "backend": "sqlite"
+      },
+      "warnings": [],
+      "recommendations": [],
+      "counterfactual": {},
+      "counterfactual_observations": []
+    }
+  ],
+  "experts": [
+    {
+      "layer": "专家层",
+      "agent": "病理Agent",
+      "claim": "病理证据不足，不能确认具体病害",
+      "confidence": 0.3,
+      "evidence": {
+        "possible_diseases": [],
+        "environment_issues": [],
+        "optimal_conditions": {
+          "air_temp_day": "18-22°C",
+          "air_temp_night": "10-15°C",
+          "soil_moisture": "60-75% 田间持水量",
+          "soil_ph": "6.5-8.0",
+          "co2": "自然通风",
+          "light": "30000-50000 lux"
+        },
+        "recommended_actions": [
+          "维持当前环境管理",
+          "密切观察症状变化，记录发展过程",
+          "如症状加重，建议取样送检确认病原"
+        ]
+      },
+      "warnings": [],
+      "recommendations": [
+        "维持当前环境管理",
+        "密切观察症状变化，记录发展过程",
+        "如症状加重，建议取样送检确认病原"
+      ],
+      "counterfactual": {
+        "alternative": "环境胁迫或生理性病害",
+        "rejection_reason": "症状描述不足以匹配侵染性病害数据库，优先考虑温湿度逆境等生理性诱因。"
+      },
+      "counterfactual_observations": []
+    },
+    {
+      "layer": "专家层",
+      "agent": "气象Agent",
+      "claim": "气象条件支持灌溉",
+      "confidence": 0.72,
+      "evidence": {
+        "irrigation": {
+          "summary": {
+            "total_rainfall_24h_mm": 0,
+            "rain_hours_count": 0,
+            "avg_temperature_24h": 32.5,
+            "max_temperature_24h": 38.7,
+            "avg_wind_speed_ms": 4.3
+          },
+          "irrigation_advice": {
+            "should_irrigate": true,
+            "reason": "未来24小时降雨不足且温度偏高，建议灌溉",
+            "recommended_time": "清晨 5:00-7:00",
+            "estimated_evaporation_mm": 14.3
+          }
+        },
+        "alerts": [
+          {
+            "type": "无预警",
+            "description": "当前无生效的气象预警"
+          }
+        ]
+      },
+      "warnings": [],
+      "recommendations": [
+        "未来24小时降雨不足且温度偏高，建议灌溉",
+        "建议作业时间：清晨 5:00-7:00"
+      ],
+      "counterfactual": {
+        "alternative": "暂缓灌溉并择机补灌",
+        "rejection_reason": "当前蒸发与土壤墒情支持灌溉，但若后续出现降雨或高湿预警，提前灌溉会叠加叶面湿度风险，故作为备选排除。"
+      },
+      "counterfactual_observations": []
+    },
+    {
+      "layer": "专家层",
+      "agent": "栽培Agent",
+      "claim": "已生成栽培管理建议",
+      "confidence": 0.68,
+      "evidence": {
+        "guide": {
+          "name": "甜菜种植管理指南",
+          "optimal_conditions": {
+            "air_temp_day": "18-22°C",
+            "air_temp_night": "10-15°C",
+            "soil_moisture": "60-75% 田间持水量",
+            "soil_ph": "6.5-8.0",
+            "co2": "自然通风",
+            "light": "30000-50000 lux"
+          },
+          "growth_stages": {
+            "苗期": {
+              "duration": "30-45天",
+              "key_tasks": [
+                "间苗定苗",
+                "中耕除草",
+                "防治立枯病"
+              ]
+            },
+            "叶丛繁茂期": {
+              "duration": "40-60天",
+              "key_tasks": [
+                "追施氮肥",
+                "保持土壤湿润",
+                "防治褐斑病"
+              ]
+            },
+            "块根糖分增长期": {
+              "duration": "50-70天",
+              "key_tasks": [
+                "控氮增钾",
+                "控制灌溉",
+                "防治根腐病"
+              ]
+            }
+          },
+          "irrigation": {
+            "method": "滴灌或喷灌",
+            "frequency": "叶丛期每 5-7 天一次",
+            "amount": "每次 10-15 m³/亩",
+            "notes": "忌积水，块根膨大期后控制灌水以防根腐"
+          }
+        },
+        "current_readings": {
+          "air_temperature": 24.1,
+          "air_humidity": 67.0,
+          "soil_moisture": 43.4,
+          "soil_temperature": 21.1,
+          "co2_concentration": 715.0,
+          "light_intensity": 0,
+          "soil_ph": 6.39
+        }
+      },
+      "warnings": [],
+      "recommendations": [
+        "维持当前管理，继续监测温湿度和叶面状态"
+      ],
+      "counterfactual": {
+        "alternative": "直接采用化学药剂防治",
+        "rejection_reason": "综合防治(IPM)原则下优先环境调控与栽培措施，化学防治作为后备手段，可避免抗药性上升与生态副作用。"
+      },
+      "counterfactual_observations": []
+    },
+    {
+      "layer": "专家层",
+      "agent": "经济Agent",
+      "claim": "经济分析：甜菜毛收益约3600元/亩，暂无明确病害，维持常规管理成本最低",
+      "confidence": 0.58,
+      "evidence": {
+        "price_table": {
+          "crop_price_per_kg": {
+            "番茄": 3.0,
+            "黄瓜": 2.5,
+            "甜菜": 1.2,
+            "棉花": 8.0
+          },
+          "pesticide_cost_per_mu": {
+            "多菌灵": 30,
+            "甲基托布津": 40,
+            "百菌清": 35,
+            "杀毒矾": 45,
+            "嘧霉胺": 50,
+            "吡虫啉": 25,
+            "印楝素": 60,
+            "枯草芽孢杆菌": 55
+          },
+          "labor_per_day": 100,
+          "yield_per_mu_kg": {
+            "番茄": 4000,
+            "黄瓜": 5000,
+            "甜菜": 3000,
+            "棉花": 250
+          }
+        },
+        "gross_revenue": 3600.0,
+        "treatment_cost": 100,
+        "cost_ratio": 0.028,
+        "mentioned_pesticides": [],
+        "economic_conflict": false
+      },
+      "warnings": [],
+      "recommendations": [
+        "无病害时以预防性管理为主，避免不必要的农药与人工投入"
+      ],
+      "counterfactual": {
+        "alternative": "加大施肥促产",
+        "rejection_reason": "无病害确诊时盲目追肥增产边际效益低且可能引发肥害，经济性不及稳产管理"
+      },
+      "counterfactual_observations": []
+    },
+    {
+      "layer": "专家层",
+      "agent": "生态Agent",
+      "claim": "生态评估：未检测到高风险化学农药，当前措施生态兼容",
+      "confidence": 0.65,
+      "evidence": {
+        "pesticide_ecology": {
+          "吡虫啉": {
+            "toxicity": "高",
+            "affected": "瓢虫/蜜蜂等授粉与天敌昆虫",
+            "alternative": "印楝素或苦参碱"
+          },
+          "多菌灵": {
+            "toxicity": "中",
+            "affected": "广谱杀菌，对天敌影响中等",
+            "alternative": "枯草芽孢杆菌"
+          },
+          "嘧霉胺": {
+            "toxicity": "中",
+            "affected": "对捕食螨有一定影响",
+            "alternative": "枯草芽孢杆菌配合通风降湿"
+          },
+          "百菌清": {
+            "toxicity": "中",
+            "affected": "广谱保护性杀菌剂",
+            "alternative": "波尔多液"
+          },
+          "甲基托布津": {
+            "toxicity": "中",
+            "affected": "广谱杀菌剂",
+            "alternative": "木霉菌制剂"
+          },
+          "杀毒矾": {
+            "toxicity": "中",
+            "affected": "对水生生物有毒",
+            "alternative": "霜脲氰·锰锌"
+          }
+        },
+        "detected_pesticides": [],
+        "ecological_conflict": false,
+        "max_toxicity": "无"
+      },
+      "warnings": [],
+      "recommendations": [
+        "当前推荐措施生态友好，维持综合防治策略"
+      ],
+      "counterfactual": {
+        "alternative": "不施加任何生态约束",
+        "rejection_reason": "完全不约束农药使用会积累生态风险与抗药性，违背IPM原则"
+      },
+      "counterfactual_observations": []
+    }
+  ],
+  "debate": [
+    {
+      "consensus": [
+        "各 Agent 暂无强冲突，建议按风险优先级执行"
+      ],
+      "conflicts": [],
+      "missing_evidence": [
+        "缺少有效图像证据，视觉 Agent 未参与确认"
+      ],
+      "risk_level": "low"
+    }
+  ],
+  "critic": [
+    {}
+  ],
+  "judge": [
+    {
+      "summary": "Orchestrator 已完成 gh-a/sugar_beet 的alert 工作流：已生成栽培管理建议。风险等级：low。",
+      "decision": "已生成栽培管理建议",
+      "confidence": 0.58,
+      "risk_level": "low",
+      "judge_mode": "rules",
+      "need_human_review": false,
+      "reasoning_trace": "KG参照疾病：甜菜褐斑病、甜菜根腐病；未触发KG硬约束否决；风险等级=low，置信度=0.58；集体漏检预警：KG中存在专家均未考虑的病害--甜菜褐斑病、甜菜根腐病（漏检比例 100%）",
+      "judge_analysis": {
+        "kg": {
+          "diseases": [
+            "甜菜褐斑病",
+            "甜菜根腐病"
+          ],
+          "rules": [
+            "甜菜褐斑病高发条件：湿度>70%，若棚内湿度明显偏低应降低该诊断置信度",
+            "甜菜褐斑病适宜温度25-30°C，环境温度偏离过大时该诊断证据减弱",
+            "甜菜褐斑病典型症状：叶片出现圆形褐色小病斑，需与视觉/症状描述核对",
+            "甜菜根腐病高发条件：湿度土壤过湿，若棚内湿度明显偏低应降低该诊断置信度",
+            "甜菜根腐病适宜温度20-28°C，环境温度偏离过大时该诊断证据减弱",
+            "甜菜根腐病典型症状：根部变褐腐烂，维管束变褐，需与视觉/症状描述核对"
+          ],
+          "backend": "memory"
+        },
+        "consistency": {
+          "agent_diagnoses": [
+            {
+              "agent": "病理Agent",
+              "claim": "病理证据不足，不能确认具体病害",
+              "kg_match": "部分匹配",
+              "conflict_reason": ""
+            }
+          ],
+          "rule_violations": [],
+          "vetoed": false,
+          "kg_diseases": [
+            "甜菜褐斑病",
+            "甜菜根腐病"
+          ]
+        },
+        "sensor_readings": {
+          "temperature": 24.1,
+          "humidity": 67.0,
+          "soil_moisture": 43.4
+        },
+        "critic": {},
+        "collective_omission": {
+          "omitted_diseases": [
+            "甜菜褐斑病",
+            "甜菜根腐病"
+          ],
+          "penalty_applied": true,
+          "controversy_delta": 0.05,
+          "counterfactuals": [
+            {
+              "agent": "病理Agent",
+              "alternative": "环境胁迫或生理性病害",
+              "rejection_reason": "症状描述不足以匹配侵染性病害数据库，优先考虑温湿度逆境等生理性诱因。"
+            },
+            {
+              "agent": "气象Agent",
+              "alternative": "暂缓灌溉并择机补灌",
+              "rejection_reason": "当前蒸发与土壤墒情支持灌溉，但若后续出现降雨或高湿预警，提前灌溉会叠加叶面湿度风险，故作为备选排除。"
+            },
+            {
+              "agent": "栽培Agent",
+              "alternative": "直接采用化学药剂防治",
+              "rejection_reason": "综合防治(IPM)原则下优先环境调控与栽培措施，化学防治作为后备手段，可避免抗药性上升与生态副作用。"
+            },
+            {
+              "agent": "经济Agent",
+              "alternative": "加大施肥促产",
+              "rejection_reason": "无病害确诊时盲目追肥增产边际效益低且可能引发肥害，经济性不及稳产管理"
+            },
+            {
+              "agent": "生态Agent",
+              "alternative": "不施加任何生态约束",
+              "rejection_reason": "完全不约束农药使用会积累生态风险与抗药性，违背IPM原则"
+            }
+          ],
+          "ignored_candidates": [
+            "甜菜褐斑病",
+            "甜菜根腐病"
+          ],
+          "retrieved_candidates": [
+            "甜菜褐斑病",
+            "甜菜根腐病"
+          ],
+          "omission_score": 1.0,
+          "omission_reason": "甜菜褐斑病、甜菜根腐病 已从知识图谱检索到，但未被任何专家考虑。",
+          "omission_level": "penalize",
+          "append_warning": true
+        },
+        "kg_evolution": {
+          "proposed": [],
+          "drafts": [],
+          "used_drafts": false
+        },
+        "calibration": {
+          "enabled": true,
+          "agents": {
+            "病理Agent": {
+              "kind": "isotonic",
+              "samples": 11
+            },
+            "气象Agent": {
+              "kind": "passthrough",
+              "samples": 12
+            },
+            "栽培Agent": {
+              "kind": "passthrough",
+              "samples": 12
+            },
+            "经济Agent": {
+              "kind": "passthrough",
+              "samples": 12
+            },
+            "生态Agent": {
+              "kind": "passthrough",
+              "samples": 12
+            }
+          }
+        }
+      },
+      "action_plan": [
+        "对异常传感器复测，并查看最近 24 小时趋势",
+        "维持当前环境管理",
+        "密切观察症状变化，记录发展过程",
+        "如症状加重，建议取样送检确认病原",
+        "未来24小时降雨不足且温度偏高，建议灌溉",
+        "建议作业时间：清晨 5:00-7:00"
+      ],
+      "decision_id": null
+    }
+  ],
+  "planner": [
+    {
+      "enabled": true,
+      "goal": "执行 Judge 裁决：已生成栽培管理建议",
+      "steps": [
+        "对异常传感器复测，并查看最近 24 小时趋势",
+        "维持当前环境管理",
+        "密切观察症状变化，记录发展过程",
+        "如症状加重，建议取样送检确认病原",
+        "未来24小时降雨不足且温度偏高，建议灌溉",
+        "建议作业时间：清晨 5:00-7:00",
+        "补充缺失证据并复评"
+      ],
+      "required_tools": [
+        "image_capture",
+        "irrigation_control"
+      ],
+      "priority": "medium",
+      "estimated_risk": "medium",
+      "estimated_cost": "medium"
+    }
+  ],
+  "tool_router": [
+    {
+      "enabled": true,
+      "requests": [
+        {
+          "tool_name": "image_capture",
+          "parameters": {
+            "mode": "close_up",
+            "count": 1,
+            "goal": "执行 Judge 裁决：已生成栽培管理建议"
+          },
+          "priority": "medium",
+          "timeout": 20.0,
+          "retry_policy": {
+            "max_attempts": 2,
+            "backoff_seconds": 1.0
+          }
+        },
+        {
+          "tool_name": "irrigation_control",
+          "parameters": {
+            "action": "schedule",
+            "goal": "执行 Judge 裁决：已生成栽培管理建议"
+          },
+          "priority": "medium",
+          "timeout": 30.0,
+          "retry_policy": {
+            "max_attempts": 2,
+            "backoff_seconds": 2.0
+          }
+        }
+      ],
+      "unresolved": []
+    }
+  ],
+  "metrics": [
+    {
+      "agent_counts": {
+        "perception": 3,
+        "memory": 4,
+        "experts": 5,
+        "total": 12
+      },
+      "debate": {
+        "consensus": 1,
+        "conflicts": 0,
+        "missing_evidence": 1,
+        "risk_level": "low"
+      },
+      "critic": {
+        "triggered": false
+      },
+      "judge": {
+        "confidence": 0.58,
+        "risk_level": "low",
+        "need_human_review": false,
+        "judge_mode": "rules"
+      },
+      "planner": {
+        "enabled": true,
+        "required_tools": 2
+      },
+      "tool_router": {
+        "enabled": true,
+        "requests": 2,
+        "unresolved": 0
+      },
+      "total_events": 19
+    }
+  ],
+  "events": [
+    {
+      "stage": "request",
+      "timestamp": "2026-08-01T12:05:12.286901+00:00",
+      "payload": {
+        "query": "温室A甜菜当前有什么风险，需要优先处理",
+        "greenhouse_id": "gh-a",
+        "crop": "sugar_beet",
+        "image_path": null,
+        "intent": "alert"
+      }
+    },
+    {
+      "stage": "perception",
+      "timestamp": "2026-08-01T12:05:12.286901+00:00",
+      "payload": {
+        "layer": "感知层",
+        "agent": "视觉Agent",
+        "claim": "未提供图像，视觉诊断跳过",
+        "confidence": 0.0,
+        "evidence": {},
+        "warnings": [
+          "缺少叶片图像，病害判断依赖症状与环境数据"
+        ],
+        "recommendations": [],
+        "counterfactual": {},
+        "counterfactual_observations": []
+      }
+    },
+    {
+      "stage": "perception",
+      "timestamp": "2026-08-01T12:05:12.287907+00:00",
+      "payload": {
+        "layer": "感知层",
+        "agent": "传感器Agent",
+        "claim": "传感器读数整体正常",
+        "confidence": 0.65,
+        "evidence": {
+          "reading": {
+            "timestamp": "2026-08-01T20:05:12.277300",
+            "greenhouse_id": "gh-a",
+            "readings": {
+              "air_temperature": 24.1,
+              "air_humidity": 67.0,
+              "soil_moisture": 43.4,
+              "soil_temperature": 21.1,
+              "co2_concentration": 715.0,
+              "light_intensity": 0,
+              "soil_ph": 6.39
+            },
+            "anomaly_injected": {}
+          },
+          "anomaly": {
+            "greenhouse_id": "gh-a",
+            "greenhouse_name": "gh-a (tomato)",
+            "timestamp": "2026-08-01T20:05:12.277300",
+            "current_readings": {
+              "air_temperature": 23.4,
+              "air_humidity": 68.4,
+              "soil_moisture": 46.2,
+              "soil_temperature": 20.4,
+              "co2_concentration": 729.0,
+              "light_intensity": 0,
+              "soil_ph": 6.62
+            },
+            "detection_result": {
+              "combined_score": 0.027,
+              "is_anomalous": false,
+              "severity": "normal",
+              "anomaly_types": [],
+              "needs_human_review": false
+            },
+            "layer_details": {
+              "L1": {
+                "layer": "L1_isolation_forest",
+                "engine": "isolation_forest",
+                "score": 0.0,
+                "anomalous": false,
+                "anomalies": [],
+                "latency_ms": 3.25
+              },
+              "L2": {
+                "layer": "L2_lstm_ae",
+                "engine": "lstm_autoencoder",
+                "score": 0.0,
+                "anomalous": false,
+                "violations": [
+                  {
+                    "feature": "soil_ph",
+                    "recon_error": 0.9722
+                  },
+                  {
+                    "feature": "soil_moisture",
+                    "recon_error": 0.9679
+                  },
+                  {
+                    "feature": "air_humidity",
+                    "recon_error": 0.9377
+                  }
+                ],
+                "latency_ms": 0.7,
+                "recon_error": 0.8724
+              },
+              "L3": {
+                "layer": "L3_chronos",
+                "engine": "linear_regression_fallback",
+                "score": 0.089,
+                "anomalous": false,
+                "predictions": {
+                  "air_temperature": 23.66,
+                  "air_humidity": 68.4,
+                  "soil_moisture": 45.33
+                },
+                "deviations": {
+                  "air_temperature": 0.0111,
+                  "air_humidity": 0.0,
+                  "soil_moisture": 0.0193
+                },
+                "latency_ms": 0.03
+              }
+            },
+            "total_latency_ms": 3.98
+          }
+        },
+        "warnings": [],
+        "recommendations": [
+          "对异常传感器复测，并查看最近 24 小时趋势"
+        ],
+        "counterfactual": {},
+        "counterfactual_observations": []
+      }
+    },
+    {
+      "stage": "perception",
+      "timestamp": "2026-08-01T12:05:12.287907+00:00",
+      "payload": {
+        "layer": "感知层",
+        "agent": "天气Agent",
+        "claim": "外部天气暂无明显预警",
+        "confidence": 0.7,
+        "evidence": {
+          "current_weather": {
+            "location": "华北平原",
+            "time": "2026-08-01T20:05:12.281306",
+            "condition": "多云转晴",
+            "temperature": 27.3,
+            "humidity": 62.3,
+            "wind_speed": 4.2,
+            "wind_direction": "西南",
+            "precipitation_mm": 0,
+            "rain_probability": 17,
+            "pressure_hpa": 1011.4,
+            "uv_index": 0,
+            "dew_point": 19.8
+          },
+          "alerts": [
+            {
+              "type": "无预警",
+              "description": "当前无生效的气象预警"
+            }
+          ]
+        },
+        "warnings": [],
+        "recommendations": [],
+        "counterfactual": {},
+        "counterfactual_observations": []
+      }
+    },
+    {
+      "stage": "memory",
+      "timestamp": "2026-08-01T12:05:12.287907+00:00",
+      "payload": {
+        "layer": "记忆层",
+        "agent": "RAG",
+        "claim": "RAG 未检索到高匹配病害",
+        "confidence": 0.25,
+        "evidence": {
+          "backend": "memory",
+          "matches": [],
+          "error": null
+        },
+        "warnings": [
+          "症状描述不足或知识库覆盖不足"
+        ],
+        "recommendations": [],
+        "counterfactual": {},
+        "counterfactual_observations": []
+      }
+    },
+    {
+      "stage": "memory",
+      "timestamp": "2026-08-01T12:05:12.287907+00:00",
+      "payload": {
+        "layer": "记忆层",
+        "agent": "知识图谱",
+        "claim": "已提取作物最佳环境约束",
+        "confidence": 0.7,
+        "evidence": {
+          "crop": "sugar_beet",
+          "optimal_conditions": {
+            "air_temp_day": "18-22°C",
+            "air_temp_night": "10-15°C",
+            "soil_moisture": "60-75% 田间持水量",
+            "soil_ph": "6.5-8.0",
+            "co2": "自然通风",
+            "light": "30000-50000 lux"
+          }
+        },
+        "warnings": [],
+        "recommendations": [],
+        "counterfactual": {},
+        "counterfactual_observations": []
+      }
+    },
+    {
+      "stage": "memory",
+      "timestamp": "2026-08-01T12:05:12.287907+00:00",
+      "payload": {
+        "layer": "记忆层",
+        "agent": "历史案例库",
+        "claim": "历史案例库暂无强匹配案例",
+        "confidence": 0.3,
+        "evidence": {
+          "matched_case": null
+        },
+        "warnings": [],
+        "recommendations": [],
+        "counterfactual": {},
+        "counterfactual_observations": []
+      }
+    },
+    {
+      "stage": "memory",
+      "timestamp": "2026-08-01T12:05:12.287907+00:00",
+      "payload": {
+        "layer": "记忆层",
+        "agent": "经验回放Agent",
+        "claim": "无历史有效结果案例可回放",
+        "confidence": 0.3,
+        "evidence": {
+          "cases": [],
+          "backend": "sqlite"
+        },
+        "warnings": [],
+        "recommendations": [],
+        "counterfactual": {},
+        "counterfactual_observations": []
+      }
+    },
+    {
+      "stage": "experts",
+      "timestamp": "2026-08-01T12:05:12.287907+00:00",
+      "payload": {
+        "layer": "专家层",
+        "agent": "病理Agent",
+        "claim": "病理证据不足，不能确认具体病害",
+        "confidence": 0.3,
+        "evidence": {
+          "possible_diseases": [],
+          "environment_issues": [],
+          "optimal_conditions": {
+            "air_temp_day": "18-22°C",
+            "air_temp_night": "10-15°C",
+            "soil_moisture": "60-75% 田间持水量",
+            "soil_ph": "6.5-8.0",
+            "co2": "自然通风",
+            "light": "30000-50000 lux"
+          },
+          "recommended_actions": [
+            "维持当前环境管理",
+            "密切观察症状变化，记录发展过程",
+            "如症状加重，建议取样送检确认病原"
+          ]
+        },
+        "warnings": [],
+        "recommendations": [
+          "维持当前环境管理",
+          "密切观察症状变化，记录发展过程",
+          "如症状加重，建议取样送检确认病原"
+        ],
+        "counterfactual": {
+          "alternative": "环境胁迫或生理性病害",
+          "rejection_reason": "症状描述不足以匹配侵染性病害数据库，优先考虑温湿度逆境等生理性诱因。"
+        },
+        "counterfactual_observations": []
+      }
+    },
+    {
+      "stage": "experts",
+      "timestamp": "2026-08-01T12:05:12.287907+00:00",
+      "payload": {
+        "layer": "专家层",
+        "agent": "气象Agent",
+        "claim": "气象条件支持灌溉",
+        "confidence": 0.72,
+        "evidence": {
+          "irrigation": {
+            "summary": {
+              "total_rainfall_24h_mm": 0,
+              "rain_hours_count": 0,
+              "avg_temperature_24h": 32.5,
+              "max_temperature_24h": 38.7,
+              "avg_wind_speed_ms": 4.3
+            },
+            "irrigation_advice": {
+              "should_irrigate": true,
+              "reason": "未来24小时降雨不足且温度偏高，建议灌溉",
+              "recommended_time": "清晨 5:00-7:00",
+              "estimated_evaporation_mm": 14.3
+            }
+          },
+          "alerts": [
+            {
+              "type": "无预警",
+              "description": "当前无生效的气象预警"
+            }
+          ]
+        },
+        "warnings": [],
+        "recommendations": [
+          "未来24小时降雨不足且温度偏高，建议灌溉",
+          "建议作业时间：清晨 5:00-7:00"
+        ],
+        "counterfactual": {
+          "alternative": "暂缓灌溉并择机补灌",
+          "rejection_reason": "当前蒸发与土壤墒情支持灌溉，但若后续出现降雨或高湿预警，提前灌溉会叠加叶面湿度风险，故作为备选排除。"
+        },
+        "counterfactual_observations": []
+      }
+    },
+    {
+      "stage": "experts",
+      "timestamp": "2026-08-01T12:05:12.287907+00:00",
+      "payload": {
+        "layer": "专家层",
+        "agent": "栽培Agent",
+        "claim": "已生成栽培管理建议",
+        "confidence": 0.68,
+        "evidence": {
+          "guide": {
+            "name": "甜菜种植管理指南",
+            "optimal_conditions": {
+              "air_temp_day": "18-22°C",
+              "air_temp_night": "10-15°C",
+              "soil_moisture": "60-75% 田间持水量",
+              "soil_ph": "6.5-8.0",
+              "co2": "自然通风",
+              "light": "30000-50000 lux"
+            },
+            "growth_stages": {
+              "苗期": {
+                "duration": "30-45天",
+                "key_tasks": [
+                  "间苗定苗",
+                  "中耕除草",
+                  "防治立枯病"
+                ]
+              },
+              "叶丛繁茂期": {
+                "duration": "40-60天",
+                "key_tasks": [
+                  "追施氮肥",
+                  "保持土壤湿润",
+                  "防治褐斑病"
+                ]
+              },
+              "块根糖分增长期": {
+                "duration": "50-70天",
+                "key_tasks": [
+                  "控氮增钾",
+                  "控制灌溉",
+                  "防治根腐病"
+                ]
+              }
+            },
+            "irrigation": {
+              "method": "滴灌或喷灌",
+              "frequency": "叶丛期每 5-7 天一次",
+              "amount": "每次 10-15 m³/亩",
+              "notes": "忌积水，块根膨大期后控制灌水以防根腐"
+            }
+          },
+          "current_readings": {
+            "air_temperature": 24.1,
+            "air_humidity": 67.0,
+            "soil_moisture": 43.4,
+            "soil_temperature": 21.1,
+            "co2_concentration": 715.0,
+            "light_intensity": 0,
+            "soil_ph": 6.39
+          }
+        },
+        "warnings": [],
+        "recommendations": [
+          "维持当前管理，继续监测温湿度和叶面状态"
+        ],
+        "counterfactual": {
+          "alternative": "直接采用化学药剂防治",
+          "rejection_reason": "综合防治(IPM)原则下优先环境调控与栽培措施，化学防治作为后备手段，可避免抗药性上升与生态副作用。"
+        },
+        "counterfactual_observations": []
+      }
+    },
+    {
+      "stage": "experts",
+      "timestamp": "2026-08-01T12:05:12.287907+00:00",
+      "payload": {
+        "layer": "专家层",
+        "agent": "经济Agent",
+        "claim": "经济分析：甜菜毛收益约3600元/亩，暂无明确病害，维持常规管理成本最低",
+        "confidence": 0.58,
+        "evidence": {
+          "price_table": {
+            "crop_price_per_kg": {
+              "番茄": 3.0,
+              "黄瓜": 2.5,
+              "甜菜": 1.2,
+              "棉花": 8.0
+            },
+            "pesticide_cost_per_mu": {
+              "多菌灵": 30,
+              "甲基托布津": 40,
+              "百菌清": 35,
+              "杀毒矾": 45,
+              "嘧霉胺": 50,
+              "吡虫啉": 25,
+              "印楝素": 60,
+              "枯草芽孢杆菌": 55
+            },
+            "labor_per_day": 100,
+            "yield_per_mu_kg": {
+              "番茄": 4000,
+              "黄瓜": 5000,
+              "甜菜": 3000,
+              "棉花": 250
+            }
+          },
+          "gross_revenue": 3600.0,
+          "treatment_cost": 100,
+          "cost_ratio": 0.028,
+          "mentioned_pesticides": [],
+          "economic_conflict": false
+        },
+        "warnings": [],
+        "recommendations": [
+          "无病害时以预防性管理为主，避免不必要的农药与人工投入"
+        ],
+        "counterfactual": {
+          "alternative": "加大施肥促产",
+          "rejection_reason": "无病害确诊时盲目追肥增产边际效益低且可能引发肥害，经济性不及稳产管理"
+        },
+        "counterfactual_observations": []
+      }
+    },
+    {
+      "stage": "experts",
+      "timestamp": "2026-08-01T12:05:12.287907+00:00",
+      "payload": {
+        "layer": "专家层",
+        "agent": "生态Agent",
+        "claim": "生态评估：未检测到高风险化学农药，当前措施生态兼容",
+        "confidence": 0.65,
+        "evidence": {
+          "pesticide_ecology": {
+            "吡虫啉": {
+              "toxicity": "高",
+              "affected": "瓢虫/蜜蜂等授粉与天敌昆虫",
+              "alternative": "印楝素或苦参碱"
+            },
+            "多菌灵": {
+              "toxicity": "中",
+              "affected": "广谱杀菌，对天敌影响中等",
+              "alternative": "枯草芽孢杆菌"
+            },
+            "嘧霉胺": {
+              "toxicity": "中",
+              "affected": "对捕食螨有一定影响",
+              "alternative": "枯草芽孢杆菌配合通风降湿"
+            },
+            "百菌清": {
+              "toxicity": "中",
+              "affected": "广谱保护性杀菌剂",
+              "alternative": "波尔多液"
+            },
+            "甲基托布津": {
+              "toxicity": "中",
+              "affected": "广谱杀菌剂",
+              "alternative": "木霉菌制剂"
+            },
+            "杀毒矾": {
+              "toxicity": "中",
+              "affected": "对水生生物有毒",
+              "alternative": "霜脲氰·锰锌"
+            }
+          },
+          "detected_pesticides": [],
+          "ecological_conflict": false,
+          "max_toxicity": "无"
+        },
+        "warnings": [],
+        "recommendations": [
+          "当前推荐措施生态友好，维持综合防治策略"
+        ],
+        "counterfactual": {
+          "alternative": "不施加任何生态约束",
+          "rejection_reason": "完全不约束农药使用会积累生态风险与抗药性，违背IPM原则"
+        },
+        "counterfactual_observations": []
+      }
+    },
+    {
+      "stage": "debate",
+      "timestamp": "2026-08-01T12:05:12.287907+00:00",
+      "payload": {
+        "consensus": [
+          "各 Agent 暂无强冲突，建议按风险优先级执行"
+        ],
+        "conflicts": [],
+        "missing_evidence": [
+          "缺少有效图像证据，视觉 Agent 未参与确认"
+        ],
+        "risk_level": "low"
+      }
+    },
+    {
+      "stage": "critic",
+      "timestamp": "2026-08-01T12:05:12.287907+00:00",
+      "payload": {}
+    },
+    {
+      "stage": "judge",
+      "timestamp": "2026-08-01T12:05:12.287907+00:00",
+      "payload": {
+        "summary": "Orchestrator 已完成 gh-a/sugar_beet 的alert 工作流：已生成栽培管理建议。风险等级：low。",
+        "decision": "已生成栽培管理建议",
+        "confidence": 0.58,
+        "risk_level": "low",
+        "judge_mode": "rules",
+        "need_human_review": false,
+        "reasoning_trace": "KG参照疾病：甜菜褐斑病、甜菜根腐病；未触发KG硬约束否决；风险等级=low，置信度=0.58；集体漏检预警：KG中存在专家均未考虑的病害--甜菜褐斑病、甜菜根腐病（漏检比例 100%）",
+        "judge_analysis": {
+          "kg": {
+            "diseases": [
+              "甜菜褐斑病",
+              "甜菜根腐病"
+            ],
+            "rules": [
+              "甜菜褐斑病高发条件：湿度>70%，若棚内湿度明显偏低应降低该诊断置信度",
+              "甜菜褐斑病适宜温度25-30°C，环境温度偏离过大时该诊断证据减弱",
+              "甜菜褐斑病典型症状：叶片出现圆形褐色小病斑，需与视觉/症状描述核对",
+              "甜菜根腐病高发条件：湿度土壤过湿，若棚内湿度明显偏低应降低该诊断置信度",
+              "甜菜根腐病适宜温度20-28°C，环境温度偏离过大时该诊断证据减弱",
+              "甜菜根腐病典型症状：根部变褐腐烂，维管束变褐，需与视觉/症状描述核对"
+            ],
+            "backend": "memory"
+          },
+          "consistency": {
+            "agent_diagnoses": [
+              {
+                "agent": "病理Agent",
+                "claim": "病理证据不足，不能确认具体病害",
+                "kg_match": "部分匹配",
+                "conflict_reason": ""
+              }
+            ],
+            "rule_violations": [],
+            "vetoed": false,
+            "kg_diseases": [
+              "甜菜褐斑病",
+              "甜菜根腐病"
+            ]
+          },
+          "sensor_readings": {
+            "temperature": 24.1,
+            "humidity": 67.0,
+            "soil_moisture": 43.4
+          },
+          "critic": {},
+          "collective_omission": {
+            "omitted_diseases": [
+              "甜菜褐斑病",
+              "甜菜根腐病"
+            ],
+            "penalty_applied": true,
+            "controversy_delta": 0.05,
+            "counterfactuals": [
+              {
+                "agent": "病理Agent",
+                "alternative": "环境胁迫或生理性病害",
+                "rejection_reason": "症状描述不足以匹配侵染性病害数据库，优先考虑温湿度逆境等生理性诱因。"
+              },
+              {
+                "agent": "气象Agent",
+                "alternative": "暂缓灌溉并择机补灌",
+                "rejection_reason": "当前蒸发与土壤墒情支持灌溉，但若后续出现降雨或高湿预警，提前灌溉会叠加叶面湿度风险，故作为备选排除。"
+              },
+              {
+                "agent": "栽培Agent",
+                "alternative": "直接采用化学药剂防治",
+                "rejection_reason": "综合防治(IPM)原则下优先环境调控与栽培措施，化学防治作为后备手段，可避免抗药性上升与生态副作用。"
+              },
+              {
+                "agent": "经济Agent",
+                "alternative": "加大施肥促产",
+                "rejection_reason": "无病害确诊时盲目追肥增产边际效益低且可能引发肥害，经济性不及稳产管理"
+              },
+              {
+                "agent": "生态Agent",
+                "alternative": "不施加任何生态约束",
+                "rejection_reason": "完全不约束农药使用会积累生态风险与抗药性，违背IPM原则"
+              }
+            ],
+            "ignored_candidates": [
+              "甜菜褐斑病",
+              "甜菜根腐病"
+            ],
+            "retrieved_candidates": [
+              "甜菜褐斑病",
+              "甜菜根腐病"
+            ],
+            "omission_score": 1.0,
+            "omission_reason": "甜菜褐斑病、甜菜根腐病 已从知识图谱检索到，但未被任何专家考虑。",
+            "omission_level": "penalize",
+            "append_warning": true
+          },
+          "kg_evolution": {
+            "proposed": [],
+            "drafts": [],
+            "used_drafts": false
+          },
+          "calibration": {
+            "enabled": true,
+            "agents": {
+              "病理Agent": {
+                "kind": "isotonic",
+                "samples": 11
+              },
+              "气象Agent": {
+                "kind": "passthrough",
+                "samples": 12
+              },
+              "栽培Agent": {
+                "kind": "passthrough",
+                "samples": 12
+              },
+              "经济Agent": {
+                "kind": "passthrough",
+                "samples": 12
+              },
+              "生态Agent": {
+                "kind": "passthrough",
+                "samples": 12
+              }
+            }
+          }
+        },
+        "action_plan": [
+          "对异常传感器复测，并查看最近 24 小时趋势",
+          "维持当前环境管理",
+          "密切观察症状变化，记录发展过程",
+          "如症状加重，建议取样送检确认病原",
+          "未来24小时降雨不足且温度偏高，建议灌溉",
+          "建议作业时间：清晨 5:00-7:00"
+        ],
+        "decision_id": null
+      }
+    },
+    {
+      "stage": "planner",
+      "timestamp": "2026-08-01T12:05:12.287907+00:00",
+      "payload": {
+        "enabled": true,
+        "goal": "执行 Judge 裁决：已生成栽培管理建议",
+        "steps": [
+          "对异常传感器复测，并查看最近 24 小时趋势",
+          "维持当前环境管理",
+          "密切观察症状变化，记录发展过程",
+          "如症状加重，建议取样送检确认病原",
+          "未来24小时降雨不足且温度偏高，建议灌溉",
+          "建议作业时间：清晨 5:00-7:00",
+          "补充缺失证据并复评"
+        ],
+        "required_tools": [
+          "image_capture",
+          "irrigation_control"
+        ],
+        "priority": "medium",
+        "estimated_risk": "medium",
+        "estimated_cost": "medium"
+      }
+    },
+    {
+      "stage": "tool_router",
+      "timestamp": "2026-08-01T12:05:12.287907+00:00",
+      "payload": {
+        "enabled": true,
+        "requests": [
+          {
+            "tool_name": "image_capture",
+            "parameters": {
+              "mode": "close_up",
+              "count": 1,
+              "goal": "执行 Judge 裁决：已生成栽培管理建议"
+            },
+            "priority": "medium",
+            "timeout": 20.0,
+            "retry_policy": {
+              "max_attempts": 2,
+              "backoff_seconds": 1.0
+            }
+          },
+          {
+            "tool_name": "irrigation_control",
+            "parameters": {
+              "action": "schedule",
+              "goal": "执行 Judge 裁决：已生成栽培管理建议"
+            },
+            "priority": "medium",
+            "timeout": 30.0,
+            "retry_policy": {
+              "max_attempts": 2,
+              "backoff_seconds": 2.0
+            }
+          }
+        ],
+        "unresolved": []
+      }
+    },
+    {
+      "stage": "metrics",
+      "timestamp": "2026-08-01T12:05:12.287907+00:00",
+      "payload": {
+        "agent_counts": {
+          "perception": 3,
+          "memory": 4,
+          "experts": 5,
+          "total": 12
+        },
+        "debate": {
+          "consensus": 1,
+          "conflicts": 0,
+          "missing_evidence": 1,
+          "risk_level": "low"
+        },
+        "critic": {
+          "triggered": false
+        },
+        "judge": {
+          "confidence": 0.58,
+          "risk_level": "low",
+          "need_human_review": false,
+          "judge_mode": "rules"
+        },
+        "planner": {
+          "enabled": true,
+          "required_tools": 2
+        },
+        "tool_router": {
+          "enabled": true,
+          "requests": 2,
+          "unresolved": 0
+        },
+        "total_events": 19
+      }
+    }
+  ]
+}
