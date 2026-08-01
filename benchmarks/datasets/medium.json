@@ -5,6 +5,12 @@
   "cases": [
     {
       "id": "tomato_irrigate_with_disease",
+      "capabilities": ["conflict_resolution", "multi_step_planning"],
+      "observable_evidence": [
+        {"capability": "conflict_resolution", "expected_behavior": "对灌溉与病害风险冲突进行裁决", "success_condition": "debate.conflicts 非空且 critic.triggered 为真"},
+        {"capability": "multi_step_planning", "expected_behavior": "将灌溉决策分解为风险判断与作业安排", "success_condition": "ExecutionPlan.steps >= 2 且 required_tools 包含期望工具"}
+      ],
+      "design_intent": "conflict_resolution + multi_step_planning: 灌溉与病害风险冲突需要裁决并安排作业",
       "query": "温室A番茄叶背有灰色霉层，今天需要浇水吗，要兼顾病害风险",
       "ground_truth": "叶霉病",
       "crop": "tomato",
@@ -14,6 +20,11 @@
     },
     {
       "id": "tomato_leaf_mold_low_humidity",
+      "capabilities": ["conflict_resolution"],
+      "observable_evidence": [
+        {"capability": "conflict_resolution", "expected_behavior": "对症状与低湿环境证据矛盾进行降权裁决", "success_condition": "debate.conflicts 非空且 critic.triggered 为真"}
+      ],
+      "design_intent": "conflict_resolution: 症状与低湿环境证据矛盾时降权裁决",
       "query": "温室A番茄叶背灰色霉层，环境是否适合发病",
       "ground_truth": "叶霉病",
       "crop": "tomato",
@@ -45,6 +56,12 @@
     },
     {
       "id": "sugar_beet_leaf_spot_irrigate",
+      "capabilities": ["conflict_resolution", "multi_step_planning"],
+      "observable_evidence": [
+        {"capability": "conflict_resolution", "expected_behavior": "对褐斑病期灌溉冲突进行裁决", "success_condition": "debate.conflicts 非空且 critic.triggered 为真"},
+        {"capability": "multi_step_planning", "expected_behavior": "将灌溉决策分解为风险判断与作业安排", "success_condition": "ExecutionPlan.steps >= 2 且 required_tools 包含期望工具"}
+      ],
+      "design_intent": "conflict_resolution + multi_step_planning: 褐斑病期灌溉冲突需裁决并安排作业",
       "query": "温室A甜菜叶片褐斑增多，近期还能浇水吗",
       "ground_truth": "褐斑病",
       "crop": "sugar_beet",
@@ -81,6 +98,11 @@
     },
     {
       "id": "tomato_monitor_anomaly",
+      "capabilities": ["uncertainty_quantification"],
+      "observable_evidence": [
+        {"capability": "uncertainty_quantification", "expected_behavior": "监测场景证据不足时明确不确定性", "success_condition": "病理 claim 为『病理证据不足』或 judge.confidence < 0.5"}
+      ],
+      "design_intent": "uncertainty_quantification: 监测场景证据不足时明确不确定性",
       "query": "温室A番茄当前环境监测数据正常吗",
       "ground_truth": "证据不足",
       "crop": "tomato",
@@ -89,6 +111,12 @@
     },
     {
       "id": "sugar_beet_consult",
+      "capabilities": ["multi_step_planning", "uncertainty_quantification"],
+      "observable_evidence": [
+        {"capability": "multi_step_planning", "expected_behavior": "将水肥安排分解为分步骤计划", "success_condition": "ExecutionPlan.steps >= 2"},
+        {"capability": "uncertainty_quantification", "expected_behavior": "无病害证据时主动降低置信度", "success_condition": "病理 claim 为『病理证据不足』或 judge.confidence < 0.5"}
+      ],
+      "design_intent": "multi_step_planning + uncertainty_quantification: 水肥安排需分步骤，证据不足时避免过度自信",
       "query": "温室A甜菜叶丛繁茂期水肥怎么安排",
       "ground_truth": "证据不足",
       "crop": "sugar_beet",
@@ -97,3 +125,5 @@
     }
   ]
 }
+
+

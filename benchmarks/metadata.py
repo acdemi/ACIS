@@ -14,8 +14,15 @@ Phase 2.1E, Sprint 04.5A (Capability Framework): :class:`BenchmarkMetadata`
 gains a ``capabilities`` field (a list of :class:`Capability`) as the primary
 capability classification. ``challenge_type`` is retained but is no longer
 the primary classification dimension. New cases must declare at least one
-capability; legacy datasets (e.g. the current ``enriched.json``) are scanned
-leniently and reported as pending annotation.
+capability; legacy datasets are scanned leniently and reported as pending
+annotation.
+
+Phase 2.1E, Sprint 04.5B (Verifiable Capability Contract): adds the frozen
+:class:`ObservableEvidence` schema — every annotated capability must be
+backed by an ``observable_evidence`` entry (``capability`` /
+``expected_behavior`` / ``success_condition``) whose capability is consistent
+with the declared ``capabilities`` list. 设计原则：可验证优先于完整性 —
+each annotation must be a reproducible, verifiable scientific assertion.
 
 This module is domain-free: it only validates JSON-native metadata dicts.
 """
@@ -70,6 +77,21 @@ class BenchmarkMetadata:
     noise_level: str
     modalities: tuple[str, ...]
     design_intent: str
+    observable_evidence: tuple[ObservableEvidence, ...] = ()
+
+
+@dataclass(frozen=True)
+class ObservableEvidence:
+    """Verifiable evidence contract for one annotated capability.
+
+    Links a capability to an observable expected behavior and a
+    machine-checkable success condition, so annotations are reproducible
+    scientific assertions rather than free-form labels.
+    """
+
+    capability: Capability
+    expected_behavior: str
+    success_condition: str
 
 
 class BenchmarkMetadataError(ValueError):
@@ -160,6 +182,9 @@ def validate_metadata(
     capabilities = _parse_capability_list(
         value.get("capabilities"), require_capabilities
     )
+    observable_evidence = validate_observable_evidence_list(
+        value.get("observable_evidence"), capabilities
+    )
     return BenchmarkMetadata(
         challenge_type=challenge_type,
         expected_reasoning_features=tuple(features),
@@ -170,6 +195,7 @@ def validate_metadata(
         noise_level=noise_level,
         modalities=tuple(modalities),
         design_intent=design_intent,
+        observable_evidence=observable_evidence,
     )
 
 
@@ -206,6 +232,71 @@ def validate_enriched_case(case: Any, index: int = 0) -> dict[str, Any]:
 
     validate_metadata(case.get("metadata"), require_capabilities=False)
     return dict(case)
+
+
+def validate_observable_evidence(value: Any) -> ObservableEvidence:
+    """Validate one raw ``observable_evidence`` item (format check)."""
+    if not isinstance(value, dict):
+        raise BenchmarkMetadataError("observable_evidence item must be an object")
+    capability = _parse_single_capability(value.get("capability"))
+    expected_behavior = value.get("expected_behavior")
+    if not isinstance(expected_behavior, str) or not expected_behavior.strip():
+        raise BenchmarkMetadataError("expected_behavior must be a non-empty string")
+    success_condition = value.get("success_condition")
+    if not isinstance(success_condition, str) or not success_condition.strip():
+        raise BenchmarkMetadataError("success_condition must be a non-empty string")
+    return ObservableEvidence(
+        capability=capability,
+        expected_behavior=expected_behavior,
+        success_condition=success_condition,
+    )
+
+
+def validate_observable_evidence_list(
+    value: Any,
+    capabilities: tuple[Capability, ...],
+) -> tuple[ObservableEvidence, ...]:
+    """Validate evidence ↔ capability consistency (1:1 coverage required).
+
+    Every declared capability must have at least one evidence entry, and
+    every evidence entry must reference a declared capability.
+    """
+    if capabilities and not isinstance(value, list):
+        raise BenchmarkMetadataError("observable_evidence must be a list")
+    if capabilities and not value:
+        raise BenchmarkMetadataError(
+            "observable_evidence must be non-empty when capabilities are declared"
+        )
+    if value is None:
+        value = []
+    if not isinstance(value, list):
+        raise BenchmarkMetadataError("observable_evidence must be a list")
+    evidences = tuple(validate_observable_evidence(item) for item in value)
+    declared = set(capabilities)
+    covered = {evidence.capability for evidence in evidences}
+    for capability in capabilities:
+        if capability not in covered:
+            raise BenchmarkMetadataError(
+                f"capability {capability.value} 缺少对应的 observable_evidence"
+            )
+    for evidence in evidences:
+        if evidence.capability not in declared:
+            raise BenchmarkMetadataError(
+                f"observable_evidence 声明了 capabilities 中未包含的 "
+                f"{evidence.capability.value}"
+            )
+    return evidences
+
+
+def _parse_single_capability(value: Any) -> Capability:
+    if not isinstance(value, str) or not value.strip():
+        raise BenchmarkMetadataError(
+            "evidence capability must be a capability name"
+        )
+    try:
+        return parse_capabilities([value])[0]
+    except ValueError as exc:
+        raise BenchmarkMetadataError(str(exc)) from None
 
 
 def _parse_capability_list(
@@ -257,7 +348,11 @@ __all__ = [
     "REASONING_FEATURES",
     "BenchmarkMetadata",
     "BenchmarkMetadataError",
+    "ObservableEvidence",
     "challenge_counts",
     "validate_enriched_case",
     "validate_metadata",
+    "validate_observable_evidence",
+    "validate_observable_evidence_list",
 ]
+

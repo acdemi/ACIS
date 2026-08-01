@@ -11,7 +11,11 @@
       "intent": "irrigate",
       "disease": "叶霉病",
       "expect_critic": true,
-      "design_intent": "debate: 验证灌溉 vs 病害冲突的多 Agent 辩论"
+      "design_intent": "debate: 验证灌溉 vs 病害冲突的多 Agent 辩论",
+      "capabilities": ["conflict_resolution"],
+      "observable_evidence": [
+        {"capability": "conflict_resolution", "expected_behavior": "对灌溉与病害风险冲突进行多 Agent 辩论并裁决", "success_condition": "debate.conflicts 非空且 debate_rounds >= 2 或 critic.triggered 为真"}
+      ]
     },
     {
       "id": "sugar_beet_irrigate_leaf_spot",
@@ -21,7 +25,11 @@
       "intent": "irrigate",
       "disease": "褐斑病",
       "expect_critic": true,
-      "design_intent": "debate: 验证灌溉建议与病害防治的冲突裁决"
+      "design_intent": "debate: 验证灌溉建议与病害防治的冲突裁决",
+      "capabilities": ["conflict_resolution"],
+      "observable_evidence": [
+        {"capability": "conflict_resolution", "expected_behavior": "对灌溉与病害风险冲突进行多 Agent 辩论并裁决", "success_condition": "debate.conflicts 非空且 debate_rounds >= 2 或 critic.triggered 为真"}
+      ]
     },
     {
       "id": "cotton_irrigate_verticillium",
@@ -31,7 +39,11 @@
       "intent": "irrigate",
       "disease": "黄萎病",
       "expect_critic": true,
-      "design_intent": "debate: 验证病害期灌溉风险的辩论降权"
+      "design_intent": "debate: 验证病害期灌溉风险的辩论降权",
+      "capabilities": ["conflict_resolution"],
+      "observable_evidence": [
+        {"capability": "conflict_resolution", "expected_behavior": "对灌溉与病害风险冲突进行多 Agent 辩论并裁决", "success_condition": "debate.conflicts 非空且 debate_rounds >= 2 或 critic.triggered 为真"}
+      ]
     },
     {
       "id": "tomato_irrigate_early_blight",
@@ -40,7 +52,12 @@
       "crop": "tomato",
       "intent": "irrigate",
       "disease": "早疫病",
-      "design_intent": "debate: 验证多轮辩论下的灌溉决策"
+      "design_intent": "debate: 验证多轮辩论下的灌溉决策",
+      "capabilities": ["conflict_resolution"],
+      "observable_evidence": [
+        {"capability": "conflict_resolution", "expected_behavior": "对灌溉与病害风险冲突进行多 Agent 辩论并裁决", "success_condition": "debate.conflicts 非空且 debate_rounds >= 2 或 critic.triggered 为真"}
+      ]
     }
   ]
 }
+

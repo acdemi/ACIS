@@ -10,7 +10,11 @@
       "crop": "tomato",
       "intent": "diagnose",
       "disease": "叶霉病",
-      "design_intent": "memory: 验证 RAG 检索命中叶霉病案例"
+      "design_intent": "memory: 验证 RAG 检索命中叶霉病案例",
+      "capabilities": ["knowledge_retrieval"],
+      "observable_evidence": [
+        {"capability": "knowledge_retrieval", "expected_behavior": "从知识库/案例库检索相关病害证据", "success_condition": "RAG 命中与 ground_truth 一致的病害且 memory_hits >= 1"}
+      ]
     },
     {
       "id": "sugar_beet_leaf_spot_memory",
@@ -19,7 +23,11 @@
       "crop": "sugar_beet",
       "intent": "diagnose",
       "disease": "褐斑病",
-      "design_intent": "memory: 验证 RAG 检索命中褐斑病知识"
+      "design_intent": "memory: 验证 RAG 检索命中褐斑病知识",
+      "capabilities": ["knowledge_retrieval"],
+      "observable_evidence": [
+        {"capability": "knowledge_retrieval", "expected_behavior": "从知识库/案例库检索相关病害证据", "success_condition": "RAG 命中与 ground_truth 一致的病害且 memory_hits >= 1"}
+      ]
     },
     {
       "id": "cotton_fusarium_memory",
@@ -28,7 +36,11 @@
       "crop": "cotton",
       "intent": "diagnose",
       "disease": "枯萎病",
-      "design_intent": "memory: 验证案例库/经验回放命中枯萎病"
+      "design_intent": "memory: 验证案例库/经验回放命中枯萎病",
+      "capabilities": ["knowledge_retrieval"],
+      "observable_evidence": [
+        {"capability": "knowledge_retrieval", "expected_behavior": "从知识库/案例库检索相关病害证据", "success_condition": "RAG 命中与 ground_truth 一致的病害且 memory_hits >= 1"}
+      ]
     },
     {
       "id": "cucumber_downy_memory",
@@ -37,7 +49,12 @@
       "crop": "cucumber",
       "intent": "diagnose",
       "disease": "霜霉病",
-      "design_intent": "memory: 验证跨温室 RAG 检索（黄瓜霜霉病）"
+      "design_intent": "memory: 验证跨温室 RAG 检索（黄瓜霜霉病）",
+      "capabilities": ["knowledge_retrieval"],
+      "observable_evidence": [
+        {"capability": "knowledge_retrieval", "expected_behavior": "从知识库/案例库检索相关病害证据", "success_condition": "RAG 命中与 ground_truth 一致的病害且 memory_hits >= 1"}
+      ]
     }
   ]
 }
+

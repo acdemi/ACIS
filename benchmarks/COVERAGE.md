@@ -1,8 +1,8 @@
 # Benchmark Coverage Report
 
-- Generated: 2026-08-01T15:23:42+00:00
+- Generated: 2026-08-01T16:31:00+00:00
 - Datasets: 9
-- Total cases: 61
+- Total cases: 64
 
 ## Dataset Inventory
 
@@ -16,7 +16,7 @@
 | debate | 4 | capability: debate | n/a（非 enriched） |
 | counterfactual | 3 | capability: counterfactual | n/a（非 enriched） |
 | adversarial | 3 | capability: adversarial | n/a（非 enriched） |
-| enriched | 15 | challenge: 五类认知挑战 | 15/15 |
+| enriched | 18 | challenge: 五类认知挑战 | 18/18 |
 
 ## Capability Suite Coverage
 
@@ -32,7 +32,7 @@
 
 | Challenge Type | Cases | metadata complete | reasoning features covered |
 |---|---|---|---|
-| missing_information | 3 | 3 | information_request |
+| missing_information | 6 | 6 | information_request |
 | contradictory_evidence | 3 | 3 | conflict_resolution, counterfactual_analysis |
 | multi_disease | 3 | 3 | counterfactual_analysis, knowledge_retrieval |
 | rare_knowledge | 3 | 3 | knowledge_retrieval |
@@ -41,5 +41,5 @@
 ## Summary
 
 - Capability suite cases with design_intent: 18/18
-- Enriched cases passing the full metadata contract: 15/15
+- Enriched cases passing the full metadata contract: 18/18
 - 设计原则：真实性优先于难度 —— 每个 case 来源于真实农业场景，目标是区分模块能力而非让系统犯错。

@@ -21,6 +21,11 @@
     },
     {
       "id": "tomato_monitor",
+      "capabilities": ["uncertainty_quantification"],
+      "observable_evidence": [
+        {"capability": "uncertainty_quantification", "expected_behavior": "无病害证据时主动降低置信度或保持监测", "success_condition": "病理 claim 为『病理证据不足』或 judge.confidence < 0.5"}
+      ],
+      "design_intent": "uncertainty_quantification: 无病害证据时主动降低置信度或保持监测",
       "query": "温室A番茄今天状态怎么样",
       "ground_truth": "证据不足",
       "crop": "tomato",
@@ -29,6 +34,12 @@
     },
     {
       "id": "tomato_irrigate",
+      "capabilities": ["multi_step_planning", "uncertainty_quantification"],
+      "observable_evidence": [
+        {"capability": "multi_step_planning", "expected_behavior": "将灌溉决策分解为环境判断与作业安排", "success_condition": "ExecutionPlan.steps >= 2 且 required_tools 包含期望工具"},
+        {"capability": "uncertainty_quantification", "expected_behavior": "无病害证据时主动降低置信度或拒绝确定诊断", "success_condition": "病理 claim 为『病理证据不足』或 judge.confidence < 0.5"}
+      ],
+      "design_intent": "multi_step_planning + uncertainty_quantification: 灌溉决策需结合环境判断，证据不足时避免过度自信",
       "query": "温室A番茄今天需要浇水吗",
       "ground_truth": "证据不足",
       "crop": "tomato",
@@ -61,6 +72,11 @@
     },
     {
       "id": "sugar_beet_alert",
+      "capabilities": ["uncertainty_quantification"],
+      "observable_evidence": [
+        {"capability": "uncertainty_quantification", "expected_behavior": "预警场景证据不足时明确不确定性", "success_condition": "病理 claim 为『病理证据不足』或 judge.confidence < 0.5"}
+      ],
+      "design_intent": "uncertainty_quantification: 预警场景证据不足时明确不确定性",
       "query": "温室A甜菜当前有什么风险，需要优先处理",
       "ground_truth": "证据不足",
       "crop": "sugar_beet",
@@ -85,6 +101,12 @@
     },
     {
       "id": "cotton_irrigate",
+      "capabilities": ["multi_step_planning", "uncertainty_quantification"],
+      "observable_evidence": [
+        {"capability": "multi_step_planning", "expected_behavior": "将花铃期灌溉决策分解为环境判断与作业安排", "success_condition": "ExecutionPlan.steps >= 2 且 required_tools 包含期望工具"},
+        {"capability": "uncertainty_quantification", "expected_behavior": "无病害证据时主动降低置信度", "success_condition": "病理 claim 为『病理证据不足』或 judge.confidence < 0.5"}
+      ],
+      "design_intent": "multi_step_planning + uncertainty_quantification: 花铃期灌溉需环境判断，证据不足时避免过度自信",
       "query": "温室A棉花花铃期需要浇水吗",
       "ground_truth": "证据不足",
       "crop": "cotton",
@@ -93,6 +115,12 @@
     },
     {
       "id": "tomato_consult",
+      "capabilities": ["multi_step_planning", "uncertainty_quantification"],
+      "observable_evidence": [
+        {"capability": "multi_step_planning", "expected_behavior": "将水肥管理咨询分解为分步骤安排", "success_condition": "ExecutionPlan.steps >= 2"},
+        {"capability": "uncertainty_quantification", "expected_behavior": "无病害证据时主动降低置信度", "success_condition": "病理 claim 为『病理证据不足』或 judge.confidence < 0.5"}
+      ],
+      "design_intent": "multi_step_planning + uncertainty_quantification: 水肥管理咨询分步骤安排，证据不足时避免过度自信",
       "query": "温室A番茄结果期水肥怎么管理，需要注意什么？",
       "ground_truth": "证据不足",
       "crop": "tomato",
@@ -101,3 +129,5 @@
     }
   ]
 }
+
+

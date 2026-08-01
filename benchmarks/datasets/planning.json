@@ -10,7 +10,11 @@
       "crop": "tomato",
       "intent": "diagnose",
       "disease": "叶霉病",
-      "design_intent": "planner: 验证多步任务分解与工具需求识别（喷药、图像采集）"
+      "design_intent": "planner: 验证多步任务分解与工具需求识别（喷药、图像采集）",
+      "capabilities": ["multi_step_planning"],
+      "observable_evidence": [
+        {"capability": "multi_step_planning", "expected_behavior": "将农事任务分解为作业步骤并识别所需工具", "success_condition": "ExecutionPlan.steps >= 2 且 required_tools 包含期望工具"}
+      ]
     },
     {
       "id": "tomato_early_blight_inspection_plan",
@@ -19,7 +23,11 @@
       "crop": "tomato",
       "intent": "diagnose",
       "disease": "早疫病",
-      "design_intent": "planner: 验证多步作业排序与工具调用链（image_capture → spray_workorder）"
+      "design_intent": "planner: 验证多步作业排序与工具调用链（image_capture → spray_workorder）",
+      "capabilities": ["multi_step_planning"],
+      "observable_evidence": [
+        {"capability": "multi_step_planning", "expected_behavior": "将农事任务分解为作业步骤并识别所需工具", "success_condition": "ExecutionPlan.steps >= 2 且 required_tools 包含期望工具"}
+      ]
     },
     {
       "id": "sugar_beet_root_rot_weekly_plan",
@@ -28,7 +36,11 @@
       "crop": "sugar_beet",
       "intent": "diagnose",
       "disease": "根腐病",
-      "design_intent": "planner: 验证周期型任务分解（用药、排水、复检）"
+      "design_intent": "planner: 验证周期型任务分解（用药、排水、复检）",
+      "capabilities": ["multi_step_planning"],
+      "observable_evidence": [
+        {"capability": "multi_step_planning", "expected_behavior": "将农事任务分解为作业步骤并识别所需工具", "success_condition": "ExecutionPlan.steps >= 2 且 required_tools 包含期望工具"}
+      ]
     },
     {
       "id": "cotton_verticillium_quarantine_plan",
@@ -37,7 +49,12 @@
       "crop": "cotton",
       "intent": "diagnose",
       "disease": "黄萎病",
-      "design_intent": "planner: 验证多工具组合计划（spray_workorder、灌溉、隔离作业）"
+      "design_intent": "planner: 验证多工具组合计划（spray_workorder、灌溉、隔离作业）",
+      "capabilities": ["multi_step_planning"],
+      "observable_evidence": [
+        {"capability": "multi_step_planning", "expected_behavior": "将农事任务分解为作业步骤并识别所需工具", "success_condition": "ExecutionPlan.steps >= 2 且 required_tools 包含期望工具"}
+      ]
     }
   ]
 }
+

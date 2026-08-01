@@ -5,6 +5,11 @@
   "cases": [
     {
       "id": "tomato_ambiguous_mold_blight",
+      "capabilities": ["counterfactual_reasoning"],
+      "observable_evidence": [
+        {"capability": "counterfactual_reasoning", "expected_behavior": "多病害信号并存时生成候选排序与排除理由", "success_condition": "病理Agent.counterfactual.alternative 与 rejection_reason 均非空"}
+      ],
+      "design_intent": "counterfactual_reasoning: 多病害信号并存时生成候选排序与排除",
       "query": "温室A番茄叶片既有黄斑霉层又有同心轮纹，优先怀疑哪种病？",
       "ground_truth": "早疫病",
       "crop": "tomato",
@@ -14,6 +19,12 @@
     },
     {
       "id": "tomato_mold_hot_dry",
+      "capabilities": ["conflict_resolution", "sensor_cross_validation"],
+      "observable_evidence": [
+        {"capability": "conflict_resolution", "expected_behavior": "对高温干燥环境与叶霉病证据矛盾进行裁决", "success_condition": "debate.conflicts 非空且 critic.triggered 为真"},
+        {"capability": "sensor_cross_validation", "expected_behavior": "交叉验证温湿度传感器读数与诊断依据", "success_condition": "传感器输出检测到异常或环境读数参与裁决依据"}
+      ],
+      "design_intent": "conflict_resolution + sensor_cross_validation: 高温干燥环境与叶霉病证据矛盾时结合传感器裁决",
       "query": "温室A番茄叶背有灰色霉层，但棚内高温干燥，是否仍怀疑叶霉病？",
       "ground_truth": "叶霉病",
       "crop": "tomato",
@@ -27,6 +38,11 @@
     },
     {
       "id": "cotton_wilt_anomaly",
+      "capabilities": ["sensor_cross_validation"],
+      "observable_evidence": [
+        {"capability": "sensor_cross_validation", "expected_behavior": "交叉验证传感器异常与病害诊断", "success_condition": "传感器输出检测到异常且诊断给出处理建议"}
+      ],
+      "design_intent": "sensor_cross_validation: 传感器异常与病害诊断的交叉验证",
       "query": "温室A棉花叶片黄绿斑驳、维管束褐变，传感器提示异常，怎么处理？",
       "ground_truth": "黄萎病",
       "crop": "cotton",
@@ -38,6 +54,11 @@
     },
     {
       "id": "sugar_beet_root_rot_overwatered",
+      "capabilities": ["sensor_cross_validation"],
+      "observable_evidence": [
+        {"capability": "sensor_cross_validation", "expected_behavior": "交叉验证土壤湿度证据与根腐病诊断", "success_condition": "传感器输出检测到异常或土壤湿度参与诊断依据"}
+      ],
+      "design_intent": "sensor_cross_validation: 土壤湿度证据与根腐病诊断的交叉验证",
       "query": "温室A甜菜萎蔫黄化，根部腐烂，最近大水漫灌过，是否根腐病？",
       "ground_truth": "根腐病",
       "crop": "sugar_beet",
@@ -50,6 +71,13 @@
     },
     {
       "id": "tomato_irrigate_after_rain",
+      "capabilities": ["multi_step_planning", "conflict_resolution", "sensor_cross_validation"],
+      "observable_evidence": [
+        {"capability": "multi_step_planning", "expected_behavior": "将雨后灌溉决策分解为风险判断与作业安排", "success_condition": "ExecutionPlan.steps >= 2 且 required_tools 包含期望工具"},
+        {"capability": "conflict_resolution", "expected_behavior": "对灌溉与病害风险冲突进行裁决", "success_condition": "debate.conflicts 非空且 critic.triggered 为真"},
+        {"capability": "sensor_cross_validation", "expected_behavior": "交叉验证雨后传感器读数与灌溉决策", "success_condition": "传感器输出检测到异常或环境读数参与裁决依据"}
+      ],
+      "design_intent": "multi_step_planning + conflict_resolution + sensor_cross_validation: 雨后灌溉需结合传感器与病害冲突安排作业",
       "query": "温室A番茄昨天刚下过大雨，今天能浇水吗，叶片有黄斑霉层怎么办？",
       "ground_truth": "叶霉病",
       "crop": "tomato",
@@ -59,6 +87,11 @@
     },
     {
       "id": "cucumber_mold_differentiation",
+      "capabilities": ["counterfactual_reasoning"],
+      "observable_evidence": [
+        {"capability": "counterfactual_reasoning", "expected_behavior": "相似霉层病害的鉴别与排除", "success_condition": "病理Agent.counterfactual.alternative 与 rejection_reason 均非空"}
+      ],
+      "design_intent": "counterfactual_reasoning: 相似霉层病害的鉴别与排除",
       "query": "温室B黄瓜叶背霉层明显，与灰霉病相似，如何区分霜霉病？",
       "ground_truth": "霜霉病",
       "crop": "cucumber",
@@ -67,4 +100,6 @@
     }
   ]
 }
+
+
 

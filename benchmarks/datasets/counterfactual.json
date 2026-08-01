@@ -11,7 +11,11 @@
       "intent": "diagnose",
       "disease": "早疫病",
       "expect_critic": true,
-      "design_intent": "counterfactual: 验证替代诊断与排除理由的生成"
+      "design_intent": "counterfactual: 验证替代诊断与排除理由的生成",
+      "capabilities": ["counterfactual_reasoning"],
+      "observable_evidence": [
+        {"capability": "counterfactual_reasoning", "expected_behavior": "生成替代诊断并给出排除理由", "success_condition": "病理Agent.counterfactual.alternative 与 rejection_reason 均非空"}
+      ]
     },
     {
       "id": "tomato_early_blight_alternatives",
@@ -20,7 +24,11 @@
       "crop": "tomato",
       "intent": "diagnose",
       "disease": "早疫病",
-      "design_intent": "counterfactual: 验证多候选病害的反事实排序"
+      "design_intent": "counterfactual: 验证多候选病害的反事实排序",
+      "capabilities": ["counterfactual_reasoning"],
+      "observable_evidence": [
+        {"capability": "counterfactual_reasoning", "expected_behavior": "生成替代诊断并给出排除理由", "success_condition": "病理Agent.counterfactual.alternative 与 rejection_reason 均非空"}
+      ]
     },
     {
       "id": "sugar_beet_root_rot_nonpathogenic",
@@ -29,7 +37,12 @@
       "crop": "sugar_beet",
       "intent": "diagnose",
       "disease": "根腐病",
-      "design_intent": "counterfactual: 验证非侵染性因素的排除论证"
+      "design_intent": "counterfactual: 验证非侵染性因素的排除论证",
+      "capabilities": ["counterfactual_reasoning"],
+      "observable_evidence": [
+        {"capability": "counterfactual_reasoning", "expected_behavior": "生成替代诊断并给出排除理由", "success_condition": "病理Agent.counterfactual.alternative 与 rejection_reason 均非空"}
+      ]
     }
   ]
 }
+

@@ -14,7 +14,11 @@
       "sensor_override": {
         "humidity_offset": -30.0
       },
-      "design_intent": "adversarial: 验证环境与症状矛盾时的边界裁决"
+      "design_intent": "adversarial: 验证环境与症状矛盾时的边界裁决",
+      "capabilities": ["conflict_resolution"],
+      "observable_evidence": [
+        {"capability": "conflict_resolution", "expected_behavior": "对症状与环境证据矛盾进行冲突消解与裁决", "success_condition": "debate.conflicts 非空且 critic.triggered 为真"}
+      ]
     },
     {
       "id": "tomato_irrigate_after_rain_anomaly",
@@ -28,7 +32,12 @@
         "humidity_offset": 15.0,
         "temp_offset": 8.0
       },
-      "design_intent": "adversarial: 验证传感器异常叠加病害风险的边界处理"
+      "design_intent": "adversarial: 验证传感器异常与灌溉-病害冲突的边界处理",
+      "capabilities": ["conflict_resolution", "sensor_cross_validation"],
+      "observable_evidence": [
+        {"capability": "conflict_resolution", "expected_behavior": "对症状与环境证据矛盾进行冲突消解与裁决", "success_condition": "debate.conflicts 非空且 critic.triggered 为真"},
+        {"capability": "sensor_cross_validation", "expected_behavior": "交叉验证传感器读数并检测异常", "success_condition": "传感器输出检测到异常或环境读数参与裁决依据"}
+      ]
     },
     {
       "id": "cotton_wilt_hot_dry",
@@ -42,7 +51,12 @@
         "temp_offset": 8.0,
         "humidity_offset": -20.0
       },
-      "design_intent": "adversarial: 验证高湿型病害与干燥环境的对抗判定"
+      "design_intent": "adversarial: 验证高湿型病害与干燥环境证据矛盾时的对抗判定",
+      "capabilities": ["conflict_resolution"],
+      "observable_evidence": [
+        {"capability": "conflict_resolution", "expected_behavior": "对症状与环境证据矛盾进行冲突消解与裁决", "success_condition": "debate.conflicts 非空且 critic.triggered 为真"}
+      ]
     }
   ]
 }
+

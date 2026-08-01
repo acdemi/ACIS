@@ -48,6 +48,13 @@ def _metadata(**overrides: object) -> dict:
         "challenge_type": "missing_information",
         "expected_reasoning_features": ["information_request"],
         "capabilities": ["information_gathering"],
+        "observable_evidence": [
+            {
+                "capability": "information_gathering",
+                "expected_behavior": "主动请求缺失信息",
+                "success_condition": "输出中包含信息补充请求",
+            }
+        ],
         "difficulty": 2,
         "crop": "tomato",
         "disease": None,
@@ -161,7 +168,7 @@ def test_render_capability_matrix_doc_includes_enriched() -> None:
     assert "## 扩展挑战矩阵（enriched.json）" in text
     for challenge in CHALLENGE_TYPES:
         assert f"| {challenge} |" in text
-    assert "| enriched | 15 |" in text
+    assert "| enriched | 18 |" in text
 
 
 def test_render_coverage_doc_covers_all_datasets() -> None:
@@ -169,7 +176,7 @@ def test_render_coverage_doc_covers_all_datasets() -> None:
     text = render_coverage_doc(datasets, generated_at="2026-01-01T00:00:00+00:00")
     assert "## Dataset Inventory" in text
     assert "## Enriched Challenge Coverage" in text
-    assert "| enriched | 15 |" in text
+    assert "| enriched | 18 |" in text
     assert "| easy |" in text
 
 
@@ -239,6 +246,7 @@ def test_challenge_ablation_stats_groups_by_challenge(tmp_path: Path) -> None:
     assert "### contradictory_evidence" in text
     assert "| no_memory |" in text
     assert "+2.000" in text  # memory_hits Δ for missing_information
+
 
 
 

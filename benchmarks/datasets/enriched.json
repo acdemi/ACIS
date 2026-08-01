@@ -16,7 +16,9 @@
         "disease": null,
         "noise_level": "low",
         "modalities": ["text"],
-        "design_intent": "missing_information: 验证症状信息缺失时系统主动请求补充信息"
+        "design_intent": "missing_information: 验证症状信息缺失时系统主动请求补充信息",
+        "capabilities": ["information_gathering"],
+        "observable_evidence": [{"capability": "information_gathering", "expected_behavior": "主动请求缺失的现场信息（温度、湿度、用药史等）", "success_condition": "输出中显式列出需要补充的信息项"}]
       }
     },
     {
@@ -33,7 +35,9 @@
         "disease": null,
         "noise_level": "low",
         "modalities": ["text", "sensor"],
-        "design_intent": "missing_information: 验证长势异常但无典型症状时的信息补全路径"
+        "design_intent": "missing_information: 验证长势异常但无典型症状时的信息补全路径",
+        "capabilities": ["information_gathering"],
+        "observable_evidence": [{"capability": "information_gathering", "expected_behavior": "主动请求缺失的现场信息（温度、湿度、用药史等）", "success_condition": "输出中显式列出需要补充的信息项"}]
       }
     },
     {
@@ -50,7 +54,9 @@
         "disease": null,
         "noise_level": "medium",
         "modalities": ["text"],
-        "design_intent": "missing_information: 验证不完整症状描述的询问能力"
+        "design_intent": "missing_information: 验证不完整症状描述的询问能力",
+        "capabilities": ["information_gathering"],
+        "observable_evidence": [{"capability": "information_gathering", "expected_behavior": "主动请求缺失的现场信息（温度、湿度、用药史等）", "success_condition": "输出中显式列出需要补充的信息项"}]
       }
     },
     {
@@ -70,7 +76,9 @@
         "disease": "叶霉病",
         "noise_level": "high",
         "modalities": ["text", "sensor"],
-        "design_intent": "contradictory_evidence: 验证高湿型病害与低湿环境证据矛盾时的降权裁决"
+        "design_intent": "contradictory_evidence: 验证高湿型病害与低湿环境证据矛盾时的降权裁决",
+        "capabilities": ["conflict_resolution"],
+        "observable_evidence": [{"capability": "conflict_resolution", "expected_behavior": "对多源矛盾证据进行冲突消解与裁决", "success_condition": "debate.conflicts 非空且 critic.triggered 为真或达成一致裁决"}]
       }
     },
     {
@@ -90,7 +98,9 @@
         "disease": "根腐病",
         "noise_level": "high",
         "modalities": ["text", "sensor"],
-        "design_intent": "contradictory_evidence: 验证喜湿型根腐病与偏干土壤的矛盾判定"
+        "design_intent": "contradictory_evidence: 验证喜湿型根腐病与偏干土壤的矛盾判定",
+        "capabilities": ["conflict_resolution"],
+        "observable_evidence": [{"capability": "conflict_resolution", "expected_behavior": "对多源矛盾证据进行冲突消解与裁决", "success_condition": "debate.conflicts 非空且 critic.triggered 为真或达成一致裁决"}]
       }
     },
     {
@@ -110,7 +120,9 @@
         "disease": "黄萎病",
         "noise_level": "high",
         "modalities": ["text", "sensor"],
-        "design_intent": "contradictory_evidence: 验证低温型黄萎病与高温环境的矛盾处理"
+        "design_intent": "contradictory_evidence: 验证低温型黄萎病与高温环境的矛盾处理",
+        "capabilities": ["conflict_resolution"],
+        "observable_evidence": [{"capability": "conflict_resolution", "expected_behavior": "对多源矛盾证据进行冲突消解与裁决", "success_condition": "debate.conflicts 非空且 critic.triggered 为真或达成一致裁决"}]
       }
     },
     {
@@ -127,7 +139,9 @@
         "disease": "早疫病",
         "noise_level": "high",
         "modalities": ["text", "image"],
-        "design_intent": "multi_disease: 验证叶霉病与早疫病并存时的候选排序与反事实排除"
+        "design_intent": "multi_disease: 验证叶霉病与早疫病并存时的候选排序与反事实排除",
+        "capabilities": ["counterfactual_reasoning"],
+        "observable_evidence": [{"capability": "counterfactual_reasoning", "expected_behavior": "生成替代诊断并给出排除理由", "success_condition": "病理Agent.counterfactual.alternative 与 rejection_reason 均非空"}]
       }
     },
     {
@@ -144,7 +158,9 @@
         "disease": "褐斑病",
         "noise_level": "high",
         "modalities": ["text", "image"],
-        "design_intent": "multi_disease: 验证褐斑病与根腐病并存时的优先级判定"
+        "design_intent": "multi_disease: 验证褐斑病与根腐病并存时的候选排序与反事实排除",
+        "capabilities": ["counterfactual_reasoning"],
+        "observable_evidence": [{"capability": "counterfactual_reasoning", "expected_behavior": "生成替代诊断并给出排除理由", "success_condition": "病理Agent.counterfactual.alternative 与 rejection_reason 均非空"}]
       }
     },
     {
@@ -161,7 +177,9 @@
         "disease": "黄萎病",
         "noise_level": "medium",
         "modalities": ["text", "image"],
-        "design_intent": "multi_disease: 验证棉花黄萎病与枯萎病的相似症状鉴别"
+        "design_intent": "multi_disease: 验证棉花黄萎病与枯萎病的相似症状鉴别",
+        "capabilities": ["counterfactual_reasoning"],
+        "observable_evidence": [{"capability": "counterfactual_reasoning", "expected_behavior": "生成替代诊断并给出排除理由", "success_condition": "病理Agent.counterfactual.alternative 与 rejection_reason 均非空"}]
       }
     },
     {
@@ -178,7 +196,9 @@
         "disease": "霜霉病",
         "noise_level": "medium",
         "modalities": ["text", "image"],
-        "design_intent": "rare_knowledge: 验证非主流作物（黄瓜）的病害知识检索"
+        "design_intent": "rare_knowledge: 验证非主流作物（黄瓜）的病害知识检索",
+        "capabilities": ["knowledge_retrieval"],
+        "observable_evidence": [{"capability": "knowledge_retrieval", "expected_behavior": "从知识库/案例库检索相关病害证据", "success_condition": "RAG/KG 输出命中与 ground_truth 一致的证据且 memory_hits >= 1"}]
       }
     },
     {
@@ -195,7 +215,9 @@
         "disease": null,
         "noise_level": "medium",
         "modalities": ["text", "image"],
-        "design_intent": "rare_knowledge: 验证缺素/生理性问题的知识边界（非病害库覆盖）"
+        "design_intent": "rare_knowledge: 验证缺素/生理性问题的知识边界（非病害库覆盖）",
+        "capabilities": ["knowledge_retrieval", "uncertainty_quantification"],
+        "observable_evidence": [{"capability": "knowledge_retrieval", "expected_behavior": "从知识库/案例库检索相关病害证据", "success_condition": "RAG/KG 输出命中与 ground_truth 一致的证据且 memory_hits >= 1"}, {"capability": "uncertainty_quantification", "expected_behavior": "证据不足时主动降低置信度或拒绝给出确定诊断", "success_condition": "病理 claim 为『病理证据不足』或 judge.confidence < 0.5"}]
       }
     },
     {
@@ -212,7 +234,9 @@
         "disease": null,
         "noise_level": "low",
         "modalities": ["text", "image"],
-        "design_intent": "rare_knowledge: 验证非侵染性（生理性开裂）的边界判定"
+        "design_intent": "rare_knowledge: 验证非侵染性（生理性开裂）的知识边界判定",
+        "capabilities": ["knowledge_retrieval", "uncertainty_quantification"],
+        "observable_evidence": [{"capability": "knowledge_retrieval", "expected_behavior": "从知识库/案例库检索相关病害证据", "success_condition": "RAG/KG 输出命中与 ground_truth 一致的证据且 memory_hits >= 1"}, {"capability": "uncertainty_quantification", "expected_behavior": "证据不足时主动降低置信度或拒绝给出确定诊断", "success_condition": "病理 claim 为『病理证据不足』或 judge.confidence < 0.5"}]
       }
     },
     {
@@ -233,7 +257,9 @@
         "disease": "叶霉病",
         "noise_level": "high",
         "modalities": ["text", "sensor"],
-        "design_intent": "sensor_conflict: 验证传感器异常叠加病害风险时的灌溉决策"
+        "design_intent": "sensor_conflict: 验证传感器异常与灌溉-病害冲突的边界处理",
+        "capabilities": ["sensor_cross_validation", "conflict_resolution"],
+        "observable_evidence": [{"capability": "sensor_cross_validation", "expected_behavior": "交叉验证多模态传感器读数并检测异常", "success_condition": "传感器输出检测到异常或环境读数参与决策依据"}, {"capability": "conflict_resolution", "expected_behavior": "对多源矛盾证据进行冲突消解与裁决", "success_condition": "debate.conflicts 非空且 critic.triggered 为真或达成一致裁决"}]
       }
     },
     {
@@ -253,7 +279,9 @@
         "disease": "黄萎病",
         "noise_level": "high",
         "modalities": ["text", "sensor"],
-        "design_intent": "sensor_conflict: 验证传感器异常与病害诊断的融合判断"
+        "design_intent": "sensor_conflict: 验证传感器异常与病害诊断的冲突消解与融合判断",
+        "capabilities": ["sensor_cross_validation", "conflict_resolution"],
+        "observable_evidence": [{"capability": "sensor_cross_validation", "expected_behavior": "交叉验证多模态传感器读数并检测异常", "success_condition": "传感器输出检测到异常或环境读数参与决策依据"}, {"capability": "conflict_resolution", "expected_behavior": "对多源矛盾证据进行冲突消解与裁决", "success_condition": "debate.conflicts 非空且 critic.triggered 为真或达成一致裁决"}]
       }
     },
     {
@@ -273,9 +301,77 @@
         "disease": "根腐病",
         "noise_level": "high",
         "modalities": ["text", "sensor"],
-        "design_intent": "sensor_conflict: 验证土壤湿度证据与根腐病诊断的协同"
+        "design_intent": "sensor_conflict: 验证土壤湿度传感器证据与根腐病诊断的协同",
+        "capabilities": ["sensor_cross_validation"],
+        "observable_evidence": [{"capability": "sensor_cross_validation", "expected_behavior": "交叉验证多模态传感器读数并检测异常", "success_condition": "传感器输出检测到异常或环境读数参与决策依据"}]
+      }
+    }
+    ,
+    {
+      "id": "ig_tomato_missing_info",
+      "query": "温室A番茄出现不明原因的叶片异常，请问还需要补充哪些现场信息才能判断？",
+      "ground_truth": "证据不足",
+      "expected_confidence_range": [0.5, 0.75],
+      "expected_tools": ["image_capture"],
+      "metadata": {
+        "challenge_type": "missing_information",
+        "expected_reasoning_features": ["information_request"],
+        "difficulty": 2,
+        "crop": "tomato",
+        "disease": null,
+        "noise_level": "low",
+        "modalities": ["text"],
+        "design_intent": "information_gathering: 验证症状不明时主动请求补充信息清单",
+        "capabilities": ["information_gathering"],
+        "observable_evidence": [
+          {"capability": "information_gathering", "expected_behavior": "主动请求缺失的现场信息（温度、湿度、用药史等）", "success_condition": "输出中显式列出需要补充的信息项"}
+        ]
+      }
+    },
+    {
+      "id": "ig_sugar_beet_missing_info",
+      "query": "温室A甜菜长势异常但症状不明显，需要补充哪些环境与用药信息？",
+      "ground_truth": "证据不足",
+      "expected_confidence_range": [0.5, 0.75],
+      "expected_tools": ["image_capture"],
+      "metadata": {
+        "challenge_type": "missing_information",
+        "expected_reasoning_features": ["information_request"],
+        "difficulty": 2,
+        "crop": "sugar_beet",
+        "disease": null,
+        "noise_level": "low",
+        "modalities": ["text", "sensor"],
+        "design_intent": "information_gathering: 验证长势异常时补充环境与用药信息",
+        "capabilities": ["information_gathering"],
+        "observable_evidence": [
+          {"capability": "information_gathering", "expected_behavior": "主动请求缺失的现场信息（温度、湿度、用药史等）", "success_condition": "输出中显式列出需要补充的信息项"}
+        ]
+      }
+    },
+    {
+      "id": "ig_cotton_missing_info",
+      "query": "温室A棉花叶片有轻微问题，请列出需要补充的信息清单",
+      "ground_truth": "证据不足",
+      "expected_confidence_range": [0.5, 0.75],
+      "expected_tools": ["image_capture"],
+      "metadata": {
+        "challenge_type": "missing_information",
+        "expected_reasoning_features": ["information_request"],
+        "difficulty": 2,
+        "crop": "cotton",
+        "disease": null,
+        "noise_level": "medium",
+        "modalities": ["text"],
+        "design_intent": "information_gathering: 验证信息缺失时生成补充清单",
+        "capabilities": ["information_gathering"],
+        "observable_evidence": [
+          {"capability": "information_gathering", "expected_behavior": "主动请求缺失的现场信息（温度、湿度、用药史等）", "success_condition": "输出中显式列出需要补充的信息项"}
+        ]
       }
     }
   ]
 }
+
+
 

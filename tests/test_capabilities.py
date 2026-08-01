@@ -52,7 +52,18 @@ _METADATA = {
 
 
 def _metadata_with_capabilities(*capabilities: str) -> dict:
-    return {**_METADATA, "capabilities": list(capabilities)}
+    return {
+        **_METADATA,
+        "capabilities": list(capabilities),
+        "observable_evidence": [
+            {
+                "capability": capability,
+                "expected_behavior": f"evidence for {capability}",
+                "success_condition": f"condition for {capability}",
+            }
+            for capability in capabilities
+        ],
+    }
 
 
 # ------------------------------ capability enum ----------------------------
@@ -118,6 +129,53 @@ def test_validate_metadata_accepts_capabilities() -> None:
         Capability.KNOWLEDGE_RETRIEVAL,
         Capability.UNCERTAINTY_QUANTIFICATION,
     )
+    assert len(metadata.observable_evidence) == 2
+
+
+def test_validate_metadata_requires_observable_evidence() -> None:
+    metadata = {**_METADATA, "capabilities": ["knowledge_retrieval"]}
+    with pytest.raises(BenchmarkMetadataError, match="observable_evidence"):
+        validate_metadata(metadata)
+
+
+def test_validate_metadata_rejects_evidence_not_in_capabilities() -> None:
+    metadata = {
+        **_METADATA,
+        "capabilities": ["knowledge_retrieval"],
+        "observable_evidence": [
+            {
+                "capability": "knowledge_retrieval",
+                "expected_behavior": "b",
+                "success_condition": "c",
+            },
+            {
+                "capability": "conflict_resolution",
+                "expected_behavior": "b",
+                "success_condition": "c",
+            },
+        ],
+    }
+    with pytest.raises(BenchmarkMetadataError, match="capabilities 中未包含"):
+        validate_metadata(metadata)
+
+
+def test_validate_observable_evidence_format() -> None:
+    from benchmarks.metadata import validate_observable_evidence
+
+    evidence = validate_observable_evidence(
+        {
+            "capability": "knowledge_retrieval",
+            "expected_behavior": "检索证据",
+            "success_condition": "命中一致",
+        }
+    )
+    assert evidence.capability == Capability.KNOWLEDGE_RETRIEVAL
+    with pytest.raises(BenchmarkMetadataError):
+        validate_observable_evidence(
+            {"capability": "knowledge_retrieval", "expected_behavior": "b"}
+        )
+    with pytest.raises(BenchmarkMetadataError):
+        validate_observable_evidence({"capability": "nope", "expected_behavior": "b", "success_condition": "c"})
 
 
 def test_validate_metadata_lenient_for_legacy_scan() -> None:
@@ -140,6 +198,18 @@ def test_coverage_rows_cover_all_capabilities() -> None:
     assert set(rows) == set(ALL_CAPABILITIES)
     covered = [capability for capability in rows if rows[capability].total > 0]
     assert len(covered) >= 5  # acceptance: at least 5 capabilities covered
+    # Sprint 04.5B: explicit annotations — information_gathering >= 6
+    assert rows[Capability.INFORMATION_GATHERING].annotated >= 6
+
+
+def test_annotated_cases_are_consistent() -> None:
+    from benchmarks.capability_matrix import build_consistency_rows
+
+    rows = build_consistency_rows(load_all_datasets())
+    annotated = [row for row in rows if row["status"] != "unannotated"]
+    inconsistent = [row for row in annotated if row["status"] == "inconsistent"]
+    assert annotated  # every capability-focused case is annotated
+    assert inconsistent == []  # acceptance: 100% consistency
 
 
 def test_coverage_under_covered_flag() -> None:
@@ -182,8 +252,10 @@ def test_annotation_suggestions_cover_unannotated_cases() -> None:
     by_case = {
         suggestion["case_id"]: suggestion["capabilities"] for suggestion in suggestions
     }
-    assert "information_gathering" in by_case["mi_tomato_growth_slow"]
-    assert "multi_step_planning" in by_case["tomato_leaf_mold_action_plan"]
+    # Annotated cases are excluded from suggestions...
+    assert "mi_tomato_growth_slow" not in by_case
+    # ...while unannotated difficulty cases remain listed for review.
+    assert "tomato_leaf_mold" in by_case
 
 
 def test_annotation_suggestions_do_not_modify_datasets() -> None:
@@ -192,7 +264,6 @@ def test_annotation_suggestions_do_not_modify_datasets() -> None:
     build_annotation_suggestions(load_all_datasets())
     after = enriched_path.read_text(encoding="utf-8")
     assert after == before
-    assert "capabilities" not in after  # still pending annotation
 
 
 def test_render_annotation_suggestions() -> None:
@@ -232,4 +303,143 @@ def test_write_capability_docs(tmp_path: Path) -> None:
     assert "# Benchmark Capability Annotation Suggestions" in suggestions_path.read_text(
         encoding="utf-8"
     )
+
+
+
+# --------------------- consistency check (Sprint 04.5B) ---------------------
+
+
+def test_check_case_consistency_consistent() -> None:
+    from benchmarks.capability_matrix import check_case_consistency
+
+    case = {
+        "id": "x",
+        "query": "q",
+        "capabilities": ["knowledge_retrieval"],
+        "observable_evidence": [
+            {
+                "capability": "knowledge_retrieval",
+                "expected_behavior": "检索证据",
+                "success_condition": "命中一致",
+            }
+        ],
+        "design_intent": "knowledge_retrieval: 验证检索",
+    }
+    check = check_case_consistency(case)
+    assert check["status"] == "consistent"
+    assert check["issues"] == []
+
+
+def test_check_case_consistency_unannotated() -> None:
+    from benchmarks.capability_matrix import check_case_consistency
+
+    check = check_case_consistency({"id": "x", "query": "q"})
+    assert check["status"] == "unannotated"
+
+
+def test_check_case_consistency_inconsistent_missing_evidence() -> None:
+    from benchmarks.capability_matrix import check_case_consistency
+
+    case = {
+        "id": "x",
+        "query": "q",
+        "capabilities": ["knowledge_retrieval"],
+        "design_intent": "knowledge_retrieval: 验证检索",
+    }
+    check = check_case_consistency(case)
+    assert check["status"] == "inconsistent"
+    assert any("observable_evidence" in issue for issue in check["issues"])
+
+
+def test_check_case_consistency_inconsistent_intent() -> None:
+    from benchmarks.capability_matrix import check_case_consistency
+
+    case = {
+        "id": "x",
+        "query": "q",
+        "capabilities": ["knowledge_retrieval"],
+        "observable_evidence": [
+            {
+                "capability": "knowledge_retrieval",
+                "expected_behavior": "检索证据",
+                "success_condition": "命中一致",
+            }
+        ],
+        "design_intent": "与能力无关的描述",
+    }
+    check = check_case_consistency(case)
+    assert check["status"] == "inconsistent"
+    assert any("design_intent" in issue for issue in check["issues"])
+
+
+def test_render_consistency_report(tmp_path: Path) -> None:
+    from benchmarks.capability_matrix import (
+        build_consistency_rows,
+        render_consistency_report,
+        write_consistency_report,
+    )
+
+    rows = build_consistency_rows(load_all_datasets())
+    text = render_consistency_report(rows, generated_at="2026-01-01T00:00:00+00:00")
+    assert "# Benchmark Capability Consistency Report" in text
+    assert "Annotated cases:" in text
+    assert "Inconsistent: 0" in text
+    assert "一致性检验" in text
+    report_path = write_consistency_report(tmp_path)
+    assert report_path.is_file()
+
+
+# --------------------- capability ablation stats ---------------------------
+
+
+def test_capability_ablation_stats_groups_by_capability(tmp_path: Path) -> None:
+    import csv
+
+    from benchmarks.capability_matrix import (
+        capability_ablation_stats,
+        write_capability_ablation_stats,
+    )
+
+    run_dir = tmp_path / "run"
+    all_on = run_dir / "all_on"
+    no_memory = run_dir / "no_memory"
+    all_on.mkdir(parents=True)
+    no_memory.mkdir(parents=True)
+    (run_dir / "REPORT.md").write_text("# Ablation Report\n", encoding="utf-8")
+    fields = [
+        "case_id",
+        "expected",
+        "accuracy",
+        "confidence",
+        "memory_hits",
+        "debate_rounds",
+        "counterfactual_count",
+    ]
+
+    def write_rows(path: Path, rows: list[dict]) -> None:
+        with path.open("w", encoding="utf-8", newline="") as handle:
+            writer = csv.DictWriter(handle, fieldnames=fields)
+            writer.writeheader()
+            for row in rows:
+                writer.writerow({field: row.get(field, "") for field in fields})
+
+    rows = [
+        {"case_id": "mi_tomato_growth_slow", "expected": "证据不足", "accuracy": 1.0, "confidence": 0.6, "memory_hits": 2, "debate_rounds": 1, "counterfactual_count": 5},
+        {"case_id": "ce_tomato_mold_dry", "expected": "叶霉病", "accuracy": 1.0, "confidence": 0.7, "memory_hits": 2, "debate_rounds": 2, "counterfactual_count": 8},
+    ]
+    write_rows(all_on / "metrics.csv", rows)
+    no_memory_rows = [
+        {**row, "memory_hits": 0} for row in rows
+    ]
+    write_rows(no_memory / "metrics.csv", no_memory_rows)
+
+    grouped = capability_ablation_stats(run_dir)
+    assert grouped[Capability.INFORMATION_GATHERING]["all_on"]["memory_hits"] == pytest.approx(2.0)
+    assert grouped[Capability.CONFLICT_RESOLUTION]["no_memory"]["memory_hits"] == pytest.approx(0.0)
+
+    report_path = write_capability_ablation_stats(run_dir)
+    text = report_path.read_text(encoding="utf-8")
+    assert "## 按 capability 分组的模块贡献统计" in text
+    assert "### information_gathering" in text
+    assert "### conflict_resolution" in text
 

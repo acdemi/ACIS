@@ -13,6 +13,14 @@ coverage density, under-covered flags) plus
 ``CAPABILITY_ANNOTATION_SUGGESTIONS.md`` for human review. Suggestions are
 never written into dataset files.
 
+Phase 2.1E, Sprint 04.5B (Verifiable Capability Contract): reads explicit
+annotations from ``metadata.capabilities`` or the case-level
+``capabilities`` field, verifies the
+``capabilities ↔ observable_evidence ↔ design_intent`` triple for every
+annotated case, and generates ``CAPABILITY_CONSISTENCY_REPORT.md``
+(inconsistent cases marked ⚠️). Annotated datasets also feed a per-capability
+ablation statistics table appended to the ablation ``REPORT.md``.
+
 Usage from the repo root::
 
     python -m benchmarks.capability_matrix
@@ -38,8 +46,10 @@ from benchmarks.capabilities import (
 from benchmarks.loader import CAPABILITY_SUITES, DATASETS_DIR, load_dataset, load_suite
 from benchmarks.metadata import (
     CHALLENGE_TYPES,
+    ObservableEvidence,
     challenge_counts,
     validate_enriched_case,
+    validate_observable_evidence_list,
 )
 from benchmarks.taxonomy import (
     CAPABILITY_COLUMNS,
@@ -299,12 +309,21 @@ class CapabilityCoverageRow:
         return self.total < UNDER_COVERED_THRESHOLD
 
 
-def case_capabilities(case: dict[str, Any]) -> tuple[Capability, ...]:
-    """Read an annotated ``capabilities`` list from a case (strict)."""
+def _case_field(case: dict[str, Any], name: str) -> Any:
+    """Read ``name`` from case metadata if present, else from the case root."""
     metadata = case.get("metadata")
-    if not isinstance(metadata, dict):
-        return ()
-    values = metadata.get("capabilities")
+    if isinstance(metadata, dict) and metadata.get(name) is not None:
+        return metadata.get(name)
+    return case.get(name)
+
+
+def case_capabilities(case: dict[str, Any]) -> tuple[Capability, ...]:
+    """Read an annotated ``capabilities`` list from a case (strict).
+
+    Prefers ``metadata.capabilities`` (enriched cases); falls back to the
+    case-level ``capabilities`` field (suite / difficulty datasets).
+    """
+    values = _case_field(case, "capabilities")
     if values is None:
         return ()
     if not isinstance(values, list):
@@ -559,6 +578,157 @@ def write_capability_docs(output_dir: str | Path | None = None) -> tuple[Path, P
 
 
 # ---------------------------------------------------------------------------
+# capability consistency check (Phase 2.1E, Sprint 04.5B)
+# ---------------------------------------------------------------------------
+
+
+def case_observable_evidence(case: dict[str, Any]) -> tuple[ObservableEvidence, ...]:
+    """Read validated observable evidence (metadata or case-level)."""
+    values = _case_field(case, "observable_evidence")
+    if values is None:
+        return ()
+    return validate_observable_evidence_list(values, case_capabilities(case))
+
+
+def case_design_intent(case: dict[str, Any]) -> str:
+    """Design intent text (metadata or case-level)."""
+    metadata = case.get("metadata")
+    if isinstance(metadata, dict) and isinstance(metadata.get("design_intent"), str):
+        return metadata["design_intent"]
+    intent = case.get("design_intent")
+    return str(intent) if isinstance(intent, str) else ""
+
+
+_INTENT_KEYWORDS: dict[Capability, tuple[str, ...]] = {
+    Capability.INFORMATION_GATHERING: ("信息", "补充", "询问"),
+    Capability.KNOWLEDGE_RETRIEVAL: ("检索", "知识", "案例", "资料", "查询"),
+    Capability.CONFLICT_RESOLUTION: ("冲突", "矛盾", "裁决", "辩论", "反驳"),
+    Capability.COUNTERFACTUAL_REASONING: ("反事实", "排除", "替代", "鉴别", "候选"),
+    Capability.UNCERTAINTY_QUANTIFICATION: (
+        "证据不足",
+        "缺素",
+        "生理性",
+        "置信度",
+        "不确定",
+    ),
+    Capability.MULTI_STEP_PLANNING: ("计划", "规划", "分解", "步骤", "作业", "安排"),
+    Capability.SENSOR_CROSS_VALIDATION: ("传感器", "异常", "多模态", "交叉验证"),
+}
+
+
+def _intent_mentions(intent: str, capability: Capability) -> bool:
+    return capability.value in intent or any(
+        keyword in intent for keyword in _INTENT_KEYWORDS[capability]
+    )
+
+
+def check_case_consistency(case: dict[str, Any]) -> dict[str, Any]:
+    """Verify ``capabilities ↔ observable_evidence ↔ design_intent``.
+
+    Unannotated cases return ``status="unannotated"`` and are not checked.
+    """
+    capabilities = case_capabilities(case)
+    issues: list[str] = []
+    if not capabilities:
+        return {"status": "unannotated", "capabilities": (), "issues": issues}
+    evidence_values = _case_field(case, "observable_evidence")
+    try:
+        validate_observable_evidence_list(evidence_values, capabilities)
+    except ValueError as exc:
+        issues.append(str(exc))
+    intent = case_design_intent(case)
+    if not intent.strip():
+        issues.append("design_intent 缺失")
+    else:
+        for capability in capabilities:
+            if not _intent_mentions(intent, capability):
+                issues.append(f"design_intent 未体现 capability {capability.value}")
+    return {
+        "status": "inconsistent" if issues else "consistent",
+        "capabilities": capabilities,
+        "issues": issues,
+    }
+
+
+def build_consistency_rows(
+    datasets: dict[str, list[dict[str, Any]]],
+) -> list[dict[str, Any]]:
+    """Per-case consistency rows across all datasets."""
+    rows: list[dict[str, Any]] = []
+    for dataset_name in DATASET_ORDER:
+        for case in datasets.get(dataset_name, []):
+            check = check_case_consistency(case)
+            rows.append(
+                {
+                    "dataset": dataset_name,
+                    "case_id": str(case.get("id", "")),
+                    "status": check["status"],
+                    "capabilities": [capability.value for capability in check["capabilities"]],
+                    "issues": check["issues"],
+                }
+            )
+    return rows
+
+
+def render_consistency_report(
+    rows: Sequence[dict[str, Any]],
+    *,
+    generated_at: str | None = None,
+) -> str:
+    """Render ``CAPABILITY_CONSISTENCY_REPORT.md``."""
+    timestamp = generated_at or datetime.now(timezone.utc).isoformat(
+        timespec="seconds"
+    )
+    annotated = [row for row in rows if row["status"] != "unannotated"]
+    consistent = [row for row in annotated if row["status"] == "consistent"]
+    inconsistent = [row for row in annotated if row["status"] == "inconsistent"]
+    lines = [
+        "# Benchmark Capability Consistency Report",
+        "",
+        f"- Generated: {timestamp}",
+        f"- Annotated cases: {len(annotated)}",
+        f"- Consistent: {len(consistent)}",
+        f"- Inconsistent: {len(inconsistent)}",
+        "",
+        "## 一致性检查（capabilities ↔ observable_evidence ↔ design_intent）",
+        "",
+        "| Dataset | Case ID | Status | Capabilities | Issues |",
+        "|---|---|---|---|---|",
+    ]
+    for row in rows:
+        status = row["status"]
+        if status == "inconsistent":
+            status = "⚠️ inconsistent"
+        issues = "; ".join(row["issues"]) if row["issues"] else "—"
+        cells = [
+            row["dataset"],
+            row["case_id"],
+            status,
+            ", ".join(row["capabilities"]) if row["capabilities"] else "—",
+            issues,
+        ]
+        lines.append("| " + " | ".join(cells) + " |")
+    lines.append("")
+    if inconsistent:
+        lines.append("存在未解决的不一致标注（⚠️），需人工修正后再合并。")
+    else:
+        lines.append(
+            "所有已标注案例均通过 Capability → Evidence → Intent 一致性检验。"
+        )
+    return "\n".join(lines) + "\n"
+
+
+def write_consistency_report(output_dir: str | Path | None = None) -> Path:
+    """Write ``CAPABILITY_CONSISTENCY_REPORT.md`` (default: ``benchmarks/``)."""
+    base = Path(output_dir) if output_dir is not None else DATASETS_DIR.parent
+    base.mkdir(parents=True, exist_ok=True)
+    path = base / "CAPABILITY_CONSISTENCY_REPORT.md"
+    rows = build_consistency_rows(load_all_datasets())
+    path.write_text(render_consistency_report(rows), encoding="utf-8")
+    return path
+
+
+# ---------------------------------------------------------------------------
 # per-challenge-type ablation statistics (Evidence Review Gate)
 # ---------------------------------------------------------------------------
 
@@ -691,6 +861,85 @@ def write_challenge_ablation_stats(run_dir: str | Path) -> Path:
     return report_path
 
 
+def capability_ablation_stats(
+    run_dir: Path,
+) -> dict[Capability, dict[str, dict[str, float]]]:
+    """Group per-combo metrics by annotated capability.
+
+    Reads the ablation run's per-combo ``metrics.csv`` files and joins them
+    with each case's explicit ``capabilities`` from ``enriched.json``.
+    """
+    enriched = load_dataset(str(DATASETS_DIR / "enriched.json"))
+    capabilities_by_case: dict[str, tuple[Capability, ...]] = {
+        case["id"]: case_capabilities(case) for case in enriched
+    }
+    grouped: dict[Capability, dict[str, dict[str, float]]] = {
+        capability: {} for capability in ALL_CAPABILITIES
+    }
+    for combo_dir in sorted(run_dir.iterdir()):
+        if not combo_dir.is_dir():
+            continue
+        csv_path = combo_dir / "metrics.csv"
+        if not csv_path.is_file():
+            continue
+        rows_by_case: dict[str, dict[str, Any]] = {}
+        with csv_path.open("r", encoding="utf-8", newline="") as handle:
+            for row in csv.DictReader(handle):
+                rows_by_case[row["case_id"]] = row
+        for capability in ALL_CAPABILITIES:
+            capability_rows = [
+                row
+                for case_id, row in rows_by_case.items()
+                if capability in capabilities_by_case.get(case_id, ())
+            ]
+            if capability_rows:
+                grouped[capability][combo_dir.name] = _group_values(capability_rows)
+    return grouped
+
+
+def render_capability_stats_section(
+    grouped: dict[Capability, dict[str, dict[str, float]]],
+) -> str:
+    """Render per-capability Δ tables (Δ = baseline − combo)."""
+    lines = ["", "## 按 capability 分组的模块贡献统计", ""]
+    for capability in ALL_CAPABILITIES:
+        combos = grouped.get(capability, {})
+        baseline = combos.get(_BASELINE_COMBO)
+        others = [name for name in combos if name != _BASELINE_COMBO]
+        lines.append(f"### {capability.value}")
+        lines.append("")
+        lines.append("| combo | " + " | ".join(GROUP_METRICS) + " |")
+        lines.append("|" + "---|" * (len(GROUP_METRICS) + 1))
+        if baseline is None:
+            lines.append(
+                "| _（无数据） | "
+                + " | ".join(["—"] * len(GROUP_METRICS))
+                + " |"
+            )
+            lines.append("")
+            continue
+        for name in others:
+            combo_values = combos.get(name, {})
+            cells = [name]
+            for metric in GROUP_METRICS:
+                delta = baseline.get(metric, 0.0) - combo_values.get(metric, 0.0)
+                cells.append(_fmt_delta(delta))
+            lines.append("| " + " | ".join(cells) + " |")
+        lines.append("")
+    return "\n".join(lines) + "\n"
+
+
+def write_capability_ablation_stats(run_dir: str | Path) -> Path:
+    """Append capability-grouped statistics to the ablation run's REPORT.md."""
+    run_dir_path = Path(run_dir)
+    report_path = run_dir_path / "REPORT.md"
+    grouped = capability_ablation_stats(run_dir_path)
+    section = render_capability_stats_section(grouped)
+    with report_path.open("a", encoding="utf-8") as handle:
+        handle.write(section)
+    return report_path
+
+
 def _mean(values: list[float]) -> float:
     return sum(values) / len(values) if values else 0.0
 
@@ -718,16 +967,21 @@ def main() -> None:
     args = parser.parse_args()
     matrix_path, coverage_path = write_docs(args.output_dir)
     capability_coverage_path, suggestions_path = write_capability_docs(args.output_dir)
+    consistency_path = write_consistency_report(args.output_dir)
     print(f"capability matrix:        {matrix_path}")
     print(f"coverage report:          {coverage_path}")
     print(f"capability coverage:      {capability_coverage_path}")
     print(f"annotation suggestions:   {suggestions_path}")
+    print(f"consistency report:       {consistency_path}")
     if args.ablation_dir:
-        report_path = write_challenge_ablation_stats(args.ablation_dir)
-        print(f"challenge stats appended to: {report_path}")
+        challenge_report = write_challenge_ablation_stats(args.ablation_dir)
+        capability_report = write_capability_ablation_stats(args.ablation_dir)
+        print(f"challenge stats appended to:  {challenge_report}")
+        print(f"capability stats appended to: {capability_report}")
 
 
 if __name__ == "__main__":
     main()
+
 
 
