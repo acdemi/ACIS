@@ -16,13 +16,13 @@ ROOT = Path(__file__).resolve().parents[1]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-from benchmarks.capabilities import (  # noqa: E402
+from benchmarks.capabilities import (
     ALL_CAPABILITIES,
     Capability,
     capability_from_reasoning_feature,
     parse_capabilities,
 )
-from benchmarks.capability_matrix import (  # noqa: E402
+from benchmarks.capability_matrix import (
     CapabilityCoverageRow,
     build_annotation_suggestions,
     build_capability_coverage,
@@ -32,8 +32,8 @@ from benchmarks.capability_matrix import (  # noqa: E402
     scan_case_capabilities,
     write_capability_docs,
 )
-from benchmarks.loader import DATASETS_DIR  # noqa: E402
-from benchmarks.metadata import (  # noqa: E402
+from benchmarks.loader import DATASETS_DIR
+from benchmarks.metadata import (
     BenchmarkMetadataError,
     validate_enriched_case,
     validate_metadata,

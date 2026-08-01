@@ -308,7 +308,7 @@ def case_capabilities(case: dict[str, Any]) -> tuple[Capability, ...]:
     if values is None:
         return ()
     if not isinstance(values, list):
-        raise ValueError(f"case {case.get('id')!r}: capabilities must be a list")
+        raise TypeError(f"case {case.get('id')!r}: capabilities must be a list")
     return parse_capabilities(values)
 
 
@@ -438,9 +438,11 @@ def render_capability_coverage(
         f"- Generated: {timestamp}",
         f"- Datasets: {len(DATASET_ORDER)}",
         f"- Total cases: {total_cases}",
-        f"- Capability-annotated cases: {annotated_cases} "
-        f"（其余 {total_cases - annotated_cases} 个为待标注，见 "
-        "CAPABILITY_ANNOTATION_SUGGESTIONS.md）",
+        (
+            f"- Capability-annotated cases: {annotated_cases} "
+            f"（其余 {total_cases - annotated_cases} 个为待标注，见 "
+            "CAPABILITY_ANNOTATION_SUGGESTIONS.md）"
+        ),
         "",
         "## 能力覆盖矩阵",
         "",
@@ -464,8 +466,10 @@ def render_capability_coverage(
         f"- 有案例覆盖的能力数：{covered}/{len(ALL_CAPABILITIES)}",
         f"- 覆盖案例 ≥ {UNDER_COVERED_THRESHOLD} 的能力数：{solid}/{len(ALL_CAPABILITIES)}",
         "- 覆盖密度 = 该能力覆盖案例数 / 全部案例数。",
-        "- 已标注 = case 的 metadata.capabilities 显式声明；待标注(推断) = "
-        "自动推断的推荐标注，需人工审查。",
+        (
+            "- 已标注 = case 的 metadata.capabilities 显式声明；待标注(推断) = "
+            "自动推断的推荐标注，需人工审查。"
+        ),
     ]
     return "\n".join(lines) + "\n"
 
@@ -519,8 +523,10 @@ def render_annotation_suggestions(
         f"- Generated: {timestamp}",
         f"- Pending cases: {len(suggestions)}",
         "",
-        "以下为自动推断的能力标注建议，供人工审查。**不会自动写入任何数据集文件**；"
-        "审查通过后可在 case 的 `metadata.capabilities` 中显式声明。",
+        (
+            "以下为自动推断的能力标注建议，供人工审查。**不会自动写入任何数据集文件**；"
+            "审查通过后可在 case 的 `metadata.capabilities` 中显式声明。"
+        ),
         "",
         "| Dataset | Case ID | 推荐 capabilities | 推断依据 |",
         "|---|---|---|---|",
@@ -723,4 +729,5 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
+
 

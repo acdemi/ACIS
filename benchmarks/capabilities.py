@@ -9,8 +9,8 @@ modules can be refactored without invalidating benchmark measurements
 
 from __future__ import annotations
 
+from collections.abc import Iterable
 from enum import Enum
-from typing import Iterable
 
 
 class Capability(str, Enum):
