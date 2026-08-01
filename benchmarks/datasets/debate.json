@@ -1,0 +1,46 @@
+{
+  "name": "debate",
+  "targeted_capability": "debate",
+  "description": "测试多 Agent 冲突消解：灌溉意图与病害风险的矛盾场景，触发辩论与反驳。",
+  "cases": [
+    {
+      "id": "tomato_irrigate_leaf_mold",
+      "query": "温室A番茄叶背灰色霉层，今天需要浇水吗，如何兼顾病害风险？",
+      "ground_truth": "叶霉病",
+      "crop": "tomato",
+      "intent": "irrigate",
+      "disease": "叶霉病",
+      "expect_critic": true,
+      "design_intent": "debate: 验证灌溉 vs 病害冲突的多 Agent 辩论"
+    },
+    {
+      "id": "sugar_beet_irrigate_leaf_spot",
+      "query": "温室A甜菜叶片褐斑增多，近期能否浇水？",
+      "ground_truth": "褐斑病",
+      "crop": "sugar_beet",
+      "intent": "irrigate",
+      "disease": "褐斑病",
+      "expect_critic": true,
+      "design_intent": "debate: 验证灌溉建议与病害防治的冲突裁决"
+    },
+    {
+      "id": "cotton_irrigate_verticillium",
+      "query": "温室A棉花黄萎病初发，花铃期还能灌溉吗？",
+      "ground_truth": "黄萎病",
+      "crop": "cotton",
+      "intent": "irrigate",
+      "disease": "黄萎病",
+      "expect_critic": true,
+      "design_intent": "debate: 验证病害期灌溉风险的辩论降权"
+    },
+    {
+      "id": "tomato_irrigate_early_blight",
+      "query": "温室A番茄早疫病斑扩散，浇水施肥该怎么安排？",
+      "ground_truth": "早疫病",
+      "crop": "tomato",
+      "intent": "irrigate",
+      "disease": "早疫病",
+      "design_intent": "debate: 验证多轮辩论下的灌溉决策"
+    }
+  ]
+}

@@ -1,0 +1,5 @@
+case_id,trace_id,expected,decision,accuracy,confidence,runtime_seconds,planner_usage,tool_usage,tool_requests,memory_hits,debate_rounds,counterfactual_count,collective_omission_count
+tomato_mold_blight_ambiguous,aaa441083ab04578a47c07abe5cdb1f0,早疫病,病理判断首选：番茄早疫病,1.0,0.73,0.0175,1.0,1.0,2,3,0,5,0
+tomato_early_blight_alternatives,336a288484dd45bf81ff2a87a8549435,早疫病,病理判断首选：番茄早疫病,1.0,0.73,0.0174,1.0,1.0,2,3,0,5,0
+sugar_beet_root_rot_nonpathogenic,30834b38dd434bb08d277a54c3451005,根腐病,病理判断首选：甜菜根腐病,1.0,0.73,0.0186,1.0,1.0,2,2,0,5,1
+__aggregate__,,,,1.0,0.73,0.017821,1.0,1.0,,8,0.0,15,1

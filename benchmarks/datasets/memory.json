@@ -1,0 +1,43 @@
+{
+  "name": "memory",
+  "targeted_capability": "memory",
+  "description": "测试 RAG/KG/案例记忆的检索精度：症状描述应命中对应病害的知识或案例。",
+  "cases": [
+    {
+      "id": "tomato_leaf_mold_memory",
+      "query": "温室A番茄叶背灰色霉层，查询历史案例中该症状的处理记录",
+      "ground_truth": "叶霉病",
+      "crop": "tomato",
+      "intent": "diagnose",
+      "disease": "叶霉病",
+      "design_intent": "memory: 验证 RAG 检索命中叶霉病案例"
+    },
+    {
+      "id": "sugar_beet_leaf_spot_memory",
+      "query": "温室A甜菜叶片圆形褐色病斑，检索知识库防治资料",
+      "ground_truth": "褐斑病",
+      "crop": "sugar_beet",
+      "intent": "diagnose",
+      "disease": "褐斑病",
+      "design_intent": "memory: 验证 RAG 检索命中褐斑病知识"
+    },
+    {
+      "id": "cotton_fusarium_memory",
+      "query": "温室A棉花半边黄化萎蔫，查询枯萎病经验回放",
+      "ground_truth": "枯萎病",
+      "crop": "cotton",
+      "intent": "diagnose",
+      "disease": "枯萎病",
+      "design_intent": "memory: 验证案例库/经验回放命中枯萎病"
+    },
+    {
+      "id": "cucumber_downy_memory",
+      "query": "温室B黄瓜叶背灰黑霉层多角病斑，检索霜霉病防治经验",
+      "ground_truth": "霜霉病",
+      "crop": "cucumber",
+      "intent": "diagnose",
+      "disease": "霜霉病",
+      "design_intent": "memory: 验证跨温室 RAG 检索（黄瓜霜霉病）"
+    }
+  ]
+}

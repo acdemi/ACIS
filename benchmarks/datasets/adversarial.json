@@ -1,0 +1,48 @@
+{
+  "name": "adversarial",
+  "targeted_capability": "adversarial",
+  "description": "测试系统边界的对抗案例：环境与症状矛盾、传感器异常叠加病害风险。",
+  "cases": [
+    {
+      "id": "tomato_mold_low_humidity",
+      "query": "温室A番茄叶背灰色霉层，但棚内湿度极低，仍怀疑叶霉病吗？",
+      "ground_truth": "叶霉病",
+      "crop": "tomato",
+      "intent": "diagnose",
+      "disease": "叶霉病",
+      "expect_critic": true,
+      "sensor_override": {
+        "humidity_offset": -30.0
+      },
+      "design_intent": "adversarial: 验证环境与症状矛盾时的边界裁决"
+    },
+    {
+      "id": "tomato_irrigate_after_rain_anomaly",
+      "query": "温室A番茄叶片有霉层，昨夜暴雨棚内湿度高，传感器提示异常，今天能浇水吗？",
+      "ground_truth": "叶霉病",
+      "crop": "tomato",
+      "intent": "irrigate",
+      "disease": "叶霉病",
+      "expect_critic": true,
+      "sensor_override": {
+        "humidity_offset": 15.0,
+        "temp_offset": 8.0
+      },
+      "design_intent": "adversarial: 验证传感器异常叠加病害风险的边界处理"
+    },
+    {
+      "id": "cotton_wilt_hot_dry",
+      "query": "温室A棉花黄绿斑驳维管束褐变，但近期高温干旱，是否黄萎病？",
+      "ground_truth": "黄萎病",
+      "crop": "cotton",
+      "intent": "diagnose",
+      "disease": "黄萎病",
+      "expect_critic": true,
+      "sensor_override": {
+        "temp_offset": 8.0,
+        "humidity_offset": -20.0
+      },
+      "design_intent": "adversarial: 验证高湿型病害与干燥环境的对抗判定"
+    }
+  ]
+}

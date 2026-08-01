@@ -8,6 +8,11 @@ Phase 2.1E, Sprint 03: dataset loading also accepts benchmark module-style
 names (``benchmarks.datasets.easy`` ...) backed by JSON files, and the
 configuration carries the ``save_traces`` flag used by the runner's
 ``--save-traces`` CLI option (default off).
+
+Phase 2.1E, Sprint 04: the runner gains independent ``critic_on`` and
+``counterfactual_on`` toggles (so an ablation can keep Critic while Debate is
+off, or strip counterfactual reasoning from agent outputs), and
+:class:`AblationConfig` drives the ablation framework in ``evals/ablation.py``.
 """
 
 from __future__ import annotations
@@ -20,6 +25,7 @@ from typing import Any
 
 DEFAULT_DATASET = "evals.fixtures"
 DEFAULT_OUTPUT_DIR = "results"
+DEFAULT_ABLATION_OUTPUT_DIR = "results/ablation"
 
 #: Module-style names served by the benchmark framework (see benchmarks/).
 BENCHMARK_PREFIX = "benchmarks.datasets."
@@ -32,8 +38,10 @@ class EvalConfig:
     dataset: str = DEFAULT_DATASET
     planner_on: bool = True
     debate_on: bool = True
+    critic_on: bool = True
     memory_on: bool = True
     tool_router_on: bool = True
+    counterfactual_on: bool = True
     output_dir: str = DEFAULT_OUTPUT_DIR
     use_langgraph: bool = True
     seed: int = 7
@@ -51,6 +59,24 @@ class EvalCase:
     ground_truth: str | None = None
     sensor_override: dict[str, Any] | None = None
     raw: dict[str, Any] = field(default_factory=dict)
+
+
+@dataclass(frozen=True)
+class AblationConfig:
+    """Configuration for a full ablation run (Phase 2.1E, Sprint 04).
+
+    ``combos`` selects ablation arms by name (see ``evals/ablation.py``);
+    an empty tuple runs every defined combo. Each combo runs through the
+    evaluation runner with its module toggle set and writes its own
+    ``metrics.csv`` under ``output_dir/<timestamp>/<combo_name>/``.
+    """
+
+    dataset: str = DEFAULT_DATASET
+    output_dir: str = DEFAULT_ABLATION_OUTPUT_DIR
+    seed: int = 7
+    max_cases: int | None = None
+    use_langgraph: bool = True
+    combos: tuple[str, ...] = ()
 
 
 def load_dataset(source: str | None = None) -> list[EvalCase]:

@@ -1,0 +1,43 @@
+{
+  "name": "planning",
+  "targeted_capability": "planner",
+  "description": "测试 Planner 的任务分解与工具需求识别能力：多步农事任务、作业排序、周期型计划。",
+  "cases": [
+    {
+      "id": "tomato_leaf_mold_action_plan",
+      "query": "温室A番茄叶片黄斑、叶背灰色霉层，请制定完整防治方案，列出需要的农事操作和工具",
+      "ground_truth": "叶霉病",
+      "crop": "tomato",
+      "intent": "diagnose",
+      "disease": "叶霉病",
+      "design_intent": "planner: 验证多步任务分解与工具需求识别（喷药、图像采集）"
+    },
+    {
+      "id": "tomato_early_blight_inspection_plan",
+      "query": "温室A番茄出现同心轮纹病斑，请安排先图像诊断、再决定用药的作业计划",
+      "ground_truth": "早疫病",
+      "crop": "tomato",
+      "intent": "diagnose",
+      "disease": "早疫病",
+      "design_intent": "planner: 验证多步作业排序与工具调用链（image_capture → spray_workorder）"
+    },
+    {
+      "id": "sugar_beet_root_rot_weekly_plan",
+      "query": "温室A甜菜根腐病疑似，制定一周防治计划：排水、灌根、复检",
+      "ground_truth": "根腐病",
+      "crop": "sugar_beet",
+      "intent": "diagnose",
+      "disease": "根腐病",
+      "design_intent": "planner: 验证周期型任务分解（用药、排水、复检）"
+    },
+    {
+      "id": "cotton_verticillium_quarantine_plan",
+      "query": "温室A棉花黄萎病扩散，规划喷药、灌根与隔离病株的作业顺序",
+      "ground_truth": "黄萎病",
+      "crop": "cotton",
+      "intent": "diagnose",
+      "disease": "黄萎病",
+      "design_intent": "planner: 验证多工具组合计划（spray_workorder、灌溉、隔离作业）"
+    }
+  ]
+}

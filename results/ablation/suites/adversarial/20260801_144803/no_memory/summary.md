@@ -1,0 +1,37 @@
+# Evaluation Summary
+
+- Generated: 2026-08-01T14:48:03+00:00
+- Dataset: `E:\knowledge_database\ACIS\benchmarks\datasets\adversarial.json` (3 cases)
+- Seed: 7
+- LangGraph: on
+
+## Configuration
+
+| toggle | value |
+|---|---|
+| planner | on |
+| debate | on |
+| memory | off |
+| tool_router | on |
+
+## Metrics
+
+| metric | value |
+|---|---|
+| accuracy | 1.00 (3/3 scored) |
+| average_confidence | 0.60 |
+| average_runtime (s) | 0.013 |
+| planner_usage | 1.00 |
+| tool_usage | 1.00 |
+| memory_hits | 0 |
+| debate_rounds | 2.00 |
+| counterfactual_count | 24 |
+| collective_omission_count | 2 |
+
+## Per-case
+
+| case_id | accuracy | confidence | runtime_s | planner | tool | memory_hits | rounds | counterfactual | omission | expected | decision |
+|---|---|---|---|---|---|---|---|---|---|---|---|
+| tomato_mold_low_humidity | 1.00 | 0.60 | 0.012 | 1.00 | 1.00 | 0 | 2 | 8 | 1 | 叶霉病 | 已生成栽培管理建议 |
+| tomato_irrigate_after_rain_anomaly | 1.00 | 0.59 | 0.011 | 1.00 | 1.00 | 0 | 2 | 8 | 1 | 叶霉病 | 气象条件支持灌溉 |
+| cotton_wilt_hot_dry | 1.00 | 0.60 | 0.014 | 1.00 | 1.00 | 0 | 2 | 8 | 0 | 黄萎病 | 已生成栽培管理建议 |

@@ -9,6 +9,13 @@ each case's unified Trace to ``<output-dir>/traces/{trace_id}.json`` via the
 frozen trace exporter, and accepts benchmark module-style dataset names
 (``benchmarks.datasets.easy`` ...).
 
+Phase 2.1E, Sprint 04: adds independent ``--critic-on/--critic-off`` and
+``--counterfactual-on/--counterfactual-off`` toggles so the ablation runner
+can quantify each cognitive module's contribution. With ``--debate-off`` the
+critic now stays on unless ``--critic-off`` is given; with
+``--counterfactual-off`` every agent's counterfactual fields are stripped
+before the debate, critic, judge, or Trace sees them.
+
 Usage from the repo root::
 
     python evals/runner.py --dataset evals.fixtures
@@ -27,7 +34,7 @@ import os
 import random
 import sys
 import time
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from pathlib import Path
 from typing import Any
 
@@ -38,6 +45,7 @@ if str(ROOT) not in sys.path:
 from trace import Trace, export_trace_json
 
 from agents.types import AgentOutput, DebateResult
+from benchmarks.loader import CAPABILITY_SUITES, suite_dataset_path
 from evals.config import EvalCase, EvalConfig, load_dataset
 from evals.metrics import (
     CaseMetrics,
@@ -79,7 +87,7 @@ class _NoopDebateEngine:
 
 
 class _NoopCriticEngine:
-    """Duck-typed critic engine used when ``debate_on=False``."""
+    """Duck-typed critic engine used when ``critic_on=False``."""
 
     def run(
         self,
@@ -88,6 +96,43 @@ class _NoopCriticEngine:
         debate: DebateResult,
     ) -> tuple[list[AgentOutput], DebateResult]:
         return outputs, debate
+
+
+class _CounterfactualFreeAgent:
+    """Duck-typed agent wrapper that strips counterfactual fields.
+
+    Wraps a real agent and clears ``counterfactual`` /
+    ``counterfactual_observations`` from its ``AgentOutput`` so the debate,
+    critic, judge, and Trace never see counterfactual reasoning. No frozen
+    module is modified; the substitution is instance-level only.
+    """
+
+    def __init__(self, agent: Any) -> None:
+        self._agent = agent
+
+    def run(self, context: Any, *args: Any, **kwargs: Any) -> AgentOutput:
+        output = self._agent.run(context, *args, **kwargs)
+        if isinstance(output, AgentOutput):
+            output.counterfactual = {}
+            output.counterfactual_observations = []
+        return output
+
+
+#: Orchestrator agent attributes that can carry counterfactual reasoning.
+_AGENT_ATTRIBUTES = (
+    "vision_agent",
+    "sensor_agent",
+    "weather_agent",
+    "rag_agent",
+    "knowledge_graph_agent",
+    "case_memory_agent",
+    "outcome_agent",
+    "pathology_agent",
+    "meteorology_agent",
+    "cultivation_agent",
+    "economic_agent",
+    "ecology_agent",
+)
 
 
 @dataclass(frozen=True)
@@ -210,11 +255,22 @@ def _apply_toggles(orchestrator: AgentOrchestrator, config: EvalConfig) -> None:
         _set_noop(orchestrator, "outcome_agent", "经验回放Agent")
     if not config.debate_on:
         setattr(orchestrator, "debate_engine", _NoopDebateEngine())  # noqa: B010
+    if not config.critic_on:
         setattr(orchestrator, "critic_engine", _NoopCriticEngine())  # noqa: B010
+    if not config.counterfactual_on:
+        _disable_counterfactual(orchestrator)
 
 
 def _set_noop(orchestrator: AgentOrchestrator, attr: str, name: str) -> None:
     setattr(orchestrator, attr, _NoopAgent("记忆层", name))
+
+
+def _disable_counterfactual(orchestrator: AgentOrchestrator) -> None:
+    """Wrap every agent so counterfactual reasoning never reaches the Trace."""
+    for attr in _AGENT_ATTRIBUTES:
+        agent = getattr(orchestrator, attr, None)
+        if agent is not None:
+            setattr(orchestrator, attr, _CounterfactualFreeAgent(agent))
 
 
 # ---------------------------------------------------------------------------
@@ -245,10 +301,19 @@ def build_parser() -> argparse.ArgumentParser:
         default=EvalConfig.dataset,
         help="dataset module path (default: evals.fixtures) or .json file",
     )
+    parser.add_argument(
+        "--suite",
+        choices=(*CAPABILITY_SUITES, "all"),
+        default=None,
+        help="run a capability suite (planning/memory/debate/counterfactual/"
+        "adversarial) instead of --dataset; 'all' runs every suite",
+    )
     _add_toggle(parser, "planner", True)
     _add_toggle(parser, "debate", True)
+    _add_toggle(parser, "critic", True)
     _add_toggle(parser, "memory", True)
     _add_toggle(parser, "tool_router", True)
+    _add_toggle(parser, "counterfactual", True)
     parser.add_argument("--output-dir", default=EvalConfig.output_dir)
     parser.add_argument(
         "--rules-only",
@@ -266,12 +331,19 @@ def build_parser() -> argparse.ArgumentParser:
 
 
 def config_from_args(args: argparse.Namespace) -> EvalConfig:
+    dataset = (
+        str(suite_dataset_path(args.suite))
+        if args.suite and args.suite != "all"
+        else args.dataset
+    )
     return EvalConfig(
-        dataset=args.dataset,
+        dataset=dataset,
         planner_on=args.planner_on,
         debate_on=args.debate_on,
+        critic_on=args.critic_on,
         memory_on=args.memory_on,
         tool_router_on=args.tool_router_on,
+        counterfactual_on=args.counterfactual_on,
         output_dir=args.output_dir,
         use_langgraph=not args.rules_only,
         seed=args.seed,
@@ -280,9 +352,7 @@ def config_from_args(args: argparse.Namespace) -> EvalConfig:
     )
 
 
-def main() -> None:
-    config = config_from_args(build_parser().parse_args())
-    result = run_evaluation(config)
+def _report_run(result: EvaluationResult) -> None:
     print(f"evaluation complete: {len(result.rows)} cases")
     print(f"  accuracy={result.aggregate.get('accuracy')}")
     print(f"  metrics.csv: {result.csv_path}")
@@ -291,6 +361,23 @@ def main() -> None:
         print(f"  traces:      {result.trace_dir} ({len(result.rows)} files)")
 
 
+def main() -> None:
+    args = build_parser().parse_args()
+    if args.suite == "all":
+        base = config_from_args(args)
+        for suite in CAPABILITY_SUITES:
+            config = replace(
+                base,
+                dataset=str(suite_dataset_path(suite)),
+                output_dir=str(Path(args.output_dir) / "suites" / suite),
+            )
+            _report_run(run_evaluation(config))
+        return
+    _report_run(run_evaluation(config_from_args(args)))
+
+
 if __name__ == "__main__":
     main()
+
+
 

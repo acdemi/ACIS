@@ -1,0 +1,281 @@
+{
+  "name": "enriched",
+  "description": "面向真实认知挑战的扩展案例集：信息缺失、矛盾证据、多病害、稀有知识与传感器冲突。",
+  "cases": [
+    {
+      "id": "mi_tomato_growth_slow",
+      "query": "温室A番茄近期生长缓慢，叶片颜色偏淡，需要补充哪些信息才能判断是否染病？",
+      "ground_truth": "证据不足",
+      "expected_confidence_range": [0.5, 0.75],
+      "expected_tools": ["image_capture"],
+      "metadata": {
+        "challenge_type": "missing_information",
+        "expected_reasoning_features": ["information_request"],
+        "difficulty": 2,
+        "crop": "tomato",
+        "disease": null,
+        "noise_level": "low",
+        "modalities": ["text"],
+        "design_intent": "missing_information: 验证症状信息缺失时系统主动请求补充信息"
+      }
+    },
+    {
+      "id": "mi_sugar_beet_partial",
+      "query": "温室A甜菜部分植株长势弱，未见明显症状，现场还需要检查哪些指标？",
+      "ground_truth": "证据不足",
+      "expected_confidence_range": [0.5, 0.75],
+      "expected_tools": ["image_capture"],
+      "metadata": {
+        "challenge_type": "missing_information",
+        "expected_reasoning_features": ["information_request"],
+        "difficulty": 2,
+        "crop": "sugar_beet",
+        "disease": null,
+        "noise_level": "low",
+        "modalities": ["text", "sensor"],
+        "design_intent": "missing_information: 验证长势异常但无典型症状时的信息补全路径"
+      }
+    },
+    {
+      "id": "mi_cotton_unclear",
+      "query": "温室A棉花叶片出现轻微异常，但描述不完整，请告诉我还需要哪些信息",
+      "ground_truth": "证据不足",
+      "expected_confidence_range": [0.5, 0.75],
+      "expected_tools": ["image_capture"],
+      "metadata": {
+        "challenge_type": "missing_information",
+        "expected_reasoning_features": ["information_request"],
+        "difficulty": 1,
+        "crop": "cotton",
+        "disease": null,
+        "noise_level": "medium",
+        "modalities": ["text"],
+        "design_intent": "missing_information: 验证不完整症状描述的询问能力"
+      }
+    },
+    {
+      "id": "ce_tomato_mold_dry",
+      "query": "温室A番茄叶背灰色霉层，但棚内湿度很低，仍应判断为叶霉病吗？",
+      "ground_truth": "叶霉病",
+      "expected_confidence_range": [0.55, 0.8],
+      "expected_tools": ["spray_workorder", "sensor_verify"],
+      "sensor_override": {
+        "humidity_offset": -30.0
+      },
+      "metadata": {
+        "challenge_type": "contradictory_evidence",
+        "expected_reasoning_features": ["conflict_resolution", "counterfactual_analysis"],
+        "difficulty": 4,
+        "crop": "tomato",
+        "disease": "叶霉病",
+        "noise_level": "high",
+        "modalities": ["text", "sensor"],
+        "design_intent": "contradictory_evidence: 验证高湿型病害与低湿环境证据矛盾时的降权裁决"
+      }
+    },
+    {
+      "id": "ce_sugar_beet_root_rot_dry",
+      "query": "温室A甜菜根部腐烂萎蔫，但土壤一直偏干，是否仍是根腐病？",
+      "ground_truth": "根腐病",
+      "expected_confidence_range": [0.55, 0.8],
+      "expected_tools": ["spray_workorder", "sensor_verify"],
+      "sensor_override": {
+        "humidity_offset": -25.0
+      },
+      "metadata": {
+        "challenge_type": "contradictory_evidence",
+        "expected_reasoning_features": ["conflict_resolution", "counterfactual_analysis"],
+        "difficulty": 4,
+        "crop": "sugar_beet",
+        "disease": "根腐病",
+        "noise_level": "high",
+        "modalities": ["text", "sensor"],
+        "design_intent": "contradictory_evidence: 验证喜湿型根腐病与偏干土壤的矛盾判定"
+      }
+    },
+    {
+      "id": "ce_cotton_wilt_hot",
+      "query": "温室A棉花黄绿斑驳维管束褐变，近期持续高温，仍怀疑黄萎病吗？",
+      "ground_truth": "黄萎病",
+      "expected_confidence_range": [0.55, 0.8],
+      "expected_tools": ["spray_workorder", "sensor_verify"],
+      "sensor_override": {
+        "temp_offset": 8.0
+      },
+      "metadata": {
+        "challenge_type": "contradictory_evidence",
+        "expected_reasoning_features": ["conflict_resolution", "counterfactual_analysis"],
+        "difficulty": 3,
+        "crop": "cotton",
+        "disease": "黄萎病",
+        "noise_level": "high",
+        "modalities": ["text", "sensor"],
+        "design_intent": "contradictory_evidence: 验证低温型黄萎病与高温环境的矛盾处理"
+      }
+    },
+    {
+      "id": "md_tomato_mold_blight",
+      "query": "温室A番茄叶片既有黄斑霉层又有同心轮纹，优先怀疑哪个病？",
+      "ground_truth": "早疫病",
+      "expected_confidence_range": [0.6, 0.85],
+      "expected_tools": ["spray_workorder", "image_capture"],
+      "metadata": {
+        "challenge_type": "multi_disease",
+        "expected_reasoning_features": ["counterfactual_analysis", "knowledge_retrieval"],
+        "difficulty": 5,
+        "crop": "tomato",
+        "disease": "早疫病",
+        "noise_level": "high",
+        "modalities": ["text", "image"],
+        "design_intent": "multi_disease: 验证叶霉病与早疫病并存时的候选排序与反事实排除"
+      }
+    },
+    {
+      "id": "md_sugar_beet_root_rot_plus",
+      "query": "温室A甜菜植株萎蔫黄化，叶片有圆形褐斑，根部腐烂，优先考虑哪种病？",
+      "ground_truth": "褐斑病",
+      "expected_confidence_range": [0.6, 0.85],
+      "expected_tools": ["spray_workorder", "image_capture"],
+      "metadata": {
+        "challenge_type": "multi_disease",
+        "expected_reasoning_features": ["counterfactual_analysis", "knowledge_retrieval"],
+        "difficulty": 5,
+        "crop": "sugar_beet",
+        "disease": "褐斑病",
+        "noise_level": "high",
+        "modalities": ["text", "image"],
+        "design_intent": "multi_disease: 验证褐斑病与根腐病并存时的优先级判定"
+      }
+    },
+    {
+      "id": "md_cotton_two_wilts",
+      "query": "温室A棉花叶片黄绿斑驳，同时半边黄化萎蔫，是哪种枯萎类病害？",
+      "ground_truth": "黄萎病",
+      "expected_confidence_range": [0.6, 0.85],
+      "expected_tools": ["spray_workorder", "image_capture"],
+      "metadata": {
+        "challenge_type": "multi_disease",
+        "expected_reasoning_features": ["counterfactual_analysis"],
+        "difficulty": 4,
+        "crop": "cotton",
+        "disease": "黄萎病",
+        "noise_level": "medium",
+        "modalities": ["text", "image"],
+        "design_intent": "multi_disease: 验证棉花黄萎病与枯萎病的相似症状鉴别"
+      }
+    },
+    {
+      "id": "rk_cucumber_downy",
+      "query": "温室B黄瓜叶片黄色褪绿斑块、多角形，叶背灰黑色霉层，属于什么病？",
+      "ground_truth": "霜霉病",
+      "expected_confidence_range": [0.6, 0.85],
+      "expected_tools": ["spray_workorder", "image_capture"],
+      "metadata": {
+        "challenge_type": "rare_knowledge",
+        "expected_reasoning_features": ["knowledge_retrieval"],
+        "difficulty": 3,
+        "crop": "cucumber",
+        "disease": "霜霉病",
+        "noise_level": "medium",
+        "modalities": ["text", "image"],
+        "design_intent": "rare_knowledge: 验证非主流作物（黄瓜）的病害知识检索"
+      }
+    },
+    {
+      "id": "rk_tomato_nutrient",
+      "query": "温室A番茄叶脉间颜色不均，老叶边缘异常，是否属于缺素或生理性问题？",
+      "ground_truth": "证据不足",
+      "expected_confidence_range": [0.5, 0.75],
+      "expected_tools": ["image_capture"],
+      "metadata": {
+        "challenge_type": "rare_knowledge",
+        "expected_reasoning_features": ["knowledge_retrieval"],
+        "difficulty": 3,
+        "crop": "tomato",
+        "disease": null,
+        "noise_level": "medium",
+        "modalities": ["text", "image"],
+        "design_intent": "rare_knowledge: 验证缺素/生理性问题的知识边界（非病害库覆盖）"
+      }
+    },
+    {
+      "id": "rk_sugar_beet_cracking",
+      "query": "温室A甜菜块根表面出现纵向裂纹，是什么原因，属于病害吗？",
+      "ground_truth": "证据不足",
+      "expected_confidence_range": [0.5, 0.75],
+      "expected_tools": ["image_capture"],
+      "metadata": {
+        "challenge_type": "rare_knowledge",
+        "expected_reasoning_features": ["knowledge_retrieval"],
+        "difficulty": 2,
+        "crop": "sugar_beet",
+        "disease": null,
+        "noise_level": "low",
+        "modalities": ["text", "image"],
+        "design_intent": "rare_knowledge: 验证非侵染性（生理性开裂）的边界判定"
+      }
+    },
+    {
+      "id": "sc_tomato_irrigate_after_rain",
+      "query": "温室A番茄叶片有霉层，昨夜暴雨后传感器提示湿度异常，今天能浇水吗？",
+      "ground_truth": "叶霉病",
+      "expected_confidence_range": [0.55, 0.8],
+      "expected_tools": ["irrigation_control", "sensor_verify", "spray_workorder"],
+      "sensor_override": {
+        "humidity_offset": 15.0,
+        "temp_offset": 8.0
+      },
+      "metadata": {
+        "challenge_type": "sensor_conflict",
+        "expected_reasoning_features": ["conflict_resolution"],
+        "difficulty": 4,
+        "crop": "tomato",
+        "disease": "叶霉病",
+        "noise_level": "high",
+        "modalities": ["text", "sensor"],
+        "design_intent": "sensor_conflict: 验证传感器异常叠加病害风险时的灌溉决策"
+      }
+    },
+    {
+      "id": "sc_cotton_wilt_anomaly",
+      "query": "温室A棉花黄绿斑驳维管束褐变，传感器检测到异常，如何处理？",
+      "ground_truth": "黄萎病",
+      "expected_confidence_range": [0.55, 0.8],
+      "expected_tools": ["spray_workorder", "sensor_verify"],
+      "sensor_override": {
+        "temp_offset": 8.0
+      },
+      "metadata": {
+        "challenge_type": "sensor_conflict",
+        "expected_reasoning_features": ["conflict_resolution", "knowledge_retrieval"],
+        "difficulty": 3,
+        "crop": "cotton",
+        "disease": "黄萎病",
+        "noise_level": "high",
+        "modalities": ["text", "sensor"],
+        "design_intent": "sensor_conflict: 验证传感器异常与病害诊断的融合判断"
+      }
+    },
+    {
+      "id": "sc_sugar_beet_overwatered",
+      "query": "温室A甜菜根部腐烂萎蔫，最近大水漫灌，传感器显示土壤偏湿，怎么处理？",
+      "ground_truth": "根腐病",
+      "expected_confidence_range": [0.55, 0.8],
+      "expected_tools": ["irrigation_control", "spray_workorder", "sensor_verify"],
+      "sensor_override": {
+        "humidity_offset": 15.0
+      },
+      "metadata": {
+        "challenge_type": "sensor_conflict",
+        "expected_reasoning_features": ["conflict_resolution", "knowledge_retrieval"],
+        "difficulty": 4,
+        "crop": "sugar_beet",
+        "disease": "根腐病",
+        "noise_level": "high",
+        "modalities": ["text", "sensor"],
+        "design_intent": "sensor_conflict: 验证土壤湿度证据与根腐病诊断的协同"
+      }
+    }
+  ]
+}
+

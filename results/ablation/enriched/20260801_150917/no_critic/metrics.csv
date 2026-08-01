@@ -1,0 +1,17 @@
+case_id,trace_id,expected,decision,accuracy,confidence,runtime_seconds,planner_usage,tool_usage,tool_requests,memory_hits,debate_rounds,counterfactual_count,collective_omission_count
+mi_tomato_growth_slow,fa42b518469d42a288de92e62664e561,证据不足,已生成栽培管理建议,1.0,0.58,0.0144,1.0,1.0,2,2,1,5,2
+mi_sugar_beet_partial,19a8ec9bb3904a628afbb188627df1ae,证据不足,已生成栽培管理建议,1.0,0.58,0.0138,1.0,1.0,2,1,1,5,2
+mi_cotton_unclear,3d46a410de664353968230ff669194e0,证据不足,已生成栽培管理建议,1.0,0.58,0.0143,1.0,1.0,2,1,1,5,2
+ce_tomato_mold_dry,07712b4abf3c4a36a2853a4fd54de615,叶霉病,已生成栽培管理建议,1.0,0.6,0.0166,1.0,1.0,5,3,2,8,1
+ce_sugar_beet_root_rot_dry,6c46b8cf0945489ab87e7e083af9a36a,根腐病,病理判断首选：甜菜根腐病,1.0,0.75,0.0171,1.0,1.0,4,2,2,8,1
+ce_cotton_wilt_hot,4aa36e8f422947c98425d37f4f7813b9,黄萎病,病理判断首选：棉花黄萎病,1.0,0.76,0.0179,1.0,1.0,4,2,2,8,0
+md_tomato_mold_blight,bb60a5dff78c44259b876d85873c3d59,早疫病,病理判断首选：番茄早疫病,1.0,0.75,0.0179,1.0,1.0,3,3,2,8,0
+md_sugar_beet_root_rot_plus,f758e597a2884d7b900ba9753e8caf6b,褐斑病,病理判断首选：甜菜褐斑病,1.0,0.74,0.0202,1.0,1.0,3,2,2,8,0
+md_cotton_two_wilts,9a90727191de49a2a46ddbce81dc1a70,黄萎病,病理判断首选：棉花黄萎病,1.0,0.75,0.0167,1.0,1.0,3,2,2,8,0
+rk_cucumber_downy,9be1a9d9a17f427cb3e65f8da53ab1bd,霜霉病,病理判断首选：黄瓜霜霉病,1.0,0.76,0.0175,1.0,1.0,3,3,2,8,0
+rk_tomato_nutrient,5d714b6cdc4c4b2ba9a84a27adb5e599,证据不足,已生成栽培管理建议,1.0,0.58,0.0161,1.0,1.0,2,2,1,5,2
+rk_sugar_beet_cracking,850d7fc644024ef793527eb1a0d1b3b5,证据不足,已生成栽培管理建议,1.0,0.58,0.0148,1.0,1.0,2,1,1,5,2
+sc_tomato_irrigate_after_rain,e3a81471566c49639721d9e4469e8c7f,叶霉病,气象条件支持灌溉,1.0,0.66,0.0178,1.0,1.0,5,3,2,8,1
+sc_cotton_wilt_anomaly,3f7c78a3c1f64730bac77b1060505a0d,黄萎病,病理判断首选：棉花黄萎病,1.0,0.75,0.0151,1.0,1.0,4,2,2,8,0
+sc_sugar_beet_overwatered,7e17e3f9580f44999f0261415d8d22fe,根腐病,病理判断首选：甜菜根腐病,1.0,0.67,0.0134,1.0,1.0,5,2,2,8,1
+__aggregate__,,,,1.0,0.672667,0.016234,1.0,1.0,,31,1.666667,105,14

@@ -1,0 +1,5 @@
+case_id,trace_id,expected,decision,accuracy,confidence,runtime_seconds,planner_usage,tool_usage,tool_requests,memory_hits,debate_rounds,counterfactual_count,collective_omission_count
+tomato_mold_low_humidity,ac0c572e386743fd90b67942d1fd60c5,叶霉病,已生成栽培管理建议,1.0,0.6,0.0301,1.0,1.0,4,3,0,5,1
+tomato_irrigate_after_rain_anomaly,781e013f3ce441fd8242bbb05f06e788,叶霉病,气象条件支持灌溉,1.0,0.65,0.0185,1.0,1.0,3,3,0,5,1
+cotton_wilt_hot_dry,9c676bdcb94b4ad5b4404d689befda4e,黄萎病,已生成栽培管理建议,1.0,0.6,0.0167,1.0,1.0,4,2,0,5,0
+__aggregate__,,,,1.0,0.616667,0.021769,1.0,1.0,,8,0.0,15,2
