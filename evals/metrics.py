@@ -10,10 +10,9 @@ dicts and never imports agent, planner, or tool-router code.
 from __future__ import annotations
 
 import re
-from dataclasses import dataclass
-from typing import Any
-
+from dataclasses import dataclass, field
 from trace.types import Trace
+from typing import Any
 
 #: Memory-layer agent outputs at or above this confidence count as a
 #: retrieval / replay "hit". The agents emit ~0.25-0.3 for misses and
@@ -41,6 +40,7 @@ class CaseMetrics:
     debate_rounds: int
     counterfactual_count: int
     collective_omission_count: int
+    capability_scores: dict[str, float] = field(default_factory=dict)
 
 
 def compute_trace_metrics(
@@ -50,6 +50,7 @@ def compute_trace_metrics(
     runtime_seconds: float = 0.0,
     expected: str | None = None,
     debate_on: bool = True,
+    capability_scores: dict[str, float] | None = None,
 ) -> CaseMetrics:
     """Derive one case's metrics from its unified Trace."""
     judge = _judge_payload(trace)
@@ -72,6 +73,7 @@ def compute_trace_metrics(
         debate_rounds=_debate_rounds(trace, debate_on),
         counterfactual_count=_counterfactual_count(trace),
         collective_omission_count=_collective_omission_count(trace),
+        capability_scores=dict(capability_scores or {}),
     )
 
 
@@ -99,6 +101,33 @@ def aggregate_metrics(rows: list[CaseMetrics]) -> dict[str, float | int | None]:
             row.collective_omission_count for row in rows
         ),
     }
+
+
+def aggregate_capability_scores(
+    rows: list[CaseMetrics],
+) -> dict[str, dict[str, float | int | None]]:
+    """Aggregate per-case capability scores by capability.
+
+    Returns ``{capability: {"average": mean, "cases": scored count,
+    "positive": count with score > 0}}`` over every row carrying the key.
+    """
+    keys: set[str] = set()
+    for row in rows:
+        keys.update(row.capability_scores)
+    result: dict[str, dict[str, float | int | None]] = {}
+    for capability in sorted(keys):
+        values = [
+            row.capability_scores[capability]
+            for row in rows
+            if capability in row.capability_scores
+        ]
+        values_dict: dict[str, float | int | None] = {
+            "average": _mean(values) if values else None,
+            "cases": len(values),
+            "positive": sum(1 for value in values if value > 0),
+        }
+        result[capability] = values_dict
+    return result
 
 
 # ---------------------------------------------------------------------------
@@ -172,3 +201,7 @@ def _collective_omission_count(trace: Trace) -> int:
 
 def _mean(values: list[float]) -> float | None:
     return sum(values) / len(values) if values else None
+
+
+
+

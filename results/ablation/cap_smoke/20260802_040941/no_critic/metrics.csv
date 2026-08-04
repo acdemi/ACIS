@@ -1,0 +1,3 @@
+case_id,trace_id,expected,decision,accuracy,confidence,runtime_seconds,planner_usage,tool_usage,tool_requests,memory_hits,debate_rounds,counterfactual_count,collective_omission_count,capability_information_gathering,capability_knowledge_retrieval,capability_conflict_resolution,capability_counterfactual_reasoning,capability_uncertainty_quantification,capability_multi_step_planning,capability_sensor_cross_validation
+tomato_leaf_mold,99c6ad9db878466fb29e9a243eac6daf,叶霉病,病理判断首选：番茄叶霉病,1.0,0.74,0.0256,1.0,1.0,3,3,2,8,0,1.0,1.0,0.0,1.0,1.0,1.0,0.0
+__aggregate__,,,,1.0,0.74,0.025554,1.0,1.0,,3,2.0,8,0,,,,,,,
