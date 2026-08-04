@@ -17,8 +17,18 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
+from benchmarks.capabilities import ALL_CAPABILITIES
 from evals.config import EvalConfig
-from evals.metrics import CaseMetrics, aggregate_metrics
+from evals.metrics import (
+    CaseMetrics,
+    aggregate_capability_scores,
+    aggregate_metrics,
+)
+
+#: Per-capability score columns appended to the metrics CSV.
+CAPABILITY_SCORE_COLUMNS: list[str] = [
+    f"capability_{capability.value}" for capability in ALL_CAPABILITIES
+]
 
 CSV_FIELDS = [
     "case_id",
@@ -35,6 +45,7 @@ CSV_FIELDS = [
     "debate_rounds",
     "counterfactual_count",
     "collective_omission_count",
+    *CAPABILITY_SCORE_COLUMNS,
 ]
 
 AGGREGATE_CASE_ID = "__aggregate__"
@@ -105,6 +116,20 @@ def write_summary_markdown(
             f"{_fmt_count(aggregate.get('collective_omission_count'))} |"
         ),
         "",
+        "## Capability Performance",
+        "",
+        "| capability | average | cases | positive |",
+        "|---|---|---|---|",
+    ]
+    capability_aggregate = aggregate_capability_scores(rows)
+    for capability in sorted(capability_aggregate):
+        values = capability_aggregate[capability]
+        lines.append(
+            f"| {capability} | {_fmt_rate(values['average'])} | "
+            f"{values['cases']} | {values['positive']} |"
+        )
+    lines += [
+        "",
         "## Per-case",
         "",
         (
@@ -122,7 +147,7 @@ def write_summary_markdown(
 # row builders
 # ---------------------------------------------------------------------------
 def _row_dict(row: CaseMetrics) -> dict[str, Any]:
-    return {
+    values: dict[str, Any] = {
         "case_id": row.case_id,
         "trace_id": row.trace_id,
         "expected": row.expected if row.expected is not None else "",
@@ -138,6 +163,9 @@ def _row_dict(row: CaseMetrics) -> dict[str, Any]:
         "counterfactual_count": row.counterfactual_count,
         "collective_omission_count": row.collective_omission_count,
     }
+    for column, capability in zip(CAPABILITY_SCORE_COLUMNS, ALL_CAPABILITIES):
+        values[column] = _cell(row.capability_scores.get(capability.value))
+    return values
 
 
 def _aggregate_row(aggregate: dict[str, float | int | None]) -> dict[str, Any]:
@@ -494,6 +522,7 @@ def _recommendations(
         module = name.replace("no_", "") or name
         lines.append(f"模块 {module}：关闭后 accuracy 下降 {delta:.3f}，边际贡献最大。")
     return lines
+
 
 
 

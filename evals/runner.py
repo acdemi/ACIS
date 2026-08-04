@@ -46,6 +46,7 @@ from trace import Trace, export_trace_json
 
 from agents.types import AgentOutput, DebateResult
 from benchmarks.loader import CAPABILITY_SUITES, suite_dataset_path
+from evals.capability_metrics import compute_capability_scores
 from evals.config import EvalCase, EvalConfig, load_dataset
 from evals.metrics import (
     CaseMetrics,
@@ -216,12 +217,14 @@ def _run_case(
         trace = orchestrator.last_trace
         if trace is None:
             raise RuntimeError(f"case {case.id}: orchestrator produced no Trace")
+        capability_scores = compute_capability_scores(trace, case)
         metrics = compute_trace_metrics(
             trace,
             case_id=case.id,
             runtime_seconds=runtime,
             expected=case.ground_truth,
             debate_on=config.debate_on,
+            capability_scores=capability_scores,
         )
         return metrics, trace
     finally:
@@ -378,6 +381,7 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
+
 
 
 
