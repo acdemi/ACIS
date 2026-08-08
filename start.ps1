@@ -14,6 +14,11 @@ param(
 
 $ErrorActionPreference = "Stop"
 
+# Windows 系统代理（如 Clash 127.0.0.1:7892）会劫持 httpx 对 localhost 的请求
+# 导致 Docker 本地服务（Qdrant 6333 等）返回 502；显式绕过本地地址。
+$env:NO_PROXY = "localhost,127.0.0.1"
+$env:no_proxy = $env:NO_PROXY
+
 function Require-Docker {
     docker info *> $null
     if ($LASTEXITCODE -ne 0) {

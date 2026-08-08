@@ -10,6 +10,11 @@
 
 set -euo pipefail
 
+# Bypass any system proxy (e.g. Clash) that would hijack httpx requests to
+# localhost and return 502 on Docker-published local services (Qdrant 6333).
+export NO_PROXY="localhost,127.0.0.1"
+export no_proxy="$NO_PROXY"
+
 CMD="${1:-start}"
 
 require_docker() {

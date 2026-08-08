@@ -223,6 +223,10 @@ RAG 环境变量：
 - `QDRANT_COLLECTION`：默认 `agri_knowledge_v1`
 - `AGRI_AI_RAG_TOP_K`：默认 `3`
 
+> **Windows 排障**：若本机存在系统代理（如 Clash `127.0.0.1:7892`），httpx 会劫持
+> localhost 请求导致 Qdrant/本地服务返回 502（RAG 静默回退内存）。运行前设置
+> `$env:NO_PROXY='localhost,127.0.0.1'`（`start.ps1` / `start.sh` 已自动处理）。
+
 ## KG/Neo4j 知识图谱
 
 Neo4j 不可用时自动回退内置病害库 DISEASE_DB：
