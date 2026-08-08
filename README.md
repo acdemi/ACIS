@@ -109,6 +109,29 @@ python orchestrator.py "温室A番茄叶片黄斑，叶背有灰色霉层，如�
 python orchestrator.py --rules-only
 ```
 
+## Docker 快速部署（一键启动）
+
+需要 Docker Desktop（Windows / macOS）或 Docker Engine（Linux），首次构建约 2~5 分钟（轻量镜像，不含 ML 可选依赖）。
+
+```powershell
+# Windows
+.\start.ps1            # 构建 + 启动 api/qdrant/neo4j + 等待健康检查
+.\start.ps1 status     # 查看服务状态
+.\start.ps1 logs       # 跟踪 API 日志
+.\start.ps1 stop       # 停止（保留数据卷）
+
+# Linux / macOS
+./start.sh start
+./start.sh import      # 可选: 导入真实 AgriKG 图谱到 Neo4j
+./start.sh stop
+```
+
+- 启动后 API 位于 `http://localhost:8000`（`GET /health`、`POST /diagnose`），Neo4j 控制台 `http://localhost:17474`（`neo4j / agriai2026`）。
+- 启用 LLM Judge / Critic：启动前设置 `$env:DEEPSEEK_API_KEY='sk-...'`（或 `export`），compose 自动透传。
+- 镜像基于 `requirements.docker.txt` 的**轻量核心依赖**：torch / transformers / scikit-learn 未打包（视觉推理、Isolation-Forest 异常检测自动降级为模拟/阈值模式）。需要完整能力时改用 `requirements.txt` 构建。
+- 真实 AgriKG 导入：将 `Agriculture_KnowledgeGraph-master` 解压到 `data/` 后运行 `.\start.ps1 import`；未导入时 Judge 自动使用内置 DISEASE_DB，离线可跑。
+- 常用 docker 命令：`docker compose ps` / `docker compose down -v`（清空数据卷）。
+
 ## TUI 演示界面（面试演示）
 
 交互式终端界面（基于 rich），自动加载 DeepSeek Key 与 Neo4j 连接，离线可跑：

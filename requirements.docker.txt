@@ -1,0 +1,19 @@
+# ACIS API runtime dependencies (lean core).
+#
+# This mirrors the project's graceful-degradation design: vision / sensor
+# anomaly / confidence calibration all fall back to rule-based or simulated
+# behavior when the ML backends are absent. Heavy optional extras
+# (torch, transformers, scikit-learn) are intentionally NOT packaged here so
+# the image builds fast; install the full requirements.txt instead if you
+# need real vision inference or Isolation-Forest anomaly detection.
+
+mcp>=1.0.0
+httpx>=0.27.0
+pydantic>=2.0.0
+openai>=1.0.0
+langgraph>=0.2.0
+fastapi>=0.111.0
+uvicorn[standard]>=0.30.0
+qdrant-client>=1.9.0
+neo4j>=5.0.0
+rich>=13.0.0

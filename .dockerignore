@@ -1,0 +1,20 @@
+# VCS / local-only artifacts (never copied into the image)
+.git
+.claude
+.context
+.env
+.venv
+__pycache__
+*.pyc
+.pytest_cache
+.ruff_cache
+.mypy_cache
+
+# Large local data / results (regenerable or host-only)
+data
+results
+neo4j
+
+# Tests and review artifacts are not needed at runtime
+tests
+REVIEW_REPORT.md
