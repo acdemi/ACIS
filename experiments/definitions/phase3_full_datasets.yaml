@@ -1,0 +1,95 @@
+name: phase3_full_datasets
+description: "Phase 3 Full — 全量 benchmark 数据集区分度扫描（真实图谱后端）"
+dataset: benchmarks.datasets.easy
+capability_eval: true
+save_traces: true
+use_llm_judge: true
+metadata:
+  author: ACIS Research
+  paper: ACIS 2.1E Phase 3 Full Dataset Scan
+  tags: [phase3, full-scan, discriminability, neo4j]
+
+runs:
+  - name: easy_all_on
+    dataset: benchmarks.datasets.easy
+    planner: true
+    debate: true
+    memory: true
+    tool_router: true
+    counterfactual: true
+    critic: true
+    seeds: [42]
+  - name: medium_all_on
+    dataset: benchmarks.datasets.medium
+    planner: true
+    debate: true
+    memory: true
+    tool_router: true
+    counterfactual: true
+    critic: true
+    seeds: [42]
+  - name: hard_all_on
+    dataset: benchmarks.datasets.hard
+    planner: true
+    debate: true
+    memory: true
+    tool_router: true
+    counterfactual: true
+    critic: true
+    seeds: [42]
+  - name: enriched_all_on
+    dataset: benchmarks.datasets.enriched
+    planner: true
+    debate: true
+    memory: true
+    tool_router: true
+    counterfactual: true
+    critic: true
+    seeds: [42]
+  - name: planning_suite
+    dataset: benchmarks.datasets.planning
+    planner: true
+    debate: true
+    memory: true
+    tool_router: true
+    counterfactual: true
+    critic: true
+    seeds: [42]
+  - name: memory_suite
+    dataset: benchmarks.datasets.memory
+    planner: true
+    debate: true
+    memory: true
+    tool_router: true
+    counterfactual: true
+    critic: true
+    seeds: [42]
+  - name: debate_suite
+    dataset: benchmarks.datasets.debate
+    planner: true
+    debate: true
+    memory: true
+    tool_router: true
+    counterfactual: true
+    critic: true
+    seeds: [42]
+  - name: counterfactual_suite
+    dataset: benchmarks.datasets.counterfactual
+    planner: true
+    debate: true
+    memory: true
+    tool_router: true
+    counterfactual: true
+    critic: true
+    seeds: [42]
+  - name: adversarial_suite
+    dataset: benchmarks.datasets.adversarial
+    planner: true
+    debate: true
+    memory: true
+    tool_router: true
+    counterfactual: true
+    critic: true
+    seeds: [42]
+
+max_cases: null
