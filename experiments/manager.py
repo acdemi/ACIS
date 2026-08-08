@@ -21,12 +21,18 @@ dependency-injection seam used by the test suite.
 from __future__ import annotations
 
 import argparse
+import json
 import sys
 import time
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
+from experiments.analysis import (
+    analyze_experiment,
+    format_analysis_markdown,
+    result_to_json,
+)
 from experiments.archive import (
     AblationSummary,
     RunSummary,
@@ -43,6 +49,7 @@ from experiments.catalog import (
     load_record,
     parse_filter_args,
 )
+from experiments.fingerprint import augment_manifest, verify_experiment
 from experiments.runner_adapter import DefaultRunnerAdapter, RunnerAdapter
 from experiments.schema import TOGGLE_FIELDS, ExperimentDefinition, load_definition
 
@@ -275,6 +282,7 @@ def run(
         runs=run_summaries,
         ablation=ablation_summary,
     )
+    manifest = augment_manifest(manifest, definition.dataset)
     write_manifest(exp_dir, manifest)
     report_path = write_report(exp_dir, definition, manifest, run_summaries, ablation_summary)
 
@@ -343,6 +351,82 @@ def cmd_latest(output_root: str) -> int:
     return 0
 
 
+def _resolve_experiment(output_root: str, name: str) -> Path | None:
+    """Resolve an experiment by path, archive dir name, or experiment name (latest)."""
+    direct = Path(name)
+    if direct.exists() and (direct / "manifest.json").exists():
+        return direct
+    under_root = Path(output_root) / name
+    if under_root.exists() and (under_root / "manifest.json").exists():
+        return under_root
+    records = list_experiments(output_root)
+    matches = [record for record in records if record.name == name]
+    if matches:
+        return matches[-1].dir
+    return None
+
+
+def cmd_analyze(output_root: str, name: str, n_resamples: int, seed: int) -> int:
+    exp_dir = _resolve_experiment(output_root, name)
+    if exp_dir is None:
+        print(f"experiment not found: {name}", file=sys.stderr)
+        return 1
+    result = analyze_experiment(exp_dir, n_resamples=n_resamples, seed=seed)
+    print(format_analysis_markdown(result))
+    json_path = exp_dir / "analysis.json"
+    json_path.write_text(
+        json.dumps(result_to_json(result), indent=2, ensure_ascii=False),
+        encoding="utf-8",
+    )
+    print(f"\nanalysis json: {json_path}", file=sys.stderr)
+    return 0
+
+
+def cmd_figure(output_root: str, name: str, n_resamples: int, seed: int) -> int:
+    from experiments.figures import generate_figures
+
+    exp_dir = _resolve_experiment(output_root, name)
+    if exp_dir is None:
+        print(f"experiment not found: {name}", file=sys.stderr)
+        return 1
+    result = analyze_experiment(exp_dir, n_resamples=n_resamples, seed=seed)
+    paths = generate_figures(exp_dir, result)
+    for path in paths:
+        print(f"figure: {path}")
+    return 0
+
+
+def cmd_report(output_root: str, name: str, n_resamples: int, seed: int) -> int:
+    from experiments.figures import generate_figures
+    from experiments.report import generate_report
+
+    exp_dir = _resolve_experiment(output_root, name)
+    if exp_dir is None:
+        print(f"experiment not found: {name}", file=sys.stderr)
+        return 1
+    result = analyze_experiment(exp_dir, n_resamples=n_resamples, seed=seed)
+    paths = generate_figures(exp_dir, result)
+    report_path = generate_report(exp_dir, result, paths)
+    print(f"report: {report_path}")
+    print(f"figures: {len(paths)}")
+    return 0
+
+
+def cmd_verify(output_root: str, name: str) -> int:
+    exp_dir = _resolve_experiment(output_root, name)
+    if exp_dir is None:
+        print(f"experiment not found: {name}", file=sys.stderr)
+        return 1
+    result = verify_experiment(exp_dir)
+    status = "PASS" if result.verified else "FAIL"
+    print(f"verify {status}: {exp_dir.name}")
+    print(f"  dataset:  {result.dataset_source}")
+    print(f"  stored:   {result.stored_sha256}")
+    print(f"  computed: {result.computed_sha256}")
+    print(f"  reason:   {result.reason}")
+    return 0 if result.verified else 1
+
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         prog="experiments.manager",
@@ -368,6 +452,28 @@ def build_parser() -> argparse.ArgumentParser:
     latest_parser = sub.add_parser("latest", help="show the most recent experiment")
     latest_parser.add_argument("--output-root", default="results/experiments")
 
+    analyze_parser = sub.add_parser("analyze", help="statistical analysis of an experiment")
+    analyze_parser.add_argument("--output-root", default="results/experiments")
+    analyze_parser.add_argument("experiment", help="experiment name or directory")
+    analyze_parser.add_argument("--n-resamples", type=int, default=1000)
+    analyze_parser.add_argument("--seed", type=int, default=0)
+
+    figure_parser = sub.add_parser("figure", help="generate publication figures")
+    figure_parser.add_argument("--output-root", default="results/experiments")
+    figure_parser.add_argument("experiment", help="experiment name or directory")
+    figure_parser.add_argument("--n-resamples", type=int, default=1000)
+    figure_parser.add_argument("--seed", type=int, default=0)
+
+    report_parser = sub.add_parser("report", help="generate full research report")
+    report_parser.add_argument("--output-root", default="results/experiments")
+    report_parser.add_argument("experiment", help="experiment name or directory")
+    report_parser.add_argument("--n-resamples", type=int, default=1000)
+    report_parser.add_argument("--seed", type=int, default=0)
+
+    verify_parser = sub.add_parser("verify", help="verify dataset fingerprint")
+    verify_parser.add_argument("--output-root", default="results/experiments")
+    verify_parser.add_argument("experiment", help="experiment name or directory")
+
     return parser
 
 
@@ -382,6 +488,14 @@ def main(argv: list[str] | None = None) -> int:
         return cmd_compare(args.output_root, args.exp1, args.exp2)
     if args.command == "latest":
         return cmd_latest(args.output_root)
+    if args.command == "analyze":
+        return cmd_analyze(args.output_root, args.experiment, args.n_resamples, args.seed)
+    if args.command == "figure":
+        return cmd_figure(args.output_root, args.experiment, args.n_resamples, args.seed)
+    if args.command == "report":
+        return cmd_report(args.output_root, args.experiment, args.n_resamples, args.seed)
+    if args.command == "verify":
+        return cmd_verify(args.output_root, args.experiment)
     return 1
 
 
