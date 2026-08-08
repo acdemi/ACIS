@@ -3,35 +3,16 @@
 - **planner.py**: mypy overload warning (accepted, low priority)
 - **orchestrator.py**: E402 due to dotenv loading order (accepted)
 - **agents/**, **rag/**, **rule_engine/**, **debate/**, **storage/**, **utils/**: pre-existing mypy errors (Sprint 01 legacy, frozen)
-- **Capability annotation (Sprint 04.5B)**: 36/36 capability-focused cases
-  (enriched 18 + 5 suites 18) explicitly annotated with `capabilities` +
-  `observable_evidence`; difficulty tiers annotated value-first (16/28
-  cases, uncertainty_quantification / multi_step_planning / conflict /
-  sensor / counterfactual signals only); the remaining 12 difficulty cases
-  are pure feature-matching cases intentionally left unannotated. Awaiting
-  Chief Maintainer annotation review.
-Benchmark Capability Annotation
-
-Status:
-Open
-
-Description:
-
-Capability Framework 已完成。
-
-全部 61 个 Benchmark Case
-目前仍依赖自动推断。
-
-下一阶段需要：
-
-Human-reviewed Capability Annotation
-
-形成 Benchmark Frozen Metadata。
-
-Priority:
-
-High
-
-Impact:
-
-Benchmark Scientific Validity
+- **Capability annotation（Sprint 04.5B）**: 52/64 案例已标注
+  （enriched 18 + 能力套件 18 + 难度分层 16）；剩余 12 个难度案例为纯特征匹配，
+  按设计不标注（宁可少标，不可乱标）。待 Chief Maintainer 审查后形成冻结元数据。
+  Priority: High（Benchmark Scientific Validity）。
+- **Capability scoring strictness（Sprint 04.5C）**:
+  - `conflict_resolution` 严格依赖 critic `triggered`：3 个环境矛盾案例
+    （ce_sugar_beet_root_rot_dry / ce_cotton_wilt_hot / sc_cotton_wilt_anomaly）分数为 0，
+    需架构师决定改标注还是改管线
+  - `information_gathering` 依赖 planner/judge 文本关键词启发式，提示词变更后需重新校准
+  - `sensor_cross_validation` 要求真实传感器异常或 `sensor_verify` 工具请求，
+    仅存在传感器数据不得分
+- **venv dev tools**: pytest 已装（9.1.1）；ruff / mypy 未安装，本地无法复跑静态检查
+- **src/ 空目录**: 占位未使用，建议使用或移除

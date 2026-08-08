@@ -65,21 +65,35 @@ python evals/ablation.py --suite planning
 
 结果写入 `results/ablation/<timestamp>/`（REPORT.md + 各组合 summary/metrics）。
 
-## Benchmark 与 Capability Framework（Sprint 03 / 04.5A）
+## Capability Evaluation Engine（Sprint 04.5C）
 
-- 数据集：`benchmarks/datasets/` 9 个文件、61 案例（easy/medium/hard + planning/memory/debate/counterfactual/adversarial + enriched）。
-- 能力枚举：`benchmarks/capabilities.py`（7 种认知能力）。
-- 覆盖矩阵自动生成：
+`evals/capability_metrics.py` 将能力契约接入运行时：从 Unified Trace 提取行为证据，
+为 7 种能力（information_gathering / knowledge_retrieval / conflict_resolution /
+counterfactual_reasoning / uncertainty_quantification / multi_step_planning /
+sensor_cross_validation）计算 0/1 分数，写入 `CaseMetrics.capability_scores`，
+并输出到 `metrics.csv` 能力列与 `summary.md` 的 “Capability Performance” 章节。
+
+- 消融联动：`--planner-off` → `information_gathering` / `multi_step_planning` 归零；
+  `--memory-off` → `knowledge_retrieval` 归零。
+- 已知严格度问题：`conflict_resolution` 依赖 critic triggered（3 个环境矛盾案例为 0）；
+  `sensor_cross_validation` 需要真实异常或 `sensor_verify` 请求。
+
+## Benchmark 与 Capability Framework（Sprint 03 / 04.5A / 04.5B）
+
+- 数据集：`benchmarks/datasets/` 9 个文件、64 案例（easy/medium/hard + planning/memory/debate/counterfactual/adversarial + enriched 18）。
+- 能力标注：52/64 案例显式标注（`capabilities` + `observable_evidence`），一致性检查 52/52。
+- 覆盖/一致性报告自动生成：
 
 ```powershell
 python -m benchmarks.capability_matrix
 ```
 
-输出 `benchmarks/CAPABILITY_COVERAGE.md` 与 `benchmarks/CAPABILITY_ANNOTATION_SUGGESTIONS.md`（61 案例待人工标注）。
+输出 `benchmarks/CAPABILITY_COVERAGE.md`、`CAPABILITY_CONSISTENCY_REPORT.md` 与
+`CAPABILITY_ANNOTATION_SUGGESTIONS.md`（12 个难度案例按设计未标注）。
 
-## 验证现状（2026-08-01）
+## 验证现状（2026-08-07）
 
-- `pytest`：167 passed。
+- `pytest`：**189 passed**。
 - `smoke_eval.py`：3 套 × 3 场景 passed。
 - `fixture_eval.py`：12 场景 passed。
-- enriched 基准：accuracy 1.00（15/15），详见 `results/summary.md`。
+- enriched 基准（18 例）：accuracy 1.00，Capability Performance 见 `results/summary.md`。

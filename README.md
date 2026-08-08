@@ -6,27 +6,30 @@ LangGraph 不可用或执行失败时自动回退规则编排。
 
 主图流程：`context → perception → memory → experts → debate → critic → judge`（含多轮辩论条件循环 `rebuttal`）。
 
-## 当前状态（2026-08-01）
+## 当前状态（2026-08-07）
 
 | 项目 | 状态 |
 |---|---|
-| 版本 | ACIS 2.1E — Evidence Platform；Sprint 04.5A（Capability Framework）已完成，等待 Evidence Review Gate |
+| 版本 | ACIS 2.1E — Evidence Platform；Sprint 01 ~ 04.5C 已完成，当前处于 **Evidence Review Gate**（等待架构师审查） |
 | 模块冻结 | Planner / Judge / Debate / Critic / Tool Router / Memory / DecisionOutput / Unified Trace / Perception Agents 冻结 2.1（详见 `context/ARCHITECTURE_STATE.md`） |
-| 单元测试 | `pytest`：167 passed（11 个测试文件） |
+| 单元测试 | `pytest`：**189 passed**（12 个测试文件） |
 | 回归 | `evals/smoke_eval.py`（3 套 × 3 场景）、`evals/fixture_eval.py`（12 场景）全绿 |
-| 基准 | `benchmarks/` 9 个数据集 / 61 案例；enriched 15 例 accuracy 1.00（详见 `results/summary.md`） |
-| 消融 | 7 组合消融已产出（`results/ablation/`），各认知模块贡献可测量 |
-| 已知债务 | 61 个案例能力标注待人工审查；冻结模块 mypy 遗留错误（详见 `context/KNOWN_DEBT.md`） |
+| 基准 | `benchmarks/` 9 个数据集 / **64 案例**（52 已标注能力，一致性检查 52/52）；enriched 18 例 accuracy 1.00 |
+| 能力度量 | 7 种认知能力均可由 Trace 自动打分（0-1），见 `results/summary.md` 的 “Capability Performance” |
+| 消融 | 7 组合消融已产出（`results/ablation/`），含能力分数消融（cap_smoke） |
+| 已知债务 | 12 个难度案例按设计未标注（待审查）；能力打分严格度问题 3 例；ruff/mypy 未装入 venv（详见 `context/KNOWN_DEBT.md`） |
 
 ## 版本演进
 
-### ACIS 2.1E — Evidence Platform（2026-07-28 ~ 2026-08-01）
+### ACIS 2.1E — Evidence Platform（2026-07-28 ~ 2026-08-02）
 
 - **Sprint 01 — Unified Trace**：`trace/` 统一追踪层（collector / exporter / types），全链路可观测。
 - **Sprint 02 — Evaluation Runner**：`evals/runner.py` + `metrics.py` + `report.py` + `config.py`，9 项指标（accuracy / average_confidence / average_runtime / planner_usage / tool_usage / memory_hits / debate_rounds / counterfactual_count / collective_omission_count）。
-- **Sprint 03 — Benchmark Framework**：`benchmarks/` 9 个数据集、61 个案例（easy/medium/hard 难度分层 + planning/memory/debate/counterfactual/adversarial 能力套件 + enriched 五类认知挑战集）。
+- **Sprint 03 — Benchmark Framework**：`benchmarks/` 9 个数据集（难度分层 + 五类能力套件 + enriched 挑战集）。
 - **Sprint 04 — Ablation Framework**：`evals/ablation.py`，基线（all_on）对比关闭 Planner / Debate / Memory / Counterfactual / Tool Router / Critic 的模块贡献消融。
-- **Sprint 04.5A — Capability Framework**：`benchmarks/capabilities.py` 定义 7 种稳定认知能力枚举；`capability_matrix.py` 自动生成 `benchmarks/CAPABILITY_COVERAGE.md` 与 `benchmarks/CAPABILITY_ANNOTATION_SUGGESTIONS.md`（61 案例待人工标注）。
+- **Sprint 04.5A — Capability Framework**：`benchmarks/capabilities.py` 定义 7 种稳定认知能力枚举；`capability_matrix.py` 自动生成 `CAPABILITY_COVERAGE.md` 与 `CAPABILITY_ANNOTATION_SUGGESTIONS.md`。
+- **Sprint 04.5B — Verifiable Capability Contract**：`observable_evidence`（`capability` / `expected_behavior` / `success_condition`）数据契约；36/36 能力案例 + 16/28 难度案例显式标注；`CAPABILITY_CONSISTENCY_REPORT.md`（52/52 一致）；enriched 新增 3 个 `information_gathering` 案例（15→18）。
+- **Sprint 04.5C — Capability Evaluation Engine**：`evals/capability_metrics.py` 将能力契约接入运行时——7 种能力全部由 Trace 自动打分（0/1），写入 `CaseMetrics.capability_scores`、`metrics.csv` 能力列与 `summary.md` 的 “Capability Performance”；消融联动验证（`--planner-off` → `information_gathering`/`multi_step_planning` 归零，`--memory-off` → `knowledge_retrieval` 归零）。
 
 ### ACIS 2.1（2026-07-25）
 
@@ -60,8 +63,8 @@ LangGraph 不可用或执行失败时自动回退规则编排。
 - `storage/`：SQLite 持久化（决策审计 + 反馈/结果回灌）
 - `gateway/`：FastAPI 路由入口
 - `ui/`：TUI + Web UI
-- `evals/`：smoke_eval / fixture_eval / runner / ablation / report
-- `benchmarks/`：基准数据集（61 案例）、能力枚举、覆盖矩阵（自动生成）
+- `evals/`：smoke_eval / fixture_eval / runner / ablation / capability_metrics / report
+- `benchmarks/`：基准数据集（64 案例）、能力枚举、覆盖/一致性报告（自动生成）
 - `context/`：Sprint 状态、路线图、架构状态、已知债务（实现入口，先读 `CURRENT_SPRINT.md`）
 - `docs/`：宪法（`ACIS.md`）、RFC、ADR、Sprint 报告
 - `results/`：评测产物（summary / suites / ablation / traces）
@@ -147,7 +150,7 @@ python orchestrator.py --llm-judge --llm-critic "温室A甜菜叶片圆形褐色
 ## 测试与评估
 
 ```powershell
-# 单元测试（167 个，11 个测试文件）
+# 单元测试（189 个，12 个测试文件）
 python -m pytest -q
 
 # 轻量回归：主图 / 规则 / LLM Judge 回退（3 套 × 3 场景）
@@ -156,14 +159,14 @@ python evals/smoke_eval.py
 # 固定场景回归（12 个确定性 crop/intent/病害 断言）
 python evals/fixture_eval.py
 
-# Benchmark 评测（数据集与能力套件）
+# Benchmark 评测（64 案例；输出含 capability_scores 与 Capability Performance）
 python evals/runner.py --dataset benchmarks.datasets.enriched
 python evals/runner.py --suite all
 
-# 消融（7 组合，输出 results/ablation/）
+# 消融（7 组合，输出 results/ablation/；能力分数随模块开关联动）
 python evals/ablation.py --dataset benchmarks.datasets.enriched
 
-# 能力覆盖矩阵与标注建议（自动生成 benchmarks/CAPABILITY_COVERAGE.md）
+# 能力覆盖/一致性/标注建议（自动生成 benchmarks/*.md，勿手写）
 python -m benchmarks.capability_matrix
 ```
 

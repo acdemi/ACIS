@@ -1,0 +1,6 @@
+case_id,trace_id,expected,decision,accuracy,confidence,runtime_seconds,planner_usage,tool_usage,tool_requests,memory_hits,debate_rounds,counterfactual_count,collective_omission_count,capability_information_gathering,capability_knowledge_retrieval,capability_conflict_resolution,capability_counterfactual_reasoning,capability_uncertainty_quantification,capability_multi_step_planning,capability_sensor_cross_validation
+mi_tomato_growth_slow,4ea319951a9f4523870f1b73a146e438,证据不足,已生成栽培管理建议,1.0,0.58,0.014,1.0,1.0,2,2,1,5,2,1.0,1.0,0.0,1.0,1.0,1.0,0.0
+mi_sugar_beet_partial,28c6c69e2f1945f996794114c51ad086,证据不足,已生成栽培管理建议,1.0,0.58,0.0139,1.0,1.0,2,1,1,5,2,1.0,1.0,0.0,1.0,1.0,1.0,0.0
+mi_cotton_unclear,40b9ed1b11924a2ca13b5da19ed8558a,证据不足,已生成栽培管理建议,1.0,0.58,0.0143,1.0,1.0,2,1,1,5,2,1.0,1.0,0.0,1.0,1.0,1.0,0.0
+ce_tomato_mold_dry,9ad67f8b28a24d3382320d7429900b74,叶霉病,已生成栽培管理建议,1.0,0.6,0.0154,1.0,1.0,5,3,2,8,1,1.0,1.0,1.0,1.0,1.0,1.0,1.0
+__aggregate__,,,,1.0,0.585,0.014412,1.0,1.0,,7,1.25,23,7,,,,,,,

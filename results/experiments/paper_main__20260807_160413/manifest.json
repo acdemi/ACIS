@@ -1,0 +1,296 @@
+{
+  "experiment": "paper_main",
+  "description": "Main paper experiment - baseline plus key ablation arms on the enriched dataset.",
+  "dataset": "benchmarks.datasets.enriched",
+  "capability_eval": true,
+  "metadata": {
+    "author": "ACIS",
+    "version": "1.0",
+    "tags": [
+      "paper",
+      "main",
+      "enriched"
+    ],
+    "notes": "Reference Figure 3/4 and Table 2.",
+    "paper": ""
+  },
+  "git": {
+    "short": "ff825c9",
+    "full": "ff825c97dd76c8a0f4e87e354b19ffb10f21a864",
+    "branch": "0.45C-Capability_Evaluation_Engine"
+  },
+  "python": "3.13.3",
+  "platform": "Windows-11-10.0.26100-SP0",
+  "started_at": "2026-08-07T16:04:13.629580+00:00",
+  "ended_at": "2026-08-07T16:04:20.448139+00:00",
+  "duration_seconds": 6.818561900000532,
+  "artifacts": {
+    "config": "config.yaml",
+    "environment": "environment.txt",
+    "report": "REPORT.md"
+  },
+  "runs": [
+    {
+      "name": "all_on",
+      "dataset": "benchmarks.datasets.enriched",
+      "output_dir": "results\\experiments\\paper_main__20260807_160413\\runs\\all_on",
+      "toggles": {
+        "planner": true,
+        "debate": true,
+        "memory": true,
+        "tool_router": true,
+        "counterfactual": true,
+        "critic": true
+      },
+      "cases": 6,
+      "aggregate": {
+        "cases": 6,
+        "scored_cases": 6,
+        "accuracy": 1.0,
+        "average_confidence": 0.6416666666666666,
+        "average_runtime": 0.015397600000293702,
+        "planner_usage": 1.0,
+        "tool_usage": 1.0,
+        "memory_hits": 11,
+        "debate_rounds": 1.5,
+        "counterfactual_count": 39,
+        "collective_omission_count": 8
+      },
+      "capability_scores": {
+        "conflict_resolution": {
+          "average": 0.16666666666666666,
+          "cases": 6,
+          "positive": 1
+        },
+        "counterfactual_reasoning": {
+          "average": 1.0,
+          "cases": 6,
+          "positive": 6
+        },
+        "information_gathering": {
+          "average": 1.0,
+          "cases": 6,
+          "positive": 6
+        },
+        "knowledge_retrieval": {
+          "average": 1.0,
+          "cases": 6,
+          "positive": 6
+        },
+        "multi_step_planning": {
+          "average": 1.0,
+          "cases": 6,
+          "positive": 6
+        },
+        "sensor_cross_validation": {
+          "average": 0.5,
+          "cases": 6,
+          "positive": 3
+        },
+        "uncertainty_quantification": {
+          "average": 1.0,
+          "cases": 6,
+          "positive": 6
+        }
+      }
+    },
+    {
+      "name": "no_memory",
+      "dataset": "benchmarks.datasets.enriched",
+      "output_dir": "results\\experiments\\paper_main__20260807_160413\\runs\\no_memory",
+      "toggles": {
+        "planner": true,
+        "debate": true,
+        "memory": false,
+        "tool_router": true,
+        "counterfactual": true,
+        "critic": true
+      },
+      "cases": 6,
+      "aggregate": {
+        "cases": 6,
+        "scored_cases": 6,
+        "accuracy": 1.0,
+        "average_confidence": 0.6416666666666666,
+        "average_runtime": 0.012458949999957744,
+        "planner_usage": 1.0,
+        "tool_usage": 1.0,
+        "memory_hits": 0,
+        "debate_rounds": 1.5,
+        "counterfactual_count": 39,
+        "collective_omission_count": 8
+      },
+      "capability_scores": {
+        "conflict_resolution": {
+          "average": 0.16666666666666666,
+          "cases": 6,
+          "positive": 1
+        },
+        "counterfactual_reasoning": {
+          "average": 1.0,
+          "cases": 6,
+          "positive": 6
+        },
+        "information_gathering": {
+          "average": 1.0,
+          "cases": 6,
+          "positive": 6
+        },
+        "knowledge_retrieval": {
+          "average": 0.0,
+          "cases": 6,
+          "positive": 0
+        },
+        "multi_step_planning": {
+          "average": 1.0,
+          "cases": 6,
+          "positive": 6
+        },
+        "sensor_cross_validation": {
+          "average": 0.5,
+          "cases": 6,
+          "positive": 3
+        },
+        "uncertainty_quantification": {
+          "average": 1.0,
+          "cases": 6,
+          "positive": 6
+        }
+      }
+    },
+    {
+      "name": "no_debate",
+      "dataset": "benchmarks.datasets.enriched",
+      "output_dir": "results\\experiments\\paper_main__20260807_160413\\runs\\no_debate",
+      "toggles": {
+        "planner": true,
+        "debate": false,
+        "memory": true,
+        "tool_router": true,
+        "counterfactual": true,
+        "critic": true
+      },
+      "cases": 6,
+      "aggregate": {
+        "cases": 6,
+        "scored_cases": 6,
+        "accuracy": 1.0,
+        "average_confidence": 0.6349999999999999,
+        "average_runtime": 0.014493566666715196,
+        "planner_usage": 1.0,
+        "tool_usage": 1.0,
+        "memory_hits": 11,
+        "debate_rounds": 0.0,
+        "counterfactual_count": 30,
+        "collective_omission_count": 8
+      },
+      "capability_scores": {
+        "conflict_resolution": {
+          "average": 0.0,
+          "cases": 6,
+          "positive": 0
+        },
+        "counterfactual_reasoning": {
+          "average": 1.0,
+          "cases": 6,
+          "positive": 6
+        },
+        "information_gathering": {
+          "average": 1.0,
+          "cases": 6,
+          "positive": 6
+        },
+        "knowledge_retrieval": {
+          "average": 1.0,
+          "cases": 6,
+          "positive": 6
+        },
+        "multi_step_planning": {
+          "average": 1.0,
+          "cases": 6,
+          "positive": 6
+        },
+        "sensor_cross_validation": {
+          "average": 0.5,
+          "cases": 6,
+          "positive": 3
+        },
+        "uncertainty_quantification": {
+          "average": 1.0,
+          "cases": 6,
+          "positive": 6
+        }
+      }
+    },
+    {
+      "name": "no_counterfactual",
+      "dataset": "benchmarks.datasets.enriched",
+      "output_dir": "results\\experiments\\paper_main__20260807_160413\\runs\\no_counterfactual",
+      "toggles": {
+        "planner": true,
+        "debate": true,
+        "memory": true,
+        "tool_router": true,
+        "counterfactual": false,
+        "critic": true
+      },
+      "cases": 6,
+      "aggregate": {
+        "cases": 6,
+        "scored_cases": 6,
+        "accuracy": 1.0,
+        "average_confidence": 0.6416666666666666,
+        "average_runtime": 0.01729744999981146,
+        "planner_usage": 1.0,
+        "tool_usage": 1.0,
+        "memory_hits": 11,
+        "debate_rounds": 1.5,
+        "counterfactual_count": 0,
+        "collective_omission_count": 9
+      },
+      "capability_scores": {
+        "conflict_resolution": {
+          "average": 0.16666666666666666,
+          "cases": 6,
+          "positive": 1
+        },
+        "counterfactual_reasoning": {
+          "average": 0.0,
+          "cases": 6,
+          "positive": 0
+        },
+        "information_gathering": {
+          "average": 1.0,
+          "cases": 6,
+          "positive": 6
+        },
+        "knowledge_retrieval": {
+          "average": 1.0,
+          "cases": 6,
+          "positive": 6
+        },
+        "multi_step_planning": {
+          "average": 1.0,
+          "cases": 6,
+          "positive": 6
+        },
+        "sensor_cross_validation": {
+          "average": 0.5,
+          "cases": 6,
+          "positive": 3
+        },
+        "uncertainty_quantification": {
+          "average": 1.0,
+          "cases": 6,
+          "positive": 6
+        }
+      }
+    }
+  ],
+  "ablation": {
+    "enabled": false,
+    "run_dir": "",
+    "report_path": "",
+    "combos": []
+  }
+}

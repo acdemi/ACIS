@@ -1,0 +1,25 @@
+name: capability_sweep
+description: Run each capability suite to exercise every cognitive dimension.
+dataset: benchmarks/datasets/planning.json
+output_root: results/experiments
+capability_eval: true
+metadata:
+  author: ACIS
+  version: "1.0"
+  tags: [capability, sweep]
+runs:
+  - name: suite_planning
+    dataset: benchmarks/datasets/planning.json
+    max_cases: 4
+  - name: suite_memory
+    dataset: benchmarks/datasets/memory.json
+    max_cases: 4
+  - name: suite_debate
+    dataset: benchmarks/datasets/debate.json
+    max_cases: 4
+  - name: suite_counterfactual
+    dataset: benchmarks/datasets/counterfactual.json
+    max_cases: 3
+  - name: suite_adversarial
+    dataset: benchmarks/datasets/adversarial.json
+    max_cases: 3

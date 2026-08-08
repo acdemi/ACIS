@@ -1,0 +1,359 @@
+{
+  "experiment": "capability_sweep",
+  "description": "Run each capability suite to exercise every cognitive dimension.",
+  "dataset": "benchmarks/datasets/planning.json",
+  "capability_eval": true,
+  "metadata": {
+    "author": "ACIS",
+    "version": "1.0",
+    "tags": [
+      "capability",
+      "sweep"
+    ],
+    "notes": "",
+    "paper": ""
+  },
+  "git": {
+    "short": "ff825c9",
+    "full": "ff825c97dd76c8a0f4e87e354b19ffb10f21a864",
+    "branch": "0.45C-Capability_Evaluation_Engine"
+  },
+  "python": "3.13.3",
+  "platform": "Windows-11-10.0.26100-SP0",
+  "started_at": "2026-08-07T16:04:03.686165+00:00",
+  "ended_at": "2026-08-07T16:04:11.925982+00:00",
+  "duration_seconds": 8.239842300000419,
+  "artifacts": {
+    "config": "config.yaml",
+    "environment": "environment.txt",
+    "report": "REPORT.md"
+  },
+  "runs": [
+    {
+      "name": "suite_planning",
+      "dataset": "benchmarks/datasets/planning.json",
+      "output_dir": "results\\experiments\\capability_sweep__20260807_160403\\runs\\suite_planning",
+      "toggles": {
+        "planner": true,
+        "debate": true,
+        "memory": true,
+        "tool_router": true,
+        "counterfactual": true,
+        "critic": true
+      },
+      "cases": 4,
+      "aggregate": {
+        "cases": 4,
+        "scored_cases": 4,
+        "accuracy": 1.0,
+        "average_confidence": 0.6975,
+        "average_runtime": 0.024502474999962942,
+        "planner_usage": 1.0,
+        "tool_usage": 1.0,
+        "memory_hits": 8,
+        "debate_rounds": 2.0,
+        "counterfactual_count": 32,
+        "collective_omission_count": 2
+      },
+      "capability_scores": {
+        "conflict_resolution": {
+          "average": 0.0,
+          "cases": 4,
+          "positive": 0
+        },
+        "counterfactual_reasoning": {
+          "average": 1.0,
+          "cases": 4,
+          "positive": 4
+        },
+        "information_gathering": {
+          "average": 1.0,
+          "cases": 4,
+          "positive": 4
+        },
+        "knowledge_retrieval": {
+          "average": 1.0,
+          "cases": 4,
+          "positive": 4
+        },
+        "multi_step_planning": {
+          "average": 1.0,
+          "cases": 4,
+          "positive": 4
+        },
+        "sensor_cross_validation": {
+          "average": 0.0,
+          "cases": 4,
+          "positive": 0
+        },
+        "uncertainty_quantification": {
+          "average": 1.0,
+          "cases": 4,
+          "positive": 4
+        }
+      }
+    },
+    {
+      "name": "suite_memory",
+      "dataset": "benchmarks/datasets/memory.json",
+      "output_dir": "results\\experiments\\capability_sweep__20260807_160403\\runs\\suite_memory",
+      "toggles": {
+        "planner": true,
+        "debate": true,
+        "memory": true,
+        "tool_router": true,
+        "counterfactual": true,
+        "critic": true
+      },
+      "cases": 4,
+      "aggregate": {
+        "cases": 4,
+        "scored_cases": 4,
+        "accuracy": 1.0,
+        "average_confidence": 0.73,
+        "average_runtime": 0.10481234999997469,
+        "planner_usage": 1.0,
+        "tool_usage": 1.0,
+        "memory_hits": 10,
+        "debate_rounds": 2.0,
+        "counterfactual_count": 32,
+        "collective_omission_count": 2
+      },
+      "capability_scores": {
+        "conflict_resolution": {
+          "average": 0.0,
+          "cases": 4,
+          "positive": 0
+        },
+        "counterfactual_reasoning": {
+          "average": 1.0,
+          "cases": 4,
+          "positive": 4
+        },
+        "information_gathering": {
+          "average": 1.0,
+          "cases": 4,
+          "positive": 4
+        },
+        "knowledge_retrieval": {
+          "average": 1.0,
+          "cases": 4,
+          "positive": 4
+        },
+        "multi_step_planning": {
+          "average": 1.0,
+          "cases": 4,
+          "positive": 4
+        },
+        "sensor_cross_validation": {
+          "average": 0.0,
+          "cases": 4,
+          "positive": 0
+        },
+        "uncertainty_quantification": {
+          "average": 1.0,
+          "cases": 4,
+          "positive": 4
+        }
+      }
+    },
+    {
+      "name": "suite_debate",
+      "dataset": "benchmarks/datasets/debate.json",
+      "output_dir": "results\\experiments\\capability_sweep__20260807_160403\\runs\\suite_debate",
+      "toggles": {
+        "planner": true,
+        "debate": true,
+        "memory": true,
+        "tool_router": true,
+        "counterfactual": true,
+        "critic": true
+      },
+      "cases": 4,
+      "aggregate": {
+        "cases": 4,
+        "scored_cases": 4,
+        "accuracy": 1.0,
+        "average_confidence": 0.595,
+        "average_runtime": 0.021613724999951955,
+        "planner_usage": 1.0,
+        "tool_usage": 1.0,
+        "memory_hits": 9,
+        "debate_rounds": 1.75,
+        "counterfactual_count": 29,
+        "collective_omission_count": 3
+      },
+      "capability_scores": {
+        "conflict_resolution": {
+          "average": 1.0,
+          "cases": 4,
+          "positive": 4
+        },
+        "counterfactual_reasoning": {
+          "average": 1.0,
+          "cases": 4,
+          "positive": 4
+        },
+        "information_gathering": {
+          "average": 1.0,
+          "cases": 4,
+          "positive": 4
+        },
+        "knowledge_retrieval": {
+          "average": 1.0,
+          "cases": 4,
+          "positive": 4
+        },
+        "multi_step_planning": {
+          "average": 1.0,
+          "cases": 4,
+          "positive": 4
+        },
+        "sensor_cross_validation": {
+          "average": 0.0,
+          "cases": 4,
+          "positive": 0
+        },
+        "uncertainty_quantification": {
+          "average": 1.0,
+          "cases": 4,
+          "positive": 4
+        }
+      }
+    },
+    {
+      "name": "suite_counterfactual",
+      "dataset": "benchmarks/datasets/counterfactual.json",
+      "output_dir": "results\\experiments\\capability_sweep__20260807_160403\\runs\\suite_counterfactual",
+      "toggles": {
+        "planner": true,
+        "debate": true,
+        "memory": true,
+        "tool_router": true,
+        "counterfactual": true,
+        "critic": true
+      },
+      "cases": 3,
+      "aggregate": {
+        "cases": 3,
+        "scored_cases": 3,
+        "accuracy": 1.0,
+        "average_confidence": 0.75,
+        "average_runtime": 0.023945633333217604,
+        "planner_usage": 1.0,
+        "tool_usage": 1.0,
+        "memory_hits": 8,
+        "debate_rounds": 2.0,
+        "counterfactual_count": 24,
+        "collective_omission_count": 1
+      },
+      "capability_scores": {
+        "conflict_resolution": {
+          "average": 0.0,
+          "cases": 3,
+          "positive": 0
+        },
+        "counterfactual_reasoning": {
+          "average": 1.0,
+          "cases": 3,
+          "positive": 3
+        },
+        "information_gathering": {
+          "average": 1.0,
+          "cases": 3,
+          "positive": 3
+        },
+        "knowledge_retrieval": {
+          "average": 1.0,
+          "cases": 3,
+          "positive": 3
+        },
+        "multi_step_planning": {
+          "average": 1.0,
+          "cases": 3,
+          "positive": 3
+        },
+        "sensor_cross_validation": {
+          "average": 0.0,
+          "cases": 3,
+          "positive": 0
+        },
+        "uncertainty_quantification": {
+          "average": 1.0,
+          "cases": 3,
+          "positive": 3
+        }
+      }
+    },
+    {
+      "name": "suite_adversarial",
+      "dataset": "benchmarks/datasets/adversarial.json",
+      "output_dir": "results\\experiments\\capability_sweep__20260807_160403\\runs\\suite_adversarial",
+      "toggles": {
+        "planner": true,
+        "debate": true,
+        "memory": true,
+        "tool_router": true,
+        "counterfactual": true,
+        "critic": true
+      },
+      "cases": 3,
+      "aggregate": {
+        "cases": 3,
+        "scored_cases": 3,
+        "accuracy": 1.0,
+        "average_confidence": 0.5966666666666667,
+        "average_runtime": 0.026135666666353547,
+        "planner_usage": 1.0,
+        "tool_usage": 1.0,
+        "memory_hits": 8,
+        "debate_rounds": 2.0,
+        "counterfactual_count": 24,
+        "collective_omission_count": 2
+      },
+      "capability_scores": {
+        "conflict_resolution": {
+          "average": 0.6666666666666666,
+          "cases": 3,
+          "positive": 2
+        },
+        "counterfactual_reasoning": {
+          "average": 1.0,
+          "cases": 3,
+          "positive": 3
+        },
+        "information_gathering": {
+          "average": 1.0,
+          "cases": 3,
+          "positive": 3
+        },
+        "knowledge_retrieval": {
+          "average": 1.0,
+          "cases": 3,
+          "positive": 3
+        },
+        "multi_step_planning": {
+          "average": 1.0,
+          "cases": 3,
+          "positive": 3
+        },
+        "sensor_cross_validation": {
+          "average": 1.0,
+          "cases": 3,
+          "positive": 3
+        },
+        "uncertainty_quantification": {
+          "average": 1.0,
+          "cases": 3,
+          "positive": 3
+        }
+      }
+    }
+  ],
+  "ablation": {
+    "enabled": false,
+    "run_dir": "",
+    "report_path": "",
+    "combos": []
+  }
+}

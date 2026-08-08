@@ -1,0 +1,745 @@
+{
+  "experiment_dir": "results\\experiments\\paper_main__20260808_064250",
+  "experiment_name": "paper_main",
+  "baseline": "all_on",
+  "runs": [
+    {
+      "name": "all_on",
+      "toggles": {
+        "planner": true,
+        "debate": true,
+        "memory": true,
+        "tool_router": true,
+        "counterfactual": true,
+        "critic": true
+      },
+      "n_seeds": 1,
+      "n_cases": 6,
+      "metrics": {
+        "accuracy": {
+          "mean": 1.0,
+          "std": 0.0,
+          "ci_low": 1.0,
+          "ci_high": 1.0,
+          "n": 6
+        },
+        "confidence": {
+          "mean": 0.6416666666666666,
+          "std": 0.0881854107359413,
+          "ci_low": 0.5833333333333334,
+          "ci_high": 0.7016666666666667,
+          "n": 6
+        },
+        "runtime_seconds": {
+          "mean": 0.0124,
+          "std": 0.0012806248474865698,
+          "ci_low": 0.011500000000000002,
+          "ci_high": 0.0133,
+          "n": 6
+        },
+        "planner_usage": {
+          "mean": 1.0,
+          "std": 0.0,
+          "ci_low": 1.0,
+          "ci_high": 1.0,
+          "n": 6
+        },
+        "tool_usage": {
+          "mean": 1.0,
+          "std": 0.0,
+          "ci_low": 1.0,
+          "ci_high": 1.0,
+          "n": 6
+        },
+        "memory_hits": {
+          "mean": 1.8333333333333333,
+          "std": 0.752772652709081,
+          "ci_low": 1.3333333333333333,
+          "ci_high": 2.3333333333333335,
+          "n": 6
+        },
+        "debate_rounds": {
+          "mean": 1.5,
+          "std": 0.5477225575051661,
+          "ci_low": 1.1666666666666667,
+          "ci_high": 1.8333333333333333,
+          "n": 6
+        }
+      },
+      "capabilities": {
+        "conflict_resolution": {
+          "mean": 0.16666666666666666,
+          "std": 0.408248290463863,
+          "ci_low": 0.0,
+          "ci_high": 0.5,
+          "n": 6
+        },
+        "counterfactual_reasoning": {
+          "mean": 1.0,
+          "std": 0.0,
+          "ci_low": 1.0,
+          "ci_high": 1.0,
+          "n": 6
+        },
+        "information_gathering": {
+          "mean": 1.0,
+          "std": 0.0,
+          "ci_low": 1.0,
+          "ci_high": 1.0,
+          "n": 6
+        },
+        "knowledge_retrieval": {
+          "mean": 1.0,
+          "std": 0.0,
+          "ci_low": 1.0,
+          "ci_high": 1.0,
+          "n": 6
+        },
+        "multi_step_planning": {
+          "mean": 1.0,
+          "std": 0.0,
+          "ci_low": 1.0,
+          "ci_high": 1.0,
+          "n": 6
+        },
+        "sensor_cross_validation": {
+          "mean": 0.5,
+          "std": 0.5477225575051661,
+          "ci_low": 0.16666666666666666,
+          "ci_high": 0.8333333333333334,
+          "n": 6
+        },
+        "uncertainty_quantification": {
+          "mean": 1.0,
+          "std": 0.0,
+          "ci_low": 1.0,
+          "ci_high": 1.0,
+          "n": 6
+        }
+      },
+      "is_baseline": true
+    },
+    {
+      "name": "no_memory",
+      "toggles": {
+        "planner": true,
+        "debate": true,
+        "memory": false,
+        "tool_router": true,
+        "counterfactual": true,
+        "critic": true
+      },
+      "n_seeds": 1,
+      "n_cases": 6,
+      "metrics": {
+        "accuracy": {
+          "mean": 1.0,
+          "std": 0.0,
+          "ci_low": 1.0,
+          "ci_high": 1.0,
+          "n": 6
+        },
+        "confidence": {
+          "mean": 0.6416666666666666,
+          "std": 0.0881854107359413,
+          "ci_low": 0.5833333333333334,
+          "ci_high": 0.7016666666666667,
+          "n": 6
+        },
+        "runtime_seconds": {
+          "mean": 0.009483333333333333,
+          "std": 0.0019497863130780938,
+          "ci_low": 0.00815,
+          "ci_high": 0.010816666666666667,
+          "n": 6
+        },
+        "planner_usage": {
+          "mean": 1.0,
+          "std": 0.0,
+          "ci_low": 1.0,
+          "ci_high": 1.0,
+          "n": 6
+        },
+        "tool_usage": {
+          "mean": 1.0,
+          "std": 0.0,
+          "ci_low": 1.0,
+          "ci_high": 1.0,
+          "n": 6
+        },
+        "memory_hits": {
+          "mean": 0.0,
+          "std": 0.0,
+          "ci_low": 0.0,
+          "ci_high": 0.0,
+          "n": 6
+        },
+        "debate_rounds": {
+          "mean": 1.5,
+          "std": 0.5477225575051661,
+          "ci_low": 1.1666666666666667,
+          "ci_high": 1.8333333333333333,
+          "n": 6
+        }
+      },
+      "capabilities": {
+        "conflict_resolution": {
+          "mean": 0.16666666666666666,
+          "std": 0.408248290463863,
+          "ci_low": 0.0,
+          "ci_high": 0.5,
+          "n": 6
+        },
+        "counterfactual_reasoning": {
+          "mean": 1.0,
+          "std": 0.0,
+          "ci_low": 1.0,
+          "ci_high": 1.0,
+          "n": 6
+        },
+        "information_gathering": {
+          "mean": 1.0,
+          "std": 0.0,
+          "ci_low": 1.0,
+          "ci_high": 1.0,
+          "n": 6
+        },
+        "knowledge_retrieval": {
+          "mean": 0.0,
+          "std": 0.0,
+          "ci_low": 0.0,
+          "ci_high": 0.0,
+          "n": 6
+        },
+        "multi_step_planning": {
+          "mean": 1.0,
+          "std": 0.0,
+          "ci_low": 1.0,
+          "ci_high": 1.0,
+          "n": 6
+        },
+        "sensor_cross_validation": {
+          "mean": 0.5,
+          "std": 0.5477225575051661,
+          "ci_low": 0.16666666666666666,
+          "ci_high": 0.8333333333333334,
+          "n": 6
+        },
+        "uncertainty_quantification": {
+          "mean": 1.0,
+          "std": 0.0,
+          "ci_low": 1.0,
+          "ci_high": 1.0,
+          "n": 6
+        }
+      },
+      "is_baseline": false
+    },
+    {
+      "name": "no_debate",
+      "toggles": {
+        "planner": true,
+        "debate": false,
+        "memory": true,
+        "tool_router": true,
+        "counterfactual": true,
+        "critic": true
+      },
+      "n_seeds": 1,
+      "n_cases": 6,
+      "metrics": {
+        "accuracy": {
+          "mean": 1.0,
+          "std": 0.0,
+          "ci_low": 1.0,
+          "ci_high": 1.0,
+          "n": 6
+        },
+        "confidence": {
+          "mean": 0.6349999999999999,
+          "std": 0.07791020472312983,
+          "ci_low": 0.5833333333333334,
+          "ci_high": 0.6883333333333334,
+          "n": 6
+        },
+        "runtime_seconds": {
+          "mean": 0.012533333333333334,
+          "std": 0.0012404300329590006,
+          "ci_low": 0.011783333333333333,
+          "ci_high": 0.013533333333333335,
+          "n": 6
+        },
+        "planner_usage": {
+          "mean": 1.0,
+          "std": 0.0,
+          "ci_low": 1.0,
+          "ci_high": 1.0,
+          "n": 6
+        },
+        "tool_usage": {
+          "mean": 1.0,
+          "std": 0.0,
+          "ci_low": 1.0,
+          "ci_high": 1.0,
+          "n": 6
+        },
+        "memory_hits": {
+          "mean": 1.8333333333333333,
+          "std": 0.752772652709081,
+          "ci_low": 1.3333333333333333,
+          "ci_high": 2.3333333333333335,
+          "n": 6
+        },
+        "debate_rounds": {
+          "mean": 0.0,
+          "std": 0.0,
+          "ci_low": 0.0,
+          "ci_high": 0.0,
+          "n": 6
+        }
+      },
+      "capabilities": {
+        "conflict_resolution": {
+          "mean": 0.0,
+          "std": 0.0,
+          "ci_low": 0.0,
+          "ci_high": 0.0,
+          "n": 6
+        },
+        "counterfactual_reasoning": {
+          "mean": 1.0,
+          "std": 0.0,
+          "ci_low": 1.0,
+          "ci_high": 1.0,
+          "n": 6
+        },
+        "information_gathering": {
+          "mean": 1.0,
+          "std": 0.0,
+          "ci_low": 1.0,
+          "ci_high": 1.0,
+          "n": 6
+        },
+        "knowledge_retrieval": {
+          "mean": 1.0,
+          "std": 0.0,
+          "ci_low": 1.0,
+          "ci_high": 1.0,
+          "n": 6
+        },
+        "multi_step_planning": {
+          "mean": 1.0,
+          "std": 0.0,
+          "ci_low": 1.0,
+          "ci_high": 1.0,
+          "n": 6
+        },
+        "sensor_cross_validation": {
+          "mean": 0.5,
+          "std": 0.5477225575051661,
+          "ci_low": 0.16666666666666666,
+          "ci_high": 0.8333333333333334,
+          "n": 6
+        },
+        "uncertainty_quantification": {
+          "mean": 1.0,
+          "std": 0.0,
+          "ci_low": 1.0,
+          "ci_high": 1.0,
+          "n": 6
+        }
+      },
+      "is_baseline": false
+    },
+    {
+      "name": "no_counterfactual",
+      "toggles": {
+        "planner": true,
+        "debate": true,
+        "memory": true,
+        "tool_router": true,
+        "counterfactual": false,
+        "critic": true
+      },
+      "n_seeds": 1,
+      "n_cases": 6,
+      "metrics": {
+        "accuracy": {
+          "mean": 1.0,
+          "std": 0.0,
+          "ci_low": 1.0,
+          "ci_high": 1.0,
+          "n": 6
+        },
+        "confidence": {
+          "mean": 0.6416666666666666,
+          "std": 0.0881854107359413,
+          "ci_low": 0.5833333333333334,
+          "ci_high": 0.7016666666666667,
+          "n": 6
+        },
+        "runtime_seconds": {
+          "mean": 0.014333333333333332,
+          "std": 0.0022615628814310396,
+          "ci_low": 0.012666666666666666,
+          "ci_high": 0.01585,
+          "n": 6
+        },
+        "planner_usage": {
+          "mean": 1.0,
+          "std": 0.0,
+          "ci_low": 1.0,
+          "ci_high": 1.0,
+          "n": 6
+        },
+        "tool_usage": {
+          "mean": 1.0,
+          "std": 0.0,
+          "ci_low": 1.0,
+          "ci_high": 1.0,
+          "n": 6
+        },
+        "memory_hits": {
+          "mean": 1.8333333333333333,
+          "std": 0.752772652709081,
+          "ci_low": 1.3333333333333333,
+          "ci_high": 2.3333333333333335,
+          "n": 6
+        },
+        "debate_rounds": {
+          "mean": 1.5,
+          "std": 0.5477225575051661,
+          "ci_low": 1.1666666666666667,
+          "ci_high": 1.8333333333333333,
+          "n": 6
+        }
+      },
+      "capabilities": {
+        "conflict_resolution": {
+          "mean": 0.16666666666666666,
+          "std": 0.408248290463863,
+          "ci_low": 0.0,
+          "ci_high": 0.5,
+          "n": 6
+        },
+        "counterfactual_reasoning": {
+          "mean": 0.0,
+          "std": 0.0,
+          "ci_low": 0.0,
+          "ci_high": 0.0,
+          "n": 6
+        },
+        "information_gathering": {
+          "mean": 1.0,
+          "std": 0.0,
+          "ci_low": 1.0,
+          "ci_high": 1.0,
+          "n": 6
+        },
+        "knowledge_retrieval": {
+          "mean": 1.0,
+          "std": 0.0,
+          "ci_low": 1.0,
+          "ci_high": 1.0,
+          "n": 6
+        },
+        "multi_step_planning": {
+          "mean": 1.0,
+          "std": 0.0,
+          "ci_low": 1.0,
+          "ci_high": 1.0,
+          "n": 6
+        },
+        "sensor_cross_validation": {
+          "mean": 0.5,
+          "std": 0.5477225575051661,
+          "ci_low": 0.16666666666666666,
+          "ci_high": 0.8333333333333334,
+          "n": 6
+        },
+        "uncertainty_quantification": {
+          "mean": 1.0,
+          "std": 0.0,
+          "ci_low": 1.0,
+          "ci_high": 1.0,
+          "n": 6
+        }
+      },
+      "is_baseline": false
+    }
+  ],
+  "effect_sizes": [
+    {
+      "ablated": "no_memory",
+      "field": "accuracy",
+      "delta": 0.0,
+      "ci_low": 0.0,
+      "ci_high": 0.0,
+      "p_value": 1.0,
+      "significant": false
+    },
+    {
+      "ablated": "no_memory",
+      "field": "confidence",
+      "delta": 0.0,
+      "ci_low": -0.08666666666666667,
+      "ci_high": 0.08666666666666656,
+      "p_value": 0.98,
+      "significant": false
+    },
+    {
+      "ablated": "no_memory",
+      "field": "conflict_resolution",
+      "delta": 0.0,
+      "ci_low": -0.5,
+      "ci_high": 0.5,
+      "p_value": 1.0,
+      "significant": false
+    },
+    {
+      "ablated": "no_memory",
+      "field": "counterfactual_reasoning",
+      "delta": 0.0,
+      "ci_low": 0.0,
+      "ci_high": 0.0,
+      "p_value": 1.0,
+      "significant": false
+    },
+    {
+      "ablated": "no_memory",
+      "field": "information_gathering",
+      "delta": 0.0,
+      "ci_low": 0.0,
+      "ci_high": 0.0,
+      "p_value": 1.0,
+      "significant": false
+    },
+    {
+      "ablated": "no_memory",
+      "field": "knowledge_retrieval",
+      "delta": 1.0,
+      "ci_low": 1.0,
+      "ci_high": 1.0,
+      "p_value": 0.0,
+      "significant": true
+    },
+    {
+      "ablated": "no_memory",
+      "field": "multi_step_planning",
+      "delta": 0.0,
+      "ci_low": 0.0,
+      "ci_high": 0.0,
+      "p_value": 1.0,
+      "significant": false
+    },
+    {
+      "ablated": "no_memory",
+      "field": "sensor_cross_validation",
+      "delta": 0.0,
+      "ci_low": -0.5,
+      "ci_high": 0.5,
+      "p_value": 1.0,
+      "significant": false
+    },
+    {
+      "ablated": "no_memory",
+      "field": "uncertainty_quantification",
+      "delta": 0.0,
+      "ci_low": 0.0,
+      "ci_high": 0.0,
+      "p_value": 1.0,
+      "significant": false
+    },
+    {
+      "ablated": "no_debate",
+      "field": "accuracy",
+      "delta": 0.0,
+      "ci_low": 0.0,
+      "ci_high": 0.0,
+      "p_value": 1.0,
+      "significant": false
+    },
+    {
+      "ablated": "no_debate",
+      "field": "confidence",
+      "delta": 0.00666666666666671,
+      "ci_low": -0.07666666666666666,
+      "ci_high": 0.08999999999999997,
+      "p_value": 0.78,
+      "significant": false
+    },
+    {
+      "ablated": "no_debate",
+      "field": "conflict_resolution",
+      "delta": 0.16666666666666666,
+      "ci_low": 0.0,
+      "ci_high": 0.5,
+      "p_value": 0.674,
+      "significant": false
+    },
+    {
+      "ablated": "no_debate",
+      "field": "counterfactual_reasoning",
+      "delta": 0.0,
+      "ci_low": 0.0,
+      "ci_high": 0.0,
+      "p_value": 1.0,
+      "significant": false
+    },
+    {
+      "ablated": "no_debate",
+      "field": "information_gathering",
+      "delta": 0.0,
+      "ci_low": 0.0,
+      "ci_high": 0.0,
+      "p_value": 1.0,
+      "significant": false
+    },
+    {
+      "ablated": "no_debate",
+      "field": "knowledge_retrieval",
+      "delta": 0.0,
+      "ci_low": 0.0,
+      "ci_high": 0.0,
+      "p_value": 1.0,
+      "significant": false
+    },
+    {
+      "ablated": "no_debate",
+      "field": "multi_step_planning",
+      "delta": 0.0,
+      "ci_low": 0.0,
+      "ci_high": 0.0,
+      "p_value": 1.0,
+      "significant": false
+    },
+    {
+      "ablated": "no_debate",
+      "field": "sensor_cross_validation",
+      "delta": 0.0,
+      "ci_low": -0.5,
+      "ci_high": 0.5,
+      "p_value": 1.0,
+      "significant": false
+    },
+    {
+      "ablated": "no_debate",
+      "field": "uncertainty_quantification",
+      "delta": 0.0,
+      "ci_low": 0.0,
+      "ci_high": 0.0,
+      "p_value": 1.0,
+      "significant": false
+    },
+    {
+      "ablated": "no_counterfactual",
+      "field": "accuracy",
+      "delta": 0.0,
+      "ci_low": 0.0,
+      "ci_high": 0.0,
+      "p_value": 1.0,
+      "significant": false
+    },
+    {
+      "ablated": "no_counterfactual",
+      "field": "confidence",
+      "delta": 0.0,
+      "ci_low": -0.08666666666666667,
+      "ci_high": 0.08666666666666656,
+      "p_value": 0.98,
+      "significant": false
+    },
+    {
+      "ablated": "no_counterfactual",
+      "field": "conflict_resolution",
+      "delta": 0.0,
+      "ci_low": -0.5,
+      "ci_high": 0.5,
+      "p_value": 1.0,
+      "significant": false
+    },
+    {
+      "ablated": "no_counterfactual",
+      "field": "counterfactual_reasoning",
+      "delta": 1.0,
+      "ci_low": 1.0,
+      "ci_high": 1.0,
+      "p_value": 0.0,
+      "significant": true
+    },
+    {
+      "ablated": "no_counterfactual",
+      "field": "information_gathering",
+      "delta": 0.0,
+      "ci_low": 0.0,
+      "ci_high": 0.0,
+      "p_value": 1.0,
+      "significant": false
+    },
+    {
+      "ablated": "no_counterfactual",
+      "field": "knowledge_retrieval",
+      "delta": 0.0,
+      "ci_low": 0.0,
+      "ci_high": 0.0,
+      "p_value": 1.0,
+      "significant": false
+    },
+    {
+      "ablated": "no_counterfactual",
+      "field": "multi_step_planning",
+      "delta": 0.0,
+      "ci_low": 0.0,
+      "ci_high": 0.0,
+      "p_value": 1.0,
+      "significant": false
+    },
+    {
+      "ablated": "no_counterfactual",
+      "field": "sensor_cross_validation",
+      "delta": 0.0,
+      "ci_low": -0.5,
+      "ci_high": 0.5,
+      "p_value": 1.0,
+      "significant": false
+    },
+    {
+      "ablated": "no_counterfactual",
+      "field": "uncertainty_quantification",
+      "delta": 0.0,
+      "ci_low": 0.0,
+      "ci_high": 0.0,
+      "p_value": 1.0,
+      "significant": false
+    }
+  ],
+  "module_capability": {
+    "memory": {
+      "conflict_resolution": 0.0,
+      "counterfactual_reasoning": 0.0,
+      "information_gathering": 0.0,
+      "knowledge_retrieval": 1.0,
+      "multi_step_planning": 0.0,
+      "sensor_cross_validation": 0.0,
+      "uncertainty_quantification": 0.0
+    },
+    "debate": {
+      "conflict_resolution": 0.16666666666666666,
+      "counterfactual_reasoning": 0.0,
+      "information_gathering": 0.0,
+      "knowledge_retrieval": 0.0,
+      "multi_step_planning": 0.0,
+      "sensor_cross_validation": 0.0,
+      "uncertainty_quantification": 0.0
+    },
+    "counterfactual": {
+      "conflict_resolution": 0.0,
+      "counterfactual_reasoning": 1.0,
+      "information_gathering": 0.0,
+      "knowledge_retrieval": 0.0,
+      "multi_step_planning": 0.0,
+      "sensor_cross_validation": 0.0,
+      "uncertainty_quantification": 0.0
+    }
+  }
+}

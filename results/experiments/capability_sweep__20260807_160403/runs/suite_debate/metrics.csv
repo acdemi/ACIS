@@ -1,0 +1,6 @@
+case_id,trace_id,expected,decision,accuracy,confidence,runtime_seconds,planner_usage,tool_usage,tool_requests,memory_hits,debate_rounds,counterfactual_count,collective_omission_count,capability_information_gathering,capability_knowledge_retrieval,capability_conflict_resolution,capability_counterfactual_reasoning,capability_uncertainty_quantification,capability_multi_step_planning,capability_sensor_cross_validation
+tomato_irrigate_leaf_mold,0426e0269dd64040a0348d6f2d12d718,叶霉病,气象条件支持灌溉,1.0,0.59,0.0208,1.0,1.0,4,3,2,8,1,1.0,1.0,1.0,1.0,1.0,1.0,0.0
+sugar_beet_irrigate_leaf_spot,65ed9a957f2a4a11b51198d83e22d17c,褐斑病,气象条件支持灌溉,1.0,0.6,0.0235,1.0,1.0,4,2,2,8,1,1.0,1.0,1.0,1.0,1.0,1.0,0.0
+cotton_irrigate_verticillium,21fa67d0dae14082837188b4dabf5cf0,黄萎病,气象条件支持灌溉,1.0,0.59,0.0207,1.0,1.0,4,1,1,5,1,1.0,1.0,1.0,1.0,1.0,1.0,0.0
+tomato_irrigate_early_blight,657bc8c8b4ff436d88d1263a3b200d75,早疫病,气象条件支持灌溉,1.0,0.6,0.0215,1.0,1.0,4,3,2,8,0,1.0,1.0,1.0,1.0,1.0,1.0,0.0
+__aggregate__,,,,1.0,0.595,0.021614,1.0,1.0,,9,1.75,29,3,,,,,,,
