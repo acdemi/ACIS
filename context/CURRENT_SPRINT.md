@@ -1,88 +1,113 @@
 # CURRENT SPRINT
 
-Phase: 2.1E  
-Sprint: 04.5C  
-Goal: Capability Evaluation Engine — 将能力契约接入运行时，实现能力指标的自动度量
+Phase: 2.1E → 2.2 Transition
+Sprint: 06
+Goal: Research Evaluation Infrastructure — 论文级统计引擎、数据集指纹、图表生成
 
 ## Read Order
-1. `docs/architecture/architecture.md`
-2. `docs/architecture/principles.md`
-3. `context/ARCHITECTURE_STATE.md`
-4. `context/KNOWN_DEBT.md`
-5. `benchmarks/capabilities.py`
-6. `benchmarks/metadata.py`
-7. `benchmarks/capability_matrix.py`
-8. `evals/runner.py`
-9. `evals/metrics.py`
-10. `evals/report.py`
+1. docs/architecture/architecture.md
+2. docs/architecture/principles.md
+3. docs/ACIS_2.1E_ARCHITECTURE_FREEZE.md
+4. context/ARCHITECTURE_STATE.md
+5. experiments/schema.py
+6. experiments/catalog.py
+7. experiments/archive.py
+8. evals/metrics.py
+9. evals/capability_metrics.py
 
 ## Scope
 
 ### Allowed Files
-- `evals/capability_metrics.py` (新建)  
-  定义能力指标的提取与计算方法：
-  - 读取 case 的 `observable_evidence`
-  - 从 Trace 中提取对应的行为证据（如 Planner 是否请求了缺失信息、是否生成了反事实候选等）
-  - 将 `success_condition` 翻译为可执行的检查逻辑
-  - 输出每个 case 的能力达成分数（Capability Score）
+- `experiments/analysis.py` (新建)
+  统计分析引擎：
+  - 多实验聚合：读取同一实验定义多次运行，计算 mean/std/ci95
+  - Bootstrap CI：1000 resamples，95 percentile interval
+  - Ablation effect size：Δ = baseline - ablated，含方向与幅度
+  - 能力分数与模块开关的关联分析
 
-- `evals/metrics.py` (扩展)  
-  集成能力指标：新增 `capability_scores` 字段到 `CaseMetrics`，并在聚合报告中增加按能力维度的统计
+- `experiments/fingerprint.py` (新建)
+  数据集指纹：
+  - 计算数据集文件 SHA256
+  - 写入 manifest.json（mandatory 字段）
+  - 提供校验命令：`python -m experiments.manager verify <experiment>`
 
-- `evals/runner.py` (微调)  
-  在运行每个 case 后，若该 case 有 `observable_evidence`，自动调用 `capability_metrics` 计算分数并记录到 Trace 或 Metrics 中（不修改核心推理逻辑）
+- `experiments/figures.py` (新建)
+  论文图表生成（matplotlib，PNG 输出）：
+  - 图1: Ablation Capability Impact（消融柱状图）
+  - 图2: Capability Radar（7 轴能力雷达图）
+  - 图3: Calibration Curve（置信度校准曲线）
+  - 图4: Experiment Comparison Heatmap（实验对比热力图）
 
-- `evals/report.py` (微调)  
-  在 `summary.md` 和 `metrics.csv` 中增加能力分数列/章节
+- `experiments/report.py` (新建)
+  论文级报告生成器：
+  - 自动生成 LaTeX 格式统计表格
+  - 统计显著性标注（bootstrap p-value）
+  - 图表嵌入 Markdown
 
-- `tests/test_capability_metrics.py` (新建)  
-  单元测试：验证每种能力的 scoring 逻辑正确，处理缺失证据的情况，模拟 Trace 数据
+- `experiments/manager.py` (扩展)
+  新增命令：
+  - `analyze <experiment>` — 统计聚合 + 效应量
+  - `figure <experiment>` — 生成论文图表
+  - `report <experiment>` — 生成完整论文报告
+  - `verify <experiment>` — 校验数据集指纹
+
+- `experiments/definitions/` (新增模板)
+  `paper_evaluation.yaml` — 多模块消融 + 5 种子复现实验
+
+- `tests/test_analysis.py` (新建)
+- `tests/test_fingerprint.py` (新建)
+- `docs/RESEARCH_EVAL_SPRINT_06_REPORT.md` (新建)
 
 ### Forbidden Files
-- 所有冻结模块（`agents/`, `planner/`, `debate/`, `rag/`, `rule_engine/`, `storage/`, `gateway/`, `ui/`）
-- `orchestrator.py`, `workflow.py`, `kg_adapter.py`
-- `benchmarks/` 目录下所有 JSON 数据集文件（只读）
-- `benchmarks/capabilities.py`, `benchmarks/metadata.py` 的接口签名不可变（只读）
+- 所有冻结模块（agents/, planner/, debate/, rag/, rule_engine/, storage/, gateway/, ui/）
+- orchestrator.py, workflow.py, kg_adapter.py
+- benchmarks/ 下所有 JSON 数据集文件（只读）
+- evals/ 核心逻辑（只读消费）
+- trace/types.py（只读，仅允许 backward-compatible 添加）
 
 ## Deliverables
 
-1. **能力指标计算模块**  
-   为以下 7 种能力设计至少一个可自动计算的指标（基于 Trace 和 evidence）：
-   - `information_gathering`：是否请求了缺失信息（planner output 中包含询问）
-   - `knowledge_retrieval`：是否触发了 RAG/KG 查询（memory_hits ≥ 1）
-   - `conflict_resolution`：是否识别并消解了矛盾（debate_rounds ≥ 1 且 critic 参与）
-   - `counterfactual_reasoning`：是否生成了替代诊断（counterfactual_count ≥ 1）
-   - `uncertainty_quantification`：置信度是否在合理范围内（confidence ≤ 0.7 当 evidence 不足时）
-   - `multi_step_planning`：是否分解了多个步骤（planner steps ≥ 2）
-   - `sensor_cross_validation`：是否使用了传感器数据且与视觉/文本交叉验证（tool_usage 包含 sensor 且 memory 中有环境数据）
+1. **统计分析引擎 (06A)**
+   - `experiments/analysis.py`
+   - 聚合：多实验 mean/std/ci95
+   - Bootstrap：1000 iterations，95% CI
+   - 效应量：Δ capability = baseline_score - ablated_score
+   - 输出 JSON + Markdown 表格
 
-2. **Trace 驱动验证**  
-   利用已有的 Unified Trace，从事件流中自动提取上述行为证据，不依赖外部人工判断。
+2. **数据集指纹 (06B)**
+   - `experiments/fingerprint.py`
+   - SHA256 计算 + manifest 注入（mandatory）
+   - `verify` 命令校验实验数据完整性
 
-3. **能力分数集成到评测报告**  
-   - 每个 case 的 `CaseMetrics` 新增 `capability_scores` 字段（字典，capability -> score 0-1）
-   - `metrics.csv` 增加各能力分数列
-   - `summary.md` 增加“Capability Performance”章节，展示每种能力的平均得分和案例分布
+3. **论文图表生成器 (06C)**
+   - `experiments/figures.py`
+   - 4 种标准图表，PNG 格式，保存到实验归档目录
+   - 图表标题、轴标签、图例使用中英双语
 
-4. **与 Ablation 联动**  
-   确保 `evals/ablation.py` 能继续正常运行，并且生成的能力分数也随模块开关变化（例如关闭 Planner 后 `information_gathering` 分数应为 0）。能力分数消融将提供比 accuracy 更细粒度的模块贡献证据。
+4. **论文级报告 (06D)**
+   - `experiments/report.py`
+   - LaTeX 表格 + 效应量标注
+   - Bootstrap p-value 显著性标记
+   - 图表嵌入
 
-5. **测试与验证**  
-   - 为每种能力至少编写一个单元测试，使用模拟 Trace 验证 scoring 正确性
-   - 在真实 enriched 数据集上运行，确认所有已标注案例都能产生有效的能力分数
+5. **多种子实验模板**
+   - `paper_evaluation.yaml`：4 种模块组合 × 5 种子（42/123/456/789/1024）
+   - 运行后产出多种子汇总统计
 
 ## Acceptance Criteria
 
-1. `python evals/runner.py --dataset benchmarks.datasets.enriched` 运行时，每个案例输出中包含 `capability_scores` 字段，且数值在 0-1 之间。
-2. 生成的能力分数与案例声明的 `capabilities` 对应：若案例标注了某能力，则对应分数应 > 0（除非系统完全未表现该能力）；若案例未标注，则仍可计算但不强制要求。
-3. 关闭 Planner 后 (`--planner-off`)，`information_gathering` 分数降为 0；关闭 Memory 后，`knowledge_retrieval` 分数降为 0（验证消融联动）。
-4. `results/summary.md` 包含“Capability Performance”表格，列出每种能力的平均得分。
-5. `tests/test_capability_metrics.py` 至少覆盖全部 7 种能力的 scoring 逻辑，`pytest` 全绿。
-6. `ruff` 和 `mypy` 对新增/修改文件零错误。
+1. `python -m experiments.manager analyze paper_main` 输出 mean/std/95% CI
+2. `python -m experiments.manager verify <experiment>` 校验数据集指纹通过；修改数据集后校验失败
+3. `python -m experiments.manager figure paper_main` 生成 4 张 PNG 图表
+4. `python -m experiments.manager report paper_main` 生成含 LaTeX 表格和显著性标注的报告
+5. `python -m experiments.manager run experiments/definitions/paper_evaluation.yaml` 产出 20 次运行 + 汇总统计
+6. `manifest.json` 中包含 `dataset_sha256` 字段（mandatory）
+7. `pytest` 全绿（含新测试），ruff & mypy clean
 
 ## Stop Conditions
-- 完成所有验收项，输出 `Sprint 04.5C Complete. Awaiting review.` 后停止。
-- **不自动进入 Sprint 05。** 等待架构师审查能力指标的设计与准确性。
+- 全部验收项达成，输出 `Sprint 06 Complete. Awaiting review.` 后停止。
+- **不自动进入 Sprint 07。** 等待架构师审查论文级实验输出的完整性与统计可信度。
 
 ## Design Principle
-**从“静态标签”到“运行时验证”**。能力契约的价值只有在运行时被度量才能实现。每个 observable_evidence 的 success_condition 应该能被 Trace 自动检查，从而使 Benchmark 成为真正的 Agent Capability Test Suite。
+**可信度优先于完整度。效应量优先于 p 值。复现优先于美观。**
+每个数字都可追溯到原始 Trace 和数据集版本，每次运行都可精确复现，每个结论都附有效应量估计和置信区间。

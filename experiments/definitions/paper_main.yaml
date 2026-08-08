@@ -1,0 +1,22 @@
+name: paper_main
+description: Main paper experiment - baseline plus key ablation arms on the enriched dataset.
+dataset: benchmarks.datasets.enriched
+output_root: results/experiments
+capability_eval: true
+metadata:
+  author: ACIS
+  version: "1.0"
+  tags: [paper, main, enriched]
+  notes: Reference Figure 3/4 and Table 2.
+runs:
+  - name: all_on
+    max_cases: 6
+  - name: no_memory
+    memory: false
+    max_cases: 6
+  - name: no_debate
+    debate: false
+    max_cases: 6
+  - name: no_counterfactual
+    counterfactual: false
+    max_cases: 6

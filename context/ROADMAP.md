@@ -3,10 +3,10 @@
 - Sprint 02: Evaluation Runner ✅
 - Sprint 03: Benchmark Framework ✅
 - Sprint 04: Ablation Framework ✅
-- Sprint 04.5: Benchmark Engineering ← **Current**
-Sprint 04.5 → Benchmark Enrichment
-         ↓
-   Evidence Review Gate ← **新增**
+- Sprint 04.5A: Capability Framework ✅
+- Sprint 04.5B: Verifiable Capability Contract ✅
+- Sprint 04.5C: Capability Evaluation Engine ✅
+- **Evidence Review Gate ← Current（等待架构师审查 04.5A~04.5C）**
          ↓ (批准)
    Sprint 05 → Experiment Manager
          ↓

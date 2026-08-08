@@ -4,7 +4,7 @@ project: ACIS
 version: 2.0
 status: Active
 priority: Reference
-last_updated: 2026-08-01
+last_updated: 2026-08-07
 depends_on:
   - ACIS.md
   - architecture.md
@@ -18,8 +18,10 @@ depends_on:
 >
 > Detailed implementation plans belong to RFCs and Phase documents.
 
-> **状态更新（2026-08-01）**：当前版本已推进至 **ACIS 2.1E（Evidence Platform）**。
-> 活跃的 Sprint 路线图以 `context/ROADMAP.md` 与 `context/CURRENT_SPRINT.md` 为准；
+> **状态更新（2026-08-07）**：当前版本 **ACIS 2.1E（Evidence Platform）**，
+> Sprint 01 ~ 04.5C 已完成，当前处于 **Evidence Review Gate**（等待架构师审查），
+> 通过后进入 Sprint 05（Experiment Manager）。活跃的 Sprint 路线图以
+> `context/ROADMAP.md` 与 `context/CURRENT_SPRINT.md` 为准；
 > 本文档保留 ACIS 2.0 / 2.1 / 3.0 的版本愿景参考。
 
 ---
@@ -38,8 +40,8 @@ Development follows incremental evolution rather than large rewrites.
 |---|---|
 | Current Version | ACIS 2.1E（Evidence Platform） |
 | Status | Stable Development |
-| Current Focus | Evidence Platform：评测、基准与能力覆盖（Unified Trace / Runner / Benchmark / Ablation / Capability Framework） |
-| Completed | ✓ Multi-Agent Workflow ✓ Debate Engine ✓ Judge ✓ Meta-Critic ✓ Memory Layer ✓ Knowledge Evolution ✓ Outcome Replay ✓ Confidence Calibration ✓ Planner ✓ Tool Router ✓ Unified Trace ✓ Evaluation Runner ✓ Benchmark Framework ✓ Ablation Framework ✓ Capability Framework |
+| Current Focus | Evidence Platform：评测、基准、能力覆盖与运行时能力度量（Unified Trace / Runner / Benchmark / Ablation / Capability Framework / Capability Evaluation Engine） |
+| Completed | ✓ Multi-Agent Workflow ✓ Debate Engine ✓ Judge ✓ Meta-Critic ✓ Memory Layer ✓ Knowledge Evolution ✓ Outcome Replay ✓ Confidence Calibration ✓ Planner ✓ Tool Router ✓ Unified Trace ✓ Evaluation Runner ✓ Benchmark Framework ✓ Ablation Framework ✓ Capability Framework ✓ Verifiable Capability Contract ✓ Capability Evaluation Engine |
 
 ---
 
