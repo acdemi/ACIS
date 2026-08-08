@@ -1,6 +1,0 @@
-case_id,trace_id,expected,decision,accuracy,confidence,runtime_seconds,planner_usage,tool_usage,tool_requests,memory_hits,debate_rounds,counterfactual_count,collective_omission_count
-tomato_leaf_mold_action_plan,6a83ee8ff4ec4823bf7f3ca675db2708,叶霉病,病理判断首选：番茄叶霉病,1.0,0.74,0.0304,1.0,1.0,3,3,2,8,0
-tomato_early_blight_inspection_plan,ee1c425a0457489ab7e89efad7cdef46,早疫病,病理判断首选：番茄早疫病,1.0,0.75,0.0273,1.0,1.0,3,3,2,8,0
-sugar_beet_root_rot_weekly_plan,42eb4af4eb644c32a22e447b8a980f35,根腐病,病理判断首选：甜菜根腐病,1.0,0.65,0.0394,1.0,1.0,3,1,2,8,1
-cotton_verticillium_quarantine_plan,9fd538726b10425c97154a0e3a0e559b,黄萎病,病理判断首选：棉花黄萎病,1.0,0.65,0.0358,1.0,1.0,3,1,2,8,1
-__aggregate__,,,,1.0,0.6975,0.033224,1.0,1.0,,8,2.0,32,2

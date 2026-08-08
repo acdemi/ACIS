@@ -1,8 +1,0 @@
-case_id,trace_id,expected,decision,accuracy,confidence,runtime_seconds,planner_usage,tool_usage,tool_requests,memory_hits,debate_rounds,counterfactual_count,collective_omission_count,capability_information_gathering,capability_knowledge_retrieval,capability_conflict_resolution,capability_counterfactual_reasoning,capability_uncertainty_quantification,capability_multi_step_planning,capability_sensor_cross_validation
-mi_tomato_growth_slow,223e969f6c8d4b0e9a768ba8b2365285,证据不足,已生成栽培管理建议,1.0,0.58,0.0161,1.0,1.0,2,2,1,5,2,1.0,1.0,0.0,1.0,1.0,1.0,0.0
-mi_sugar_beet_partial,a27d8c957f4347be9d07e412f21d400c,证据不足,已生成栽培管理建议,1.0,0.58,0.0158,1.0,1.0,2,1,1,5,2,1.0,1.0,0.0,1.0,1.0,1.0,0.0
-mi_cotton_unclear,8be8d2097a194f13b2bb48007f2249cf,证据不足,已生成栽培管理建议,1.0,0.58,0.0151,1.0,1.0,2,1,1,5,2,1.0,1.0,0.0,1.0,1.0,1.0,0.0
-ce_tomato_mold_dry,0878c9512e4b4e2fa47a8821649f2a25,叶霉病,已生成栽培管理建议,1.0,0.6,0.0172,1.0,1.0,5,3,2,8,1,1.0,1.0,1.0,1.0,1.0,1.0,1.0
-ce_sugar_beet_root_rot_dry,cfcdc7c5e75745c896923656bbf3f95d,根腐病,病理判断首选：甜菜根腐病,1.0,0.75,0.0178,1.0,1.0,4,2,2,8,1,1.0,1.0,0.0,1.0,1.0,1.0,1.0
-ce_cotton_wilt_hot,f02667144bdb4bceabf92f3163b47c7f,黄萎病,病理判断首选：棉花黄萎病,1.0,0.76,0.0164,1.0,1.0,4,2,2,8,0,1.0,1.0,0.0,1.0,1.0,1.0,1.0
-__aggregate__,,,,1.0,0.641667,0.016401,1.0,1.0,,11,1.5,39,8,,,,,,,

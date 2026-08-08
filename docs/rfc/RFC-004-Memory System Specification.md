@@ -1,6 +1,6 @@
 # RFC-004: Memory System Specification
 
-**Status:** Draft
+**Status:** Accepted
 **Version:** 1.0.0
 **Author:** Chief Architect
 **Maintainer:** Chief Maintainer

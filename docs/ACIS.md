@@ -341,11 +341,7 @@ ROADMAP - when capabilities are delivered
 
 ↓
 
-IMPLEMENTATION_PLAN - how the system is built, phased
-
-↓
-
-IMPLEMENTATION_ARCHITECTURE - how modules are realized in code
+IMPLEMENTATION_AUDIT - how modules are realized in code (verified against the current tree)
 
 ↓
 

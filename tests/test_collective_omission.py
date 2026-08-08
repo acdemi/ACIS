@@ -9,13 +9,9 @@ plus the pure helpers in utils.omission.
 """
 from __future__ import annotations
 
-import os
-import sys
 from dataclasses import fields as dataclass_fields
 
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-
-import pytest  # noqa: E402
+import pytest
 
 from agents.judge_agent import JudgeAgent  # noqa: E402
 from agents.types import AgentOutput, DebateResult, DecisionOutput, RequestContext  # noqa: E402

@@ -9,14 +9,8 @@ from __future__ import annotations
 
 import dataclasses
 import json
-import sys
-from pathlib import Path
 
 import pytest
-
-ROOT = Path(__file__).resolve().parents[1]
-if str(ROOT) not in sys.path:
-    sys.path.insert(0, str(ROOT))
 
 from agents.types import AgentOutput, DebateResult, DecisionOutput, RequestContext  # noqa: E402
 from planner.types import ExecutionPlan  # noqa: E402

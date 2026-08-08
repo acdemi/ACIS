@@ -1,5 +1,7 @@
 # RFC-003: Agent Protocol Specification
 
+> 此 RFC 尚未在 ACIS 2.1E 中实现（agent lifecycle / capability declaration 协议未落地）。
+
 **Status:** Draft
 **Version:** 1.0.0
 **Author:** Chief Architect

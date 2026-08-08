@@ -13,12 +13,7 @@ These tests pin down:
 from __future__ import annotations
 
 import json
-import os
-import sys
 from dataclasses import asdict, fields
-
-# Make the repo root importable when running ``pytest tests/test_agent_output.py``
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from agents.types import AgentOutput  # noqa: E402
 

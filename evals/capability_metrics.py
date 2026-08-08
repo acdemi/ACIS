@@ -16,6 +16,12 @@ from trace.types import Trace
 from typing import Any
 
 from benchmarks.capabilities import ALL_CAPABILITIES, Capability
+from evals.metrics import (
+    MEMORY_HIT_CONFIDENCE,
+    _counterfactual_count,
+    _judge_payload,
+    _memory_hits,
+)
 
 #: Score dict keys, aligned with the capability enum.
 CAPABILITY_SCORE_KEYS: tuple[str, ...] = tuple(
@@ -28,10 +34,6 @@ UNCERTAINTY_CONFIDENCE_MAX = 0.7
 
 #: Confidence floor for a confident decision when evidence supports it.
 CONFIDENT_CONFIDENCE_MIN = 0.5
-
-#: Memory-layer confidence threshold for a retrieval hit (matches
-#: ``evals.metrics.MEMORY_HIT_CONFIDENCE``).
-MEMORY_HIT_CONFIDENCE = 0.5
 
 #: Keywords indicating an active request for missing information.
 INFO_REQUEST_KEYWORDS: tuple[str, ...] = (
@@ -163,31 +165,9 @@ def _planner_payload(trace: Trace) -> dict[str, Any]:
     return events[0].payload if events else {}
 
 
-def _judge_payload(trace: Trace) -> dict[str, Any]:
-    events = trace.by_stage("judge")
-    return events[0].payload if events else {}
-
-
 def _critic_payload(trace: Trace) -> dict[str, Any]:
     events = trace.by_stage("critic")
     return events[0].payload if events else {}
-
-
-def _memory_hits(trace: Trace) -> int:
-    return sum(
-        1
-        for event in trace.by_stage("memory")
-        if float(event.payload.get("confidence", 0.0)) >= MEMORY_HIT_CONFIDENCE
-    )
-
-
-def _counterfactual_count(trace: Trace) -> int:
-    return sum(
-        1
-        for event in trace.events
-        if event.payload.get("counterfactual")
-        or event.payload.get("counterfactual_observations")
-    )
 
 
 def _sensor_agent_payloads(trace: Trace) -> list[dict[str, Any]]:

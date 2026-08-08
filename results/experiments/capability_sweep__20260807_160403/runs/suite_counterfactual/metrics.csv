@@ -1,5 +1,0 @@
-case_id,trace_id,expected,decision,accuracy,confidence,runtime_seconds,planner_usage,tool_usage,tool_requests,memory_hits,debate_rounds,counterfactual_count,collective_omission_count,capability_information_gathering,capability_knowledge_retrieval,capability_conflict_resolution,capability_counterfactual_reasoning,capability_uncertainty_quantification,capability_multi_step_planning,capability_sensor_cross_validation
-tomato_mold_blight_ambiguous,08342a6fd51e46f787bd3dd0f1eb30bb,早疫病,病理判断首选：番茄早疫病,1.0,0.75,0.0233,1.0,1.0,3,3,2,8,0,1.0,1.0,0.0,1.0,1.0,1.0,0.0
-tomato_early_blight_alternatives,13a8e435637c44a19c3a8ad98543ae5c,早疫病,病理判断首选：番茄早疫病,1.0,0.75,0.0238,1.0,1.0,3,3,2,8,0,1.0,1.0,0.0,1.0,1.0,1.0,0.0
-sugar_beet_root_rot_nonpathogenic,884e3e83aa8541baa0e205fa97e100ce,根腐病,病理判断首选：甜菜根腐病,1.0,0.75,0.0248,1.0,1.0,3,2,2,8,1,1.0,1.0,0.0,1.0,1.0,1.0,0.0
-__aggregate__,,,,1.0,0.75,0.023946,1.0,1.0,,8,2.0,24,1,,,,,,,

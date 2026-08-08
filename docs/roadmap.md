@@ -2,15 +2,17 @@
 document: Roadmap
 project: ACIS
 version: 2.0
-status: Active
+status: Archived
 priority: Reference
-last_updated: 2026-08-07
+last_updated: 2026-08-08
 depends_on:
   - ACIS.md
-  - architecture.md
 ---
 
 # ACIS Development Roadmap
+
+> **归档（2026-08-08）**：本文档为历史路线图，已归档。
+> 当前路线以 `context/CURRENT_SPRINT.md` 为唯一事实源。
 
 > This roadmap describes the planned evolution of ACIS.
 >

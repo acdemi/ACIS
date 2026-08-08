@@ -1,4 +1,4 @@
-# 本地密钥与配置（含 DEEPSEEK_API_KEY / NEO4J_PASSWORD）
+# Local secrets and config (DEEPSEEK_API_KEY / NEO4J_PASSWORD)
 .env
 
 # Python
@@ -7,22 +7,22 @@ __pycache__/
 *.pyc
 .venv/
 
-# Neo4j 运行时挂载目录
+# Neo4j runtime mount directories
 neo4j/logs/
 neo4j/import/
 neo4j/plugins/
 
-# 编辑器
+# Editors
 .vscode/
 .idea/
 
-# 运行时数据库
+# Runtime database
 data/
 
-# 文件系统锁文件（挂载残留）
+# Filesystem lock files (mount leftovers)
 .fuse_hidden*
 
-# Cowork 会话上下文
+# Cowork session context
 .context/
 # === Housekeeping 2026-08-08 ===
 # Type/lint/test caches (regenerable)

@@ -17,59 +17,23 @@
 需要运行：Neo4j 数据库（默认 bolt://localhost:7687），并已导入 AgriKG 数据
 """
 
-import os
+import sys
+from pathlib import Path
+
 from mcp.server.fastmcp import FastMCP
 
+ROOT = Path(__file__).resolve().parent.parent
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
+
+from kg_adapter import (  # noqa: E402
+    NEO4J_URI,
+    _neo4j_available,
+    _parse_base_info,
+    _query_neo4j,
+)
+
 mcp = FastMCP("agri-knowledge-graph")
-
-# ============================================================
-# Neo4j 连接配置
-# ============================================================
-
-NEO4J_URI = os.environ.get("NEO4J_URI", "bolt://localhost:7687")
-NEO4J_USER = os.environ.get("NEO4J_USER", "neo4j")
-NEO4J_PASSWORD = os.environ.get("NEO4J_PASSWORD", "agriai2026")
-
-_driver = None
-
-
-def _get_driver():
-    """懒加载 Neo4j 驱动"""
-    global _driver
-    if _driver is not None:
-        return _driver
-    try:
-        from neo4j import GraphDatabase
-        _driver = GraphDatabase.driver(NEO4J_URI, auth=(NEO4J_USER, NEO4J_PASSWORD))
-        return _driver
-    except Exception:
-        return None
-
-
-def _neo4j_available() -> bool:
-    """检查 Neo4j 是否可连接"""
-    driver = _get_driver()
-    if driver is None:
-        return False
-    try:
-        with driver.session() as session:
-            session.run("RETURN 1")
-            return True
-    except Exception:
-        return False
-
-
-def _query_neo4j(cypher: str, params: dict = None) -> list:
-    """执行 Cypher 查询并返回结果"""
-    driver = _get_driver()
-    if driver is None:
-        return []
-    try:
-        with driver.session() as session:
-            result = session.run(cypher, params or {})
-            return [record.data() for record in result]
-    except Exception:
-        return []
 
 
 # ============================================================
@@ -130,19 +94,6 @@ def _guess_crop(title: str) -> str:
         if c in title:
             return c
     return ""
-
-
-def _parse_base_info(keys_str, vals_str) -> list:
-    """把互动百科的 baseInfoKeyList/baseInfoValueList（## 分隔）解析为 [{key,value}]"""
-    keys = [k.strip().rstrip("：:").strip()
-            for k in (keys_str or "").split("##") if k.strip()]
-    vals = [v.strip() for v in (vals_str or "").split("##") if v.strip()]
-    pairs = []
-    for i, k in enumerate(keys):
-        v = vals[i] if i < len(vals) else ""
-        if k:
-            pairs.append({"key": k, "value": v})
-    return pairs
 
 
 def _get_disease_base(disease_name: str) -> list:

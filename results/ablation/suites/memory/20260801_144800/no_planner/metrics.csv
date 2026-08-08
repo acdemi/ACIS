@@ -1,6 +1,0 @@
-case_id,trace_id,expected,decision,accuracy,confidence,runtime_seconds,planner_usage,tool_usage,tool_requests,memory_hits,debate_rounds,counterfactual_count,collective_omission_count
-tomato_leaf_mold_memory,7dd3c7c7036749609c01d8c3266a4684,叶霉病,病理判断首选：番茄叶霉病,1.0,0.66,0.0168,0.0,0.0,0,3,2,8,1
-sugar_beet_leaf_spot_memory,8585cc8198394d158500c431fac4250b,褐斑病,病理判断首选：甜菜褐斑病,1.0,0.75,0.0175,0.0,0.0,0,2,2,8,1
-cotton_fusarium_memory,b6d5fafa56bd4d4cae9fbb0c952f561a,枯萎病,病理判断首选：棉花枯萎病,1.0,0.75,0.0178,0.0,0.0,0,2,2,8,0
-cucumber_downy_memory,ae1e3941b93545d9ba1598dd5a74ec19,霜霉病,病理判断首选：黄瓜霜霉病,1.0,0.76,0.0316,0.0,0.0,0,3,2,8,0
-__aggregate__,,,,1.0,0.73,0.020928,0.0,0.0,,10,2.0,32,2
