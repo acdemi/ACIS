@@ -6,18 +6,19 @@ LangGraph 不可用或执行失败时自动回退规则编排。
 
 主图流程：`context → perception → memory → experts → debate → critic → judge`（含多轮辩论条件循环 `rebuttal`）。
 
-## 当前状态（2026-08-07）
+## 当前状态（2026-08-08）
 
 | 项目 | 状态 |
 |---|---|
-| 版本 | ACIS 2.1E — Evidence Platform；Sprint 01 ~ 04.5C 已完成，当前处于 **Evidence Review Gate**（等待架构师审查） |
+| 版本 | ACIS 2.1E — Evidence Platform；Sprint 01 ~ 06 已完成（Sprint 05 Experiment Manager、Sprint 06 Research Evaluation Infrastructure） |
 | 模块冻结 | Planner / Judge / Debate / Critic / Tool Router / Memory / DecisionOutput / Unified Trace / Perception Agents 冻结 2.1（详见 `context/ARCHITECTURE_STATE.md`） |
-| 单元测试 | `pytest`：**189 passed**（12 个测试文件） |
+| 单元测试 | `pytest`：**222 passed**（15 个测试文件 + `conftest.py`） |
 | 回归 | `evals/smoke_eval.py`（3 套 × 3 场景）、`evals/fixture_eval.py`（12 场景）全绿 |
 | 基准 | `benchmarks/` 9 个数据集 / **64 案例**（52 已标注能力，一致性检查 52/52）；enriched 18 例 accuracy 1.00 |
 | 能力度量 | 7 种认知能力均可由 Trace 自动打分（0-1），见 `results/summary.md` 的 “Capability Performance” |
 | 消融 | 7 组合消融已产出（`results/ablation/`），含能力分数消融（cap_smoke） |
-| 已知债务 | 12 个难度案例按设计未标注（待审查）；能力打分严格度问题 3 例；ruff/mypy 未装入 venv（详见 `context/KNOWN_DEBT.md`） |
+| 实验管理 | `experiments/` 实验管理器：YAML 定义 / 多 seed 运行 / manifest 可复现归档 / 统计分析与论文图（见 `results/experiments/`） |
+| 已知债务 | 12 个难度案例按设计未标注（待审查）；能力打分严格度问题 3 例（详见 `context/KNOWN_DEBT.md`） |
 
 ## 版本演进
 
@@ -30,6 +31,8 @@ LangGraph 不可用或执行失败时自动回退规则编排。
 - **Sprint 04.5A — Capability Framework**：`benchmarks/capabilities.py` 定义 7 种稳定认知能力枚举；`capability_matrix.py` 自动生成 `CAPABILITY_COVERAGE.md` 与 `CAPABILITY_ANNOTATION_SUGGESTIONS.md`。
 - **Sprint 04.5B — Verifiable Capability Contract**：`observable_evidence`（`capability` / `expected_behavior` / `success_condition`）数据契约；36/36 能力案例 + 16/28 难度案例显式标注；`CAPABILITY_CONSISTENCY_REPORT.md`（52/52 一致）；enriched 新增 3 个 `information_gathering` 案例（15→18）。
 - **Sprint 04.5C — Capability Evaluation Engine**：`evals/capability_metrics.py` 将能力契约接入运行时——7 种能力全部由 Trace 自动打分（0/1），写入 `CaseMetrics.capability_scores`、`metrics.csv` 能力列与 `summary.md` 的 “Capability Performance”；消融联动验证（`--planner-off` → `information_gathering`/`multi_step_planning` 归零，`--memory-off` → `knowledge_retrieval` 归零）。
+- **Sprint 05 — Experiment Manager**：`experiments/`（manager / schema / catalog / archive / analysis / figures），YAML 实验定义、多 seed 运行、`config.yaml` / `manifest.json` 可复现归档、`list` / `compare` / `latest` CLI（详见 `docs/EXPERIMENT_MANAGER_SPRINT_05_REPORT.md`）。
+- **Sprint 06 — Research Evaluation Infrastructure**：`experiments/analysis.py` + `figures.py` 统计检验（bootstrap 置信区间）与论文图；归档新增 `dataset_sha256` 指纹、`analysis.json`、`figures/`（详见 `docs/RESEARCH_EVAL_SPRINT_06_REPORT.md`）。
 
 ### ACIS 2.1（2026-07-25）
 
@@ -59,27 +62,28 @@ LangGraph 不可用或执行失败时自动回退规则编排。
 - `debate/`：Debate 协调器 + Critic 反驳轮次
 - `rag/`：知识库（Qdrant 可选，默认内存回退）
 - `kg_adapter.py` + `kg/`：知识图谱适配器 + AgriKG MCP Server
-- `rule_engine/`：传感器模拟、异常检测、规则版 Router
+- `rule_engine/`：传感器异常检测（sensor_anomaly MCP）
 - `storage/`：SQLite 持久化（决策审计 + 反馈/结果回灌）
 - `gateway/`：FastAPI 路由入口
 - `ui/`：TUI + Web UI
 - `evals/`：smoke_eval / fixture_eval / runner / ablation / capability_metrics / report
+- `experiments/`：实验管理器（Sprint 05/06：YAML 定义、多 seed 运行、统计分析与论文图）
 - `benchmarks/`：基准数据集（64 案例）、能力枚举、覆盖/一致性报告（自动生成）
 - `context/`：Sprint 状态、路线图、架构状态、已知债务（实现入口，先读 `CURRENT_SPRINT.md`）
 - `docs/`：宪法（`ACIS.md`）、RFC、ADR、Sprint 报告
-- `results/`：评测产物（summary / suites / ablation / traces）
+- `results/`：评测产物（summary / suites / ablation / traces / experiments，gitignored）
 - `utils/`：置信度校准、集体遗漏分析
-- `agri-ai/.venv`：项目 Python 3.13 虚拟环境（运行时依赖已装）
+- `.venv`：项目 Python 3.13 虚拟环境（运行时 + 开发依赖已装）
 
 ## 环境准备
 
 ```powershell
 # 推荐使用仓库自带 venv
-.\agri-ai\.venv\Scripts\Activate.ps1
+.\.venv\Scripts\Activate.ps1
 # 或直接指定解释器
 $env:PYTHONIOENCODING='utf-8'
 $env:PYTHONPATH='.'
-$py = 'E:\knowledge_database\ACIS\agri-ai\.venv\Scripts\python.exe'
+$py = 'E:\knowledge_database\ACIS\.venv\Scripts\python.exe'
 
 # 首次安装依赖（含开发工具）
 pip install -r requirements.txt pytest ruff mypy
@@ -150,7 +154,7 @@ python orchestrator.py --llm-judge --llm-critic "温室A甜菜叶片圆形褐色
 ## 测试与评估
 
 ```powershell
-# 单元测试（189 个，12 个测试文件）
+# 单元测试（222 个，15 个测试文件 + conftest.py）
 python -m pytest -q
 
 # 轻量回归：主图 / 规则 / LLM Judge 回退（3 套 × 3 场景）
@@ -168,6 +172,10 @@ python evals/ablation.py --dataset benchmarks.datasets.enriched
 
 # 能力覆盖/一致性/标注建议（自动生成 benchmarks/*.md，勿手写）
 python -m benchmarks.capability_matrix
+
+# 实验管理（Sprint 05/06；YAML 定义见 experiments/definitions/）
+python -m experiments.manager list --output-root results/experiments
+python -m experiments.manager run experiments/definitions/phase2_multiseed.yaml
 ```
 
 ## RAG/Qdrant 记忆层
@@ -231,5 +239,5 @@ uvicorn gateway.app:app --reload
 - `context/KNOWN_DEBT.md`：已知技术债务
 - `docs/ACIS.md`：项目宪法
 - `docs/rfc/RFC001-System Architecture.md`：架构权威文档（RFC-001）
-- `docs/architecture/`：架构、原则、愿景
+- `docs/architecture/architecture.md`：分层架构入口（权威见 RFC-001）
 - `benchmarks/README.md`：基准框架说明

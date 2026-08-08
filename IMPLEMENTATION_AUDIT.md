@@ -2,6 +2,12 @@
 
 > 审计日期：2026-08-07 | 代码根：`E:\knowledge_database\ACIS`（原 `agent协作模式初探` 目录已更名/迁移至此）
 
+> **更新（2026-08-08）**：本报告为 2026-08-07 快照，以下事项已变化：
+> - Sprint 05（Experiment Manager）/ Sprint 06（Research Evaluation Infrastructure）已完成（见 `docs/EXPERIMENT_MANAGER_SPRINT_05_REPORT.md`、`docs/RESEARCH_EVAL_SPRINT_06_REPORT.md`），Evidence Review Gate 已通过。
+> - `pytest` 现为 **222 passed**（15 个测试文件 + `conftest.py`）；ruff / mypy 已装入 `.venv`。
+> - 清理（P0-P2，commit `89fa630`）：删除 `src/` 空目录、`rule_engine/router.py`、`rule_engine/sensor_simulator.py`、根目录 phase0 脚本；`kg/mcp_server.py` 复用 `kg_adapter` 的 Neo4j 客户端；`tests/conftest.py` 取代各测试文件的 sys.path 样板；`results/` 移出 git 跟踪（.gitignore 保留，产物仅存本地）。
+> - 当前状态以 `README.md` 与 `context/CURRENT_SPRINT.md` 为准。
+
 ---
 
 ## 一、全景
