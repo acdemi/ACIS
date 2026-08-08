@@ -197,7 +197,7 @@ Priority:
 # Audit Checklist
 
 - [ ] Consistent with ACIS.md
-- [ ] Compatible with architecture.md
+- [ ] Compatible with RFC-001
 - [ ] Single Responsibility maintained
 - [ ] No unnecessary complexity
 - [ ] Interfaces clearly defined

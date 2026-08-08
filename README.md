@@ -262,5 +262,4 @@ uvicorn gateway.app:app --reload
 - `context/KNOWN_DEBT.md`：已知技术债务
 - `docs/ACIS.md`：项目宪法
 - `docs/rfc/RFC001-System Architecture.md`：架构权威文档（RFC-001）
-- `docs/architecture/architecture.md`：分层架构入口（权威见 RFC-001）
 - `benchmarks/README.md`：基准框架说明

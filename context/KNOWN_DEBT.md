@@ -14,5 +14,5 @@
   - `information_gathering` 依赖 planner/judge 文本关键词启发式，提示词变更后需重新校准
   - `sensor_cross_validation` 要求真实传感器异常或 `sensor_verify` 工具请求，
     仅存在传感器数据不得分
-- **venv dev tools**: pytest 已装（9.1.1）；ruff / mypy 未安装，本地无法复跑静态检查
-- **src/ 空目录**: 占位未使用，建议使用或移除
+- **venv dev tools**: pytest（9.1.1）/ ruff（0.16.2）/ mypy（2.3.0）均已装入 `.venv`（2026-08-08）
+- **src/ 空目录**: 已移除（2026-08-08，清理 commit 89fa630）

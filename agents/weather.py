@@ -1,5 +1,6 @@
 """气象数据服务（模拟）"""
-import random, math
+import random
+import math
 from datetime import datetime, timedelta
 
 _WEATHER_STATE = {"condition": "多云转晴", "season": "夏季", "region": "华北平原", "base_temp": 32.0, "base_humidity": 55.0}

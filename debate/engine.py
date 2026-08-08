@@ -1,6 +1,5 @@
 """DebateEngine — 冲突检测与共识生成"""
 from __future__ import annotations
-from typing import Any
 from agents.types import AgentOutput, RequestContext, DebateResult
 
 class DebateEngine:
@@ -14,7 +13,7 @@ class DebateEngine:
         if sensor is None: return None
         v = sensor.evidence.get("reading", {}).get("readings", {}).get("air_humidity")
         try: return float(v) if v is not None else None
-        except: return None
+        except Exception: return None
 
     def run(self, outputs: list[AgentOutput], context: RequestContext | None = None, multi_round: bool = False, history: list[DebateResult] | None = None) -> DebateResult:
         consensus, conflicts, missing_evidence = [], [], []

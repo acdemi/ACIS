@@ -1,7 +1,7 @@
 """WeatherAgent — 天气感知层"""
 from __future__ import annotations
 from agents.types import AgentOutput, RequestContext
-from agents.weather import get_current_weather, get_weather_alerts, get_weather_for_irrigation
+from agents.weather import get_current_weather, get_weather_alerts
 
 class WeatherAgent:
     name = "天气Agent"

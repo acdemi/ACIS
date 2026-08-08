@@ -19,9 +19,9 @@ ANOMALIES = {}
 
 def _tod(hour):
     t = 3.0 * math.sin(math.pi * (hour - 6) / 12) if 6 <= hour <= 18 else -2.0
-    l = math.sin(math.pi * (hour - 6) / 12) if 6 <= hour <= 18 else 0.0
+    light = math.sin(math.pi * (hour - 6) / 12) if 6 <= hour <= 18 else 0.0
     c = 100.0 if hour < 6 or hour > 20 else -50.0
-    return {"temp": t, "light": l, "co2": c}
+    return {"temp": t, "light": light, "co2": c}
 
 def _n(v, pct=0.02):
     return v * (1 + random.uniform(-pct, pct))

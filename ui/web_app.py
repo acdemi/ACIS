@@ -4,9 +4,11 @@ Agri AI Web UI — Streamlit 全功能界面 v2
 
 from __future__ import annotations
 
-import json, os, sys, tempfile
+import json
+import os
+import sys
+import tempfile
 from pathlib import Path
-from typing import Any
 
 ROOT = Path(__file__).resolve().parents[1]
 if str(ROOT) not in sys.path:
@@ -51,8 +53,8 @@ for k in ("messages", "history_count", "last_decision", "editing"):
 # ============================================================
 def _cc(s):
     return "#2d7d46" if s >= 0.7 else "#ff9800" if s >= 0.4 else "#f44336"
-def _ri(l):
-    return {"low": "🟢", "medium": "🟡", "high": "🔴"}.get(l, "⚪")
+def _ri(risk):
+    return {"low": "🟢", "medium": "🟡", "high": "🔴"}.get(risk, "⚪")
 def _fmt_sensor(r):
     if not r: return ""
     L = {"air_temperature":"🌡️气温","air_humidity":"💧湿度","soil_moisture":"🪴土壤含水","soil_temperature":"🌡️地温","co2_concentration":"💨CO₂","light_intensity":"☀️光照","soil_ph":"🧪pH"}
@@ -143,7 +145,7 @@ if run_btn and query.strip():
             st.error(f"诊断出错: {e}")
     if image_path and os.path.exists(image_path):
         try: os.unlink(image_path)
-        except: pass
+        except Exception: pass
 
 # ============================================================
 # Decision rendering
@@ -208,9 +210,9 @@ def _show_decision(d):
         ja = getattr(d, "judge_analysis", {})
         if ja:
             with st.expander("⚖️ Judge"):
-                w = ja.get("winner",""); l = ja.get("loser","")
+                w = ja.get("winner",""); loser = ja.get("loser","")
                 if w: st.markdown(f"**胜**: {w}")
-                if l: st.markdown(f"**负**: {l}")
+                if loser: st.markdown(f"**负**: {loser}")
                 for k2, v2 in ja.items():
                     if k2 not in ("winner","loser"): st.markdown(f"**{k2}**: {json.dumps(v2,ensure_ascii=False)[:200]}")
 

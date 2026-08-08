@@ -69,7 +69,7 @@ Rejected alternatives:
 # Non Goals
 
 This RFC does NOT specify:
-- Implementation details or coding style (see IMPLEMENTATION_ARCHITECTURE).
+- Implementation details or coding style (see IMPLEMENTATION_AUDIT.md).
 - Database schema or storage layout (see RFC-004, RFC-002).
 - Deployment, prompt engineering, or model selection (out of scope).
 - Roadmap timing (see ROADMAP).

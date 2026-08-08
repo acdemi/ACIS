@@ -6,7 +6,8 @@ ACIS 2.0 增强：
   争议分 +0.2 并适度下调置信度。
 """
 from __future__ import annotations
-import json, os
+import json
+import os
 from dataclasses import asdict
 from typing import Any
 from agents.types import AgentOutput, RequestContext, DebateResult, DecisionOutput
@@ -54,7 +55,7 @@ class JudgeAgent:
             v = readings.get(rk)
             if v is not None:
                 try: result[mk] = float(v)
-                except: pass
+                except Exception: pass
         return result
 
     def _kg_consistency(self, outputs, kg, sensor_readings):
@@ -268,7 +269,7 @@ class JudgeAgent:
     @staticmethod
     def _clean_confidence(v, default):
         try: return round(min(0.95, max(0.1, float(v))), 2)
-        except: return default
+        except Exception: return default
 
     @staticmethod
     def _extract_token_usage(resp: Any) -> dict[str, int] | None:

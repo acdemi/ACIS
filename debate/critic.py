@@ -19,7 +19,7 @@ from dataclasses import replace
 from typing import TYPE_CHECKING, Any
 
 if TYPE_CHECKING:  # 仅类型提示，运行时不导入 orchestrator，避免循环依赖
-    from orchestrator import AgentOutput, DebateResult, RequestContext
+    pass
 
 HIGH_HUMIDITY = 80.0
 LOW_HUMIDITY = 55.0

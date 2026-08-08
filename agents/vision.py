@@ -12,8 +12,6 @@
 """
 
 import os
-import json
-from typing import Optional
 from mcp.server.fastmcp import FastMCP
 
 mcp = FastMCP("vision-perception")
@@ -105,7 +103,7 @@ def _get_classifier():
         from transformers import pipeline
         _classifier = pipeline("image-classification", model=model_id, top_k=5)
         return _classifier
-    except Exception as e:
+    except Exception:
         # 如果模型下载失败，返回模拟分类器
         return None
 
@@ -166,7 +164,7 @@ def _format_result(raw_results: list[dict], image_path: str) -> dict:
             "top3": top3,
         },
         "summary": (
-            f"✅ 作物健康，未发现明显病害" if is_healthy
+            "✅ 作物健康，未发现明显病害" if is_healthy
             else f"⚠️ 检测到 {cn_name}（置信度 {confidence:.1%}）"
         ),
     }

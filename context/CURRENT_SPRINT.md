@@ -4,10 +4,13 @@ Phase: 2.1E → 2.2 Transition
 Sprint: 06
 Goal: Research Evaluation Infrastructure — 论文级统计引擎、数据集指纹、图表生成
 
+> **状态（2026-08-08）**：Sprint 06 已完成（见 `docs/RESEARCH_EVAL_SPRINT_06_REPORT.md`），
+> 按 Stop Conditions 等待架构师审查，不自动进入 Sprint 07。
+
 ## Read Order
-1. docs/architecture/architecture.md
+1. docs/rfc/RFC001-System Architecture.md
 2. docs/architecture/principles.md
-3. docs/ACIS_2.1E_ARCHITECTURE_FREEZE.md
+3. docs/ACIS.md
 4. context/ARCHITECTURE_STATE.md
 5. experiments/schema.py
 6. experiments/catalog.py

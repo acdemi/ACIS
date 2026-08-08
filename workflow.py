@@ -129,7 +129,6 @@ class AgricultureWorkflow:
         context = state["context"]
         orchestrator = self.orchestrator
         debate = state["debate"]
-        decision = state["decision"]
         doubts: list[str] = []
         doubts.extend(debate.conflicts)
         doubts.extend(debate.missing_evidence)
