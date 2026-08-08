@@ -1,0 +1,70 @@
+name: phase3_pilot_hard
+description: "Phase 3 Pilot — 测试 hard 数据集的区分度"
+dataset: benchmarks.datasets.hard
+capability_eval: true
+save_traces: true
+use_llm_judge: true
+metadata:
+  author: ACIS Research
+  paper: ACIS 2.1E Phase 3 Pilot
+  tags: [phase3, pilot, discriminability]
+
+runs:
+  - name: all_on
+    planner: true
+    debate: true
+    memory: true
+    tool_router: true
+    counterfactual: true
+    critic: true
+    seeds: [42]
+  - name: no_memory
+    planner: true
+    debate: true
+    memory: false
+    tool_router: true
+    counterfactual: true
+    critic: true
+    seeds: [42]
+  - name: no_debate
+    planner: true
+    debate: false
+    memory: true
+    tool_router: true
+    counterfactual: true
+    critic: true
+    seeds: [42]
+  - name: no_counterfactual
+    planner: true
+    debate: true
+    memory: true
+    tool_router: true
+    counterfactual: false
+    critic: true
+    seeds: [42]
+  - name: no_planner
+    planner: false
+    debate: true
+    memory: true
+    tool_router: true
+    counterfactual: true
+    critic: true
+    seeds: [42]
+  - name: no_tool_router
+    planner: true
+    debate: true
+    memory: true
+    tool_router: false
+    counterfactual: true
+    critic: true
+    seeds: [42]
+  - name: no_critic
+    planner: true
+    debate: true
+    memory: true
+    tool_router: true
+    counterfactual: true
+    critic: false
+    seeds: [42]
+
+max_cases: null
