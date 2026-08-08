@@ -47,7 +47,7 @@ runs:
     critic: true
     seeds: [42]
   - name: planning_suite
-    dataset: benchmarks.datasets.planning
+    dataset: benchmarks/datasets/planning.json
     planner: true
     debate: true
     memory: true
@@ -56,7 +56,7 @@ runs:
     critic: true
     seeds: [42]
   - name: memory_suite
-    dataset: benchmarks.datasets.memory
+    dataset: benchmarks/datasets/memory.json
     planner: true
     debate: true
     memory: true
@@ -65,7 +65,7 @@ runs:
     critic: true
     seeds: [42]
   - name: debate_suite
-    dataset: benchmarks.datasets.debate
+    dataset: benchmarks/datasets/debate.json
     planner: true
     debate: true
     memory: true
@@ -74,7 +74,7 @@ runs:
     critic: true
     seeds: [42]
   - name: counterfactual_suite
-    dataset: benchmarks.datasets.counterfactual
+    dataset: benchmarks/datasets/counterfactual.json
     planner: true
     debate: true
     memory: true
@@ -83,7 +83,7 @@ runs:
     critic: true
     seeds: [42]
   - name: adversarial_suite
-    dataset: benchmarks.datasets.adversarial
+    dataset: benchmarks/datasets/adversarial.json
     planner: true
     debate: true
     memory: true
