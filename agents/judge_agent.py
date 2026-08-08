@@ -223,6 +223,7 @@ class JudgeAgent:
         model = os.environ.get("AGRI_AI_JUDGE_MODEL") or os.environ.get("DEEPSEEK_MODEL", "deepseek-chat")
         resp = client.chat.completions.create(model=model, messages=[{"role": "system", "content": self._judge_system_prompt()}, {"role": "user", "content": json.dumps(payload, ensure_ascii=False)}], temperature=0.1, response_format={"type": "json_object"})
         llm = json.loads(resp.choices[0].message.content or "{}")
+        token_usage = self._extract_token_usage(resp)
         fb = self._run_rule_judge(context, outputs, debate, kg, debate_round)
         decision = str(llm.get("final_diagnosis") or llm.get("decision") or fb.decision)
         action_plan = self._clean_string_list(llm.get("action_plan")) or fb.action_plan
@@ -235,7 +236,7 @@ class JudgeAgent:
         if "DeepSeek" not in summary: summary = f"DeepSeek Judge 结构化裁决：{summary}"
         if debate_round >= 2: summary = f"【第二轮辩论后裁决】{summary}"
         omission = fb.judge_analysis.get("collective_omission", {})
-        return DecisionOutput(summary=summary, decision=decision, confidence=confidence, risk_level=risk_level, action_plan=action_plan[:6], debate=debate, traces=outputs, judge_mode="deepseek", need_human_review=need_human_review, reasoning_trace=str(llm.get("reasoning_trace") or fb.reasoning_trace), judge_analysis={"consistency_analysis": llm.get("consistency_analysis", {}), "evidence_scores": llm.get("evidence_scores", {}), "kg_contribution": llm.get("kg_contribution", ""), "kg": {"diseases": kg.get("diseases", []), "rules": kg.get("rules", []), "backend": kg.get("backend", "memory")}, "critic": debate.critic, "collective_omission": omission, "kg_evolution": fb.judge_analysis.get("kg_evolution", {}), "calibration": self.calibrator.status()})
+        return DecisionOutput(summary=summary, decision=decision, confidence=confidence, risk_level=risk_level, action_plan=action_plan[:6], debate=debate, traces=outputs, judge_mode="deepseek", need_human_review=need_human_review, reasoning_trace=str(llm.get("reasoning_trace") or fb.reasoning_trace), judge_analysis={"consistency_analysis": llm.get("consistency_analysis", {}), "evidence_scores": llm.get("evidence_scores", {}), "kg_contribution": llm.get("kg_contribution", ""), "kg": {"diseases": kg.get("diseases", []), "rules": kg.get("rules", []), "backend": kg.get("backend", "memory")}, "critic": debate.critic, "collective_omission": omission, "kg_evolution": fb.judge_analysis.get("kg_evolution", {}), "calibration": self.calibrator.status()}, token_usage=token_usage)
 
     def _build_judge_payload(self, context, outputs, debate, kg):
         sr = self._sensor_readings(outputs)
@@ -268,3 +269,23 @@ class JudgeAgent:
     def _clean_confidence(v, default):
         try: return round(min(0.95, max(0.1, float(v))), 2)
         except: return default
+
+    @staticmethod
+    def _extract_token_usage(resp: Any) -> dict[str, int] | None:
+        """Extract additive token-usage observability from an LLM response.
+
+        Returns ``None`` when usage is unavailable (rule fallback, API error,
+        or the response object lacks the attribute), preserving backward
+        compatibility with older traces.
+        """
+        try:
+            usage = resp.usage
+            if usage is None:
+                return None
+            return {
+                "judge_prompt_tokens": int(usage.prompt_tokens),
+                "judge_completion_tokens": int(usage.completion_tokens),
+                "judge_total_tokens": int(usage.total_tokens),
+            }
+        except (AttributeError, TypeError, ValueError):
+            return None

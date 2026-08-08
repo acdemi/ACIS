@@ -44,6 +44,7 @@ class EvalConfig:
     counterfactual_on: bool = True
     output_dir: str = DEFAULT_OUTPUT_DIR
     use_langgraph: bool = True
+    use_llm_judge: bool = False
     seed: int = 7
     max_cases: int | None = None
     persist: bool = False

@@ -62,3 +62,6 @@ class DecisionOutput:
     reasoning_trace: str = ""
     judge_analysis: dict[str, Any] = field(default_factory=dict)
     decision_id: int | None = None
+    #: Optional additive observability — token usage from the LLM judge call.
+    #: Present only when the DeepSeek response exposes ``usage``; None otherwise.
+    token_usage: dict[str, int] | None = None

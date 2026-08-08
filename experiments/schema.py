@@ -44,9 +44,11 @@ class RunSpec:
     counterfactual: bool = True
     critic: bool = True
     seed: int = 7
+    seeds: list[int] = field(default_factory=list)
     max_cases: int | None = None
     save_traces: bool = False
     rules_only: bool = False
+    use_llm_judge: bool = False
 
 
 @dataclass(frozen=True)
@@ -100,10 +102,36 @@ def _as_int_or_none(value: Any) -> int | None:
     return int(value)
 
 
+def _parse_seeds(value: Any) -> list[int]:
+    """Parse a ``seeds: [a, b, c]`` list, empty if absent."""
+    if value is None:
+        return []
+    if isinstance(value, (int, str)) and not isinstance(value, bool):
+        raise TypeError("seeds must be a list of integers, e.g. [41, 42, 43]")
+    if not isinstance(value, list):
+        raise TypeError(
+            f"seeds must be a list of integers, got {type(value).__name__}"
+        )
+    result: list[int] = []
+    for item in value:
+        try:
+            result.append(int(item))
+        except (TypeError, ValueError) as exc:
+            raise ValueError(f"each seed must be an integer, got {item!r}") from exc
+    return result
+
+
 def _parse_run(raw: dict[str, Any]) -> RunSpec:
     name = raw.get("name")
     if not name:
         raise ValueError("each run must define a non-empty 'name'")
+    seeds = _parse_seeds(raw.get("seeds"))
+    if seeds and "seed" in raw:
+        raise ValueError(
+            f"run {name!r}: 'seed' and 'seeds' are mutually exclusive; "
+            "specify only one"
+        )
+    resolved_seed = _as_int_or_none(raw.get("seed"))
     return RunSpec(
         name=str(name),
         dataset=raw.get("dataset"),
@@ -113,10 +141,12 @@ def _parse_run(raw: dict[str, Any]) -> RunSpec:
         tool_router=_as_bool(raw.get("tool_router", True)),
         counterfactual=_as_bool(raw.get("counterfactual", True)),
         critic=_as_bool(raw.get("critic", True)),
-        seed=int(raw.get("seed", 7)),
+        seed=resolved_seed if resolved_seed is not None else 7,
+        seeds=seeds,
         max_cases=_as_int_or_none(raw.get("max_cases")),
         save_traces=_as_bool(raw.get("save_traces", False), False),
         rules_only=_as_bool(raw.get("rules_only", False), False),
+        use_llm_judge=_as_bool(raw.get("use_llm_judge", False), False),
     )
 
 
@@ -168,7 +198,19 @@ def parse_definition(data: dict[str, Any]) -> ExperimentDefinition:
     runs_raw = data.get("runs") or []
     if not isinstance(runs_raw, list):
         raise TypeError("'runs' must be a list")
-    runs = tuple(_parse_run(run) for run in runs_raw)
+    # Top-level defaults propagate to runs that don't set the field explicitly.
+    top_use_llm_judge = data.get("use_llm_judge")
+    top_save_traces = data.get("save_traces")
+    runs_list: list[RunSpec] = []
+    for raw in runs_raw:
+        if not isinstance(raw, dict):
+            raise TypeError("each run must be a mapping")
+        if top_use_llm_judge is not None and "use_llm_judge" not in raw:
+            raw = dict(raw, use_llm_judge=_as_bool(top_use_llm_judge, False))
+        if top_save_traces is not None and "save_traces" not in raw:
+            raw = dict(raw, save_traces=_as_bool(top_save_traces, False))
+        runs_list.append(_parse_run(raw))
+    runs = tuple(runs_list)
     return ExperimentDefinition(
         name=str(name),
         description=str(data.get("description", "")),

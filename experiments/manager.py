@@ -74,6 +74,21 @@ def _run_toggles(run_spec: Any) -> dict[str, bool]:
     return {field: bool(getattr(run_spec, field)) for field in TOGGLE_FIELDS}
 
 
+def _expand_seeds(run_spec: Any) -> list[Any]:
+    """Expand a multi-seed run into one spec per seed (``{name}__seed{seed}``).
+
+    A run with no ``seeds`` is returned unchanged (single-seed behavior).
+    """
+    if not run_spec.seeds:
+        return [run_spec]
+    from dataclasses import replace
+
+    return [
+        replace(run_spec, seed=seed, name=f"{run_spec.name}__seed{seed}")
+        for seed in run_spec.seeds
+    ]
+
+
 def _capability_averages(rows: list[Any]) -> dict[str, Any]:
     if not rows:
         return {}
@@ -252,13 +267,15 @@ def run(
 
     run_summaries: list[RunSummary] = []
     for run_spec in definition.runs:
-        dataset = run_spec.dataset or definition.dataset
-        run_dir = exp_dir / "runs" / run_spec.name
-        run_dir.mkdir(parents=True, exist_ok=True)
-        result = runner.run_evaluation(
-            run_spec, dataset=dataset, output_dir=str(run_dir)
-        )
-        run_summaries.append(_summarize_run(run_spec, dataset, run_dir, result))
+        specs = _expand_seeds(run_spec)
+        for spec in specs:
+            dataset = spec.dataset or definition.dataset
+            run_dir = exp_dir / "runs" / spec.name
+            run_dir.mkdir(parents=True, exist_ok=True)
+            result = runner.run_evaluation(
+                spec, dataset=dataset, output_dir=str(run_dir)
+            )
+            run_summaries.append(_summarize_run(spec, dataset, run_dir, result))
 
     ablation_summary = AblationSummary()
     if definition.ablation.enabled:

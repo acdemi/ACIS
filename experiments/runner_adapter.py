@@ -62,6 +62,7 @@ def run_spec_to_eval_config(
         tool_router_on=run_spec.tool_router,
         counterfactual_on=run_spec.counterfactual,
         use_langgraph=not run_spec.rules_only,
+        use_llm_judge=run_spec.use_llm_judge,
         seed=run_spec.seed,
         max_cases=run_spec.max_cases,
         save_traces=run_spec.save_traces,

@@ -41,6 +41,7 @@ class CaseMetrics:
     counterfactual_count: int
     collective_omission_count: int
     capability_scores: dict[str, float] = field(default_factory=dict)
+    judge_total_tokens: int = 0
 
 
 def compute_trace_metrics(
@@ -58,6 +59,7 @@ def compute_trace_metrics(
     planner = metrics.get("planner", {})
     tool_router = metrics.get("tool_router", {})
     tool_requests = int(tool_router.get("requests", 0))
+    token_usage = judge.get("token_usage") or {}
     return CaseMetrics(
         case_id=case_id,
         trace_id=trace.trace_id,
@@ -74,6 +76,7 @@ def compute_trace_metrics(
         counterfactual_count=_counterfactual_count(trace),
         collective_omission_count=_collective_omission_count(trace),
         capability_scores=dict(capability_scores or {}),
+        judge_total_tokens=int(token_usage.get("judge_total_tokens", 0)),
     )
 
 
@@ -100,6 +103,7 @@ def aggregate_metrics(rows: list[CaseMetrics]) -> dict[str, float | int | None]:
         "collective_omission_count": sum(
             row.collective_omission_count for row in rows
         ),
+        "judge_total_tokens": sum(row.judge_total_tokens for row in rows),
     }
 
 

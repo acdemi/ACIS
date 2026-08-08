@@ -70,7 +70,7 @@ def _serialize_critic(debate: DebateResult) -> dict[str, Any]:
 
 
 def _serialize_decision(decision: DecisionOutput) -> dict[str, Any]:
-    return {
+    payload: dict[str, Any] = {
         "summary": decision.summary,
         "decision": decision.decision,
         "confidence": decision.confidence,
@@ -82,6 +82,9 @@ def _serialize_decision(decision: DecisionOutput) -> dict[str, Any]:
         "action_plan": list(decision.action_plan),
         "decision_id": decision.decision_id,
     }
+    if decision.token_usage is not None:
+        payload["token_usage"] = dict(decision.token_usage)
+    return payload
 
 
 def _serialize_plan(plan: ExecutionPlan | None) -> dict[str, Any]:

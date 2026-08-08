@@ -202,7 +202,7 @@ def test_backward_compatibility(judge):
     expected = {
         "summary", "decision", "confidence", "risk_level", "action_plan",
         "debate", "traces", "judge_mode", "need_human_review",
-        "reasoning_trace", "judge_analysis", "decision_id",
+        "reasoning_trace", "judge_analysis", "decision_id", "token_usage",
     }
     assert {f.name for f in dataclass_fields(DecisionOutput)} == expected
     out = AgentOutput(

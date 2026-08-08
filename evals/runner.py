@@ -157,7 +157,7 @@ def run_evaluation(config: EvalConfig) -> EvaluationResult:
         cases = cases[: config.max_cases]
 
     random.seed(config.seed)
-    orchestrator = AgentOrchestrator(use_langgraph=config.use_langgraph)
+    orchestrator = AgentOrchestrator(use_langgraph=config.use_langgraph, use_llm_judge=config.use_llm_judge)
     _apply_toggles(orchestrator, config)
     _warm_up(orchestrator)  # 吸收冷启动，保证 runtime 指标是稳态值
 

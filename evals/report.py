@@ -45,6 +45,7 @@ CSV_FIELDS = [
     "debate_rounds",
     "counterfactual_count",
     "collective_omission_count",
+    "judge_total_tokens",
     *CAPABILITY_SCORE_COLUMNS,
 ]
 
@@ -115,6 +116,10 @@ def write_summary_markdown(
             "| collective_omission_count | "
             f"{_fmt_count(aggregate.get('collective_omission_count'))} |"
         ),
+        (
+            "| judge_total_tokens | "
+            f"{_fmt_count(aggregate.get('judge_total_tokens'))} |"
+        ),
         "",
         "## Capability Performance",
         "",
@@ -162,6 +167,7 @@ def _row_dict(row: CaseMetrics) -> dict[str, Any]:
         "debate_rounds": row.debate_rounds,
         "counterfactual_count": row.counterfactual_count,
         "collective_omission_count": row.collective_omission_count,
+        "judge_total_tokens": row.judge_total_tokens,
     }
     for column, capability in zip(CAPABILITY_SCORE_COLUMNS, ALL_CAPABILITIES):
         values[column] = _cell(row.capability_scores.get(capability.value))
@@ -184,6 +190,7 @@ def _aggregate_row(aggregate: dict[str, float | int | None]) -> dict[str, Any]:
         "debate_rounds": _cell(aggregate.get("debate_rounds")),
         "counterfactual_count": aggregate.get("counterfactual_count") or 0,
         "collective_omission_count": aggregate.get("collective_omission_count") or 0,
+        "judge_total_tokens": aggregate.get("judge_total_tokens") or 0,
     }
 
 
