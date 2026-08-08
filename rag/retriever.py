@@ -222,16 +222,16 @@ def _qdrant_hits(query: str, crop: str = "", top_k: int | None = None) -> list[R
             must=[FieldCondition(key="crop", match=MatchValue(value=crop_zh))]
         )
 
-    search_result = client.search(
+    search_result = client.query_points(
         collection_name=_collection_name(),
-        query_vector=embed_text(query),
+        query=embed_text(query),
         query_filter=query_filter,
         limit=_get_top_k(top_k),
         with_payload=True,
     )
 
     hits = []
-    for point in search_result:
+    for point in search_result.points:
         payload = dict(point.payload or {})
         metadata = dict(payload.get("metadata") or {})
         metadata["backend"] = "qdrant"
