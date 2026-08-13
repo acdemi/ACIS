@@ -1,0 +1,295 @@
+{
+  "name": "challenge_set_v1",
+  "version": 1,
+  "description": "Phase 4 Challenge Set — 任务有效性探针集。针对 Phase 3 暴露的准确率饱和问题（症状描述过于典型、区分特征过于明显），在现有真实图谱/知识库实体范围内（AgriKG + DISEASE_DB 的 7 种病害、4 种作物）构造 4 组对抗性探针：ambiguity（共享症状歧义）、conflicting（环境与诊断矛盾）、incomplete（信息缺失需弃权）、multi_step（多步推理）。本集合与 Phase 3 的 64 个 benchmark cases 完全隔离：不修改任何既有 case，不走内置 loader（benchmarks.datasets.*），仅通过独立路径加载。",
+  "groups": {
+    "ambiguity": {
+      "label": "ambiguity",
+      "description": "症状歧义组：两种病害共享症状特征（霉层/维管束/病斑/萎蔫），query 未给出决定性区分特征或特征指向相反方向；正确输出需要鉴别与排除（differential）。",
+      "cases": [
+        {
+          "id": "amb_tomato_mold_blind_leaf",
+          "group": "ambiguity",
+          "difficulty": 2,
+          "input": "温室A番茄叶背有灰色霉层，叶片正面淡黄色病斑，棚内温度26℃湿度80%，是叶霉病还是早疫病？",
+          "expected_key_factors": ["backside_mold", "yellow_spot", "high_humidity", "differential"],
+          "ground_truth": "叶霉病",
+          "crop": "tomato",
+          "intent": "diagnose",
+          "design_intent": "ambiguity: 叶霉病与早疫病共享病斑+霉类特征，决定性区分特征是叶背霉层（叶霉病）vs 同心轮纹（早疫病）；两病匹配分接近，需鉴别排除"
+        },
+        {
+          "id": "amb_tomato_ring_before_gray",
+          "group": "ambiguity",
+          "difficulty": 2,
+          "input": "温室A番茄下部叶片出现褐色同心轮纹病斑，病斑中央尚未灰白，是早疫病吗？",
+          "expected_key_factors": ["concentric_ring", "brown_spot", "gray_white_center", "differential"],
+          "ground_truth": "早疫病",
+          "crop": "tomato",
+          "intent": "diagnose",
+          "design_intent": "ambiguity: 轮纹病斑早期中央未灰白，不能因缺少灰白特征而误判；需以轮纹+下部叶片首发定位早疫病并排除叶霉病"
+        },
+        {
+          "id": "amb_cucumber_angular_no_mold",
+          "group": "ambiguity",
+          "difficulty": 2,
+          "input": "温室B黄瓜叶片出现多角形黄褐色斑块，叶背暂未见霉层，是霜霉病早期吗？",
+          "expected_key_factors": ["angular_lesion", "yellow_spot", "leaf_dew", "differential"],
+          "ground_truth": "霜霉病",
+          "crop": "cucumber",
+          "intent": "diagnose",
+          "design_intent": "ambiguity: 霜霉病早期霉层未显，仅凭多角形（叶脉限制）斑块鉴别；需结合湿度/结露条件确认并排除其他叶斑"
+        },
+        {
+          "id": "amb_sugar_spot_wilt",
+          "group": "ambiguity",
+          "difficulty": 2,
+          "input": "温室A甜菜下部老叶出现圆形褐色病斑，植株轻微萎蔫，是褐斑病还是根腐病？",
+          "expected_key_factors": ["circular_spot", "brown_spot", "lower_leaf_start", "differential"],
+          "ground_truth": "褐斑病",
+          "crop": "sugar_beet",
+          "intent": "diagnose",
+          "design_intent": "ambiguity: 褐斑病（叶部）与根腐病（根部）共享萎蔫/黄化间接症状；圆形褐斑+下部老叶首发指向褐斑病，需排除根腐病"
+        },
+        {
+          "id": "amb_cotton_edge_vas",
+          "group": "ambiguity",
+          "difficulty": 3,
+          "input": "温室A棉花叶缘发黄且维管束褐变，未见半边黄化也未萎蔫，是黄萎病还是枯萎病？",
+          "expected_key_factors": ["edge_yellowing", "vascular_browning", "half_leaf_yellowing", "differential"],
+          "ground_truth": "黄萎病",
+          "crop": "cotton",
+          "intent": "diagnose",
+          "design_intent": "ambiguity: 黄萎病与枯萎病共享维管束褐变；枯萎病特征为半边黄化+萎蔫，本query显式否定二者，叶缘黄化+叶脉间斑驳指向黄萎病；关键词引擎会被维管束+黄化误导至枯萎病"
+        },
+        {
+          "id": "amb_tomato_curl_mold",
+          "group": "ambiguity",
+          "difficulty": 3,
+          "input": "温室A番茄下部叶片卷曲、边缘干枯，叶背隐约灰色霉层，是叶霉病还是早疫病？",
+          "expected_key_factors": ["leaf_curl", "backside_mold", "lower_leaf_start", "differential"],
+          "ground_truth": "叶霉病",
+          "crop": "tomato",
+          "intent": "diagnose",
+          "design_intent": "ambiguity: 卷曲/干枯为叶霉病晚期信号，与早疫病枯死斑容易混淆；叶背霉层（虽隐约）仍是决定性特征，需排除早疫病"
+        }
+      ]
+    },
+    "conflicting": {
+      "label": "conflicting",
+      "description": "环境矛盾组：症状证据指向某病害，但环境读数（温/湿度、土壤）与该病害的发病条件（DISEASE_DB conditions）相矛盾；正确输出应保留主诊断但识别冲突、下调置信度或提高风险等级，而不是被环境反向带偏。",
+      "cases": [
+        {
+          "id": "conf_cucumber_hot_dry",
+          "group": "conflicting",
+          "difficulty": 3,
+          "input": "温室B黄瓜叶背灰黑色霉层、多角形病斑，但棚内持续高温35℃且干燥，仍怀疑霜霉病吗？",
+          "expected_key_factors": ["backside_mold", "angular_lesion", "high_temp", "low_humidity", "risk_priority"],
+          "ground_truth": "霜霉病",
+          "crop": "cucumber",
+          "intent": "diagnose",
+          "design_intent": "conflicting: 霜霉病需15-22℃、>90%湿度与叶面结露；高温35℃干燥环境与之矛盾，需识别冲突而非反转诊断"
+        },
+        {
+          "id": "conf_sugar_spot_cold",
+          "group": "conflicting",
+          "difficulty": 2,
+          "input": "温室A甜菜叶片圆形褐斑增多，但近期棚内低温12℃，是否仍为褐斑病？",
+          "expected_key_factors": ["circular_spot", "brown_spot", "low_temp", "risk_priority"],
+          "ground_truth": "褐斑病",
+          "crop": "sugar_beet",
+          "intent": "diagnose",
+          "design_intent": "conflicting: 褐斑病适温25-30℃；低温12℃与环境矛盾，症状（圆形褐斑）仍支持褐斑病，需识别环境冲突"
+        },
+        {
+          "id": "conf_tomato_blight_cool_rain",
+          "group": "conflicting",
+          "difficulty": 3,
+          "input": "温室A番茄叶片同心轮纹病斑，近期低温多雨，早疫病还成立吗？",
+          "expected_key_factors": ["concentric_ring", "low_temp", "high_humidity", "risk_priority"],
+          "ground_truth": "早疫病",
+          "crop": "tomato",
+          "intent": "diagnose",
+          "design_intent": "conflicting: 早疫病适温25-30℃；低温多雨与之矛盾，但轮纹病斑为决定性症状，需识别冲突并下调置信度"
+        },
+        {
+          "id": "conf_cotton_wilt_dry_soil",
+          "group": "conflicting",
+          "difficulty": 3,
+          "input": "温室A棉花叶脉间黄绿斑驳、维管束褐变，但土壤持续干旱，仍怀疑黄萎病吗？",
+          "expected_key_factors": ["mottling", "vascular_browning", "soil_dry", "risk_priority"],
+          "ground_truth": "黄萎病",
+          "crop": "cotton",
+          "intent": "diagnose",
+          "design_intent": "conflicting: 黄萎病在低温多雨或大水漫灌后发病重；土壤持续干旱与环境矛盾，症状（黄绿斑驳+维管束褐变）仍支持黄萎病"
+        },
+        {
+          "id": "conf_cotton_fusarium_cool_wet",
+          "group": "conflicting",
+          "difficulty": 3,
+          "input": "温室A棉花植株半边黄化萎蔫，近期凉爽多雨，是枯萎病吗？",
+          "expected_key_factors": ["half_leaf_yellowing", "wilt", "low_temp", "high_humidity", "differential"],
+          "ground_truth": "枯萎病",
+          "crop": "cotton",
+          "intent": "diagnose",
+          "design_intent": "conflicting: 枯萎病适温25-28℃；凉爽多雨环境更接近黄萎病条件，但半边黄化+萎蔫为枯萎病决定性症状，需在冲突中鉴别"
+        },
+        {
+          "id": "conf_sugar_rootrot_dry",
+          "group": "conflicting",
+          "difficulty": 2,
+          "input": "温室A甜菜根部变褐腐烂、叶片黄化，但棚内干燥且土温偏高，是否根腐病？",
+          "expected_key_factors": ["root_rot", "yellowing", "soil_dry", "risk_priority"],
+          "ground_truth": "根腐病",
+          "crop": "sugar_beet",
+          "intent": "diagnose",
+          "design_intent": "conflicting: 根腐病在土壤过湿时加重；干燥+土温偏高与之矛盾，根部腐烂症状仍支持根腐病"
+        }
+      ]
+    },
+    "incomplete": {
+      "label": "incomplete",
+      "description": "信息缺失组：query 缺少决定性区分特征（只给共享词、模糊词或否定词），当前知识库无法确认病害；正确输出应弃权（证据不足）并列出需补充的现场信息，而不是被部分关键词带偏强行确诊。",
+      "cases": [
+        {
+          "id": "inc_cucumber_unspecified",
+          "group": "incomplete",
+          "difficulty": 1,
+          "input": "温室B黄瓜叶片出现异常，没有描述具体症状，如何判断？",
+          "expected_key_factors": ["evidence_insufficient", "info_request"],
+          "ground_truth": "证据不足",
+          "crop": "cucumber",
+          "intent": "diagnose",
+          "design_intent": "incomplete: 零症状描述，无任何关键词命中；正确输出为证据不足并请求补充症状"
+        },
+        {
+          "id": "inc_tomato_vague_spot",
+          "group": "incomplete",
+          "difficulty": 3,
+          "input": "温室A番茄叶片出现斑点，没有其他信息，是什么病？",
+          "expected_key_factors": ["evidence_insufficient", "info_request", "differential"],
+          "ground_truth": "证据不足",
+          "crop": "tomato",
+          "intent": "diagnose",
+          "design_intent": "incomplete: 斑点一词同时命中早疫病与叶霉病的通用词表，关键词引擎会凭字典序盲猜；正确输出为证据不足并请求病斑形状/位置/霉层信息"
+        },
+        {
+          "id": "inc_cotton_edge_yellow",
+          "group": "incomplete",
+          "difficulty": 1,
+          "input": "温室A棉花仅叶缘轻微发黄，其他一切正常，是什么问题？",
+          "expected_key_factors": ["edge_yellowing", "evidence_insufficient", "info_request"],
+          "ground_truth": "证据不足",
+          "crop": "cotton",
+          "intent": "diagnose",
+          "design_intent": "incomplete: 叶缘发黄单独出现不足以区分黄萎病/枯萎病/生理性缺素；正确输出为证据不足并请求维管束与植株整体状态信息"
+        },
+        {
+          "id": "inc_sugar_beet_weak",
+          "group": "incomplete",
+          "difficulty": 2,
+          "input": "温室A甜菜长势变弱，根部需要挖开检查吗，现在能下结论吗？",
+          "expected_key_factors": ["evidence_insufficient", "info_request", "root_check"],
+          "ground_truth": "证据不足",
+          "crop": "sugar_beet",
+          "intent": "diagnose",
+          "design_intent": "incomplete: 根部一词单独命中根腐病关键词表，引擎给出低分猜测；正确输出为证据不足并建议挖根检查确认"
+        },
+        {
+          "id": "inc_tomato_yellow_no_cue",
+          "group": "incomplete",
+          "difficulty": 3,
+          "input": "温室A番茄叶片普遍发黄，叶背无霉层也无轮纹，是病害还是生理问题？",
+          "expected_key_factors": ["yellowing", "evidence_insufficient", "info_request"],
+          "ground_truth": "证据不足",
+          "crop": "tomato",
+          "intent": "diagnose",
+          "design_intent": "incomplete: 显式否定两个番茄病害的决定性特征（霉层/轮纹）；发黄可能为缺素或生理性障碍，正确输出为证据不足并请求肥水/根系信息"
+        },
+        {
+          "id": "inc_cucumber_mold_unclear_shape",
+          "group": "incomplete",
+          "difficulty": 3,
+          "input": "温室B黄瓜叶背有霉层但病斑形状看不清，能确诊霜霉病吗？",
+          "expected_key_factors": ["backside_mold", "angular_lesion", "evidence_insufficient", "info_request"],
+          "ground_truth": "证据不足",
+          "crop": "cucumber",
+          "intent": "diagnose",
+          "design_intent": "incomplete: 霉层+叶背命中霜霉病关键词但病斑形状（多角形/叶脉限制）未确认，不足以与灰霉类病害鉴别；正确输出为证据不足"
+        }
+      ]
+    },
+    "multi_step": {
+      "label": "multi_step",
+      "description": "多步推理组：query 同时携带症状、环境与决策请求（灌溉/防治安排），正确输出需串联 诊断→环境校验→风险优先级→作业安排 的推理链；单跳关键词命中无法覆盖完整因子集。",
+      "cases": [
+        {
+          "id": "ms_cucumber_downy_irrigate",
+          "group": "multi_step",
+          "difficulty": 2,
+          "input": "温室B黄瓜叶背灰黑色霉层、多角形病斑，结瓜期今天还能浇水吗？",
+          "expected_key_factors": ["backside_mold", "angular_lesion", "leaf_dew", "delay_irrigation"],
+          "ground_truth": "霜霉病",
+          "crop": "cucumber",
+          "intent": "irrigate",
+          "design_intent": "multi_step: 先诊断霜霉病，再结合叶面结露发病条件判断灌溉风险，给出暂缓/控制灌溉的决策链"
+        },
+        {
+          "id": "ms_cotton_wilt_irrigate",
+          "group": "multi_step",
+          "difficulty": 3,
+          "input": "温室A棉花花铃期黄绿斑驳维管束褐变，近期干旱，今天能否灌溉？",
+          "expected_key_factors": ["mottling", "vascular_browning", "soil_dry", "irrigation_decision", "risk_priority"],
+          "ground_truth": "黄萎病",
+          "crop": "cotton",
+          "intent": "irrigate",
+          "design_intent": "multi_step: 先诊断黄萎病，再权衡花铃期需水与黄萎病大水漫灌加重风险的矛盾，给出滴灌/少量分次的灌溉决策"
+        },
+        {
+          "id": "ms_sugar_spot_irrigate_cold",
+          "group": "multi_step",
+          "difficulty": 3,
+          "input": "温室A甜菜叶丛繁茂期褐斑增多，棚内低温多湿，能浇水吗？",
+          "expected_key_factors": ["circular_spot", "brown_spot", "low_temp", "irrigation_decision", "risk_priority"],
+          "ground_truth": "褐斑病",
+          "crop": "sugar_beet",
+          "intent": "irrigate",
+          "design_intent": "multi_step: 先诊断褐斑病，识别低温多湿环境与褐斑病适温的矛盾，再给出先防病后水肥的灌溉安排"
+        },
+        {
+          "id": "ms_tomato_mold_ventilate",
+          "group": "multi_step",
+          "difficulty": 2,
+          "input": "温室A番茄叶背灰色霉层、下部叶片卷曲，通风不良，如何安排防控步骤？",
+          "expected_key_factors": ["backside_mold", "leaf_curl", "poor_ventilation", "action_plan"],
+          "ground_truth": "叶霉病",
+          "crop": "tomato",
+          "intent": "diagnose",
+          "design_intent": "multi_step: 先诊断叶霉病，结合通风不良诱因给出 通风降湿→摘除病叶→药剂防治 的多步防控计划"
+        },
+        {
+          "id": "ms_tomato_blight_stem",
+          "group": "multi_step",
+          "difficulty": 3,
+          "input": "温室A番茄同心轮纹病斑已蔓延至茎部，果实即将膨大，防治顺序怎么安排？",
+          "expected_key_factors": ["concentric_ring", "stem_lesion", "fruit_stage", "action_plan"],
+          "ground_truth": "早疫病",
+          "crop": "tomato",
+          "intent": "diagnose",
+          "design_intent": "multi_step: 早疫病茎部病斑为高严重度信号，需结合果实膨大期安排 清除病残体→药剂保护果实→水肥管理 的防治顺序"
+        },
+        {
+          "id": "ms_cotton_fusarium_quarantine",
+          "group": "multi_step",
+          "difficulty": 3,
+          "input": "温室A棉花半边黄化萎蔫确诊枯萎病，相邻地块还能正常浇水吗？",
+          "expected_key_factors": ["half_leaf_yellowing", "wilt", "quarantine", "irrigation_decision"],
+          "ground_truth": "枯萎病",
+          "crop": "cotton",
+          "intent": "diagnose",
+          "design_intent": "multi_step: 枯萎病土壤带菌，确诊后需隔离病区并避免串水传播，灌溉决策需考虑检疫隔离步骤"
+        }
+      ]
+    }
+  }
+}

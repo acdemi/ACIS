@@ -1,0 +1,57 @@
+{
+  "source": "reports/phase4_evaluation_pilot.md (Phase 4.1 pilot, recorded observations)",
+  "configs": {
+    "c0_bare_baseline": {
+      "label": "C0",
+      "n_cases": 24,
+      "accuracy": 0.5611,
+      "ece": 0.4979,
+      "abstention_rate": 29.17,
+      "coherence": 1.8333
+    },
+    "c1_all_on": {
+      "label": "C1",
+      "n_cases": 24,
+      "accuracy": 0.5451,
+      "ece": 0.4571,
+      "abstention_rate": 25.0,
+      "coherence": 1.6667
+    },
+    "c2_no_memory": {
+      "label": "C2",
+      "n_cases": 24,
+      "accuracy": 0.5062,
+      "ece": 0.5104,
+      "abstention_rate": 25.0,
+      "coherence": 1.5833
+    }
+  },
+  "observed_rankings": {
+    "accuracy": [
+      "c0_bare_baseline",
+      "c1_all_on",
+      "c2_no_memory"
+    ],
+    "ece": [
+      "c1_all_on",
+      "c0_bare_baseline",
+      "c2_no_memory"
+    ],
+    "abstention_rate": [
+      "c0_bare_baseline",
+      "c1_all_on",
+      "c2_no_memory"
+    ],
+    "coherence": [
+      "c0_bare_baseline",
+      "c1_all_on",
+      "c2_no_memory"
+    ]
+  },
+  "direction_notes": {
+    "accuracy": "desc (higher accuracy ranks first)",
+    "ece": "asc (lower ECE ranks first)",
+    "abstention_rate": "desc (recorded as observed; higher abstention in C0 driven by correct abstention on incomplete cases)",
+    "coherence": "desc (higher coherence = more key factors covered; Phase 4.1 order: C0 1.833 > C1 1.667 > C2 1.583)"
+  }
+}

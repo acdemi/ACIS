@@ -35,3 +35,6 @@ data/
 
 # Experiment results (regenerable, kept locally)
 results/
+
+# Experiment run logs (regenerable, kept locally)
+logs/
