@@ -1,0 +1,15 @@
+# Phase 4.2-R Pre-check Report
+
+> Generated: 2026-08-30T16:22:18.878946+00:00
+> Case: amb_tomato_mold_blind_leaf | seed: 42 | configs: ['C0', 'C1', 'C2']
+> Harness reference: reports\phase4_2_raw_results.json
+
+| config | real decision | real confidence | judge_mode | harness diagnosis | harness confidence | label match | conf. offset |
+|---|---|---|---|---|---|---|---|
+| C0 | 番茄叶霉病 | 0.6 | deepseek | 番茄叶霉病 | 0.92 | match (叶霉病 vs 叶霉病) | 0.320 |
+| C1 | 番茄叶霉病 | 0.62 | deepseek | 番茄叶霉病 | 0.85 | match (叶霉病 vs 叶霉病) | 0.230 |
+| C2 | 无法定论（待实验室病原鉴定） | 0.2 | deepseek | 番茄叶霉病 | 0.95 | DIFFERS (ABSTAIN vs 叶霉病) | 0.750 |
+
+## Verdict
+
+**FAIL** — C0: confidence offset 0.320 > 0.3; C2: confidence offset 0.750 > 0.3
