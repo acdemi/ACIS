@@ -1,5 +1,47 @@
 # ACIS Changelog
 
+## [Phase 4.2-R] — 2026-08-31
+
+### Added
+- 真实 Agent 评测与诊断：`scripts/run_phase4_2_real_agent.py`、`scripts/generate_stability_report.py`、`scripts/stress_test_judge.py`
+- 报告：`reports/phase4_2_real_agent/`（稳定性 / judge 回退诊断 / 环境差异 / 预检）、`reports/phase4_2_r3_stability_report.md`、`reports/phase4_2_r3_stress_test.md`、`reports/phase4_2_r4_precheck_report.json`
+
+### Findings
+- R2 诊断：216 次真实运行中 191 次 judge 回退 rules（`APIConnectionError: Connection error.`）；端点配置不一致（免费网关 vs 付费端点 402）为候选根因
+- R3 稳定性（rule-engine coherence judge）：C0 accuracy 0.3623±0.1624 > C1 0.2799±0.1505、C2 0.2975±0.1247；排名跨 seed 翻转
+- R3 压力测试：C1/seed42/`amb_tomato_mold_blind_leaf` 30/30 PASS（均值 179.8s/次）
+- R4 预检：harness 与真实 Agent 决策对比 **FAIL**（C0 置信度偏移 0.320、C2 0.750，C2 标签 ABSTAIN vs 叶霉病）
+
+### Known Issues
+- judge 端点/连接性配置需统一（含重试策略）
+- harness 与真实链路结果不一致，评分口径需对齐
+
+---
+
+## [Phase 4.2] — 2026-08-10
+
+### Added
+- Challenge Set v1：`benchmarks/challenge_set_v1.json`（24 案例，5 类挑战）
+- 多 seed 验证：3 seeds × 3 configs × 24 cases = 216 calls（`reports/phase4_validation_report.md`）
+- `src/openmetaphysics/evaluation/`（challenge_scorer / challenge_report）
+
+### Findings
+- C1/C2 相对 C0：弃权率下降（41/33/31）、平均置信度上升（0.39/0.50/0.52），accuracy 未显著改善
+- 1 条 malformed output（seed 44 / C2 / case 8）
+
+---
+
+## [Phase 4.1] — 2026-08-09
+
+### Added
+- Phase 4 pilot：3 configs × 24 cases = 72 calls（`reports/phase4_evaluation_pilot.md`）
+
+### Findings
+- accuracy：C0 0.5611 / C1 0.5451 / C2 0.5062；仅 ECE C1 略优（0.4571）
+- C1 未在任一维度显著优于 C0
+
+---
+
 ## [2.1E-Sprint04.5C] — 2026-08-02
 
 ### Added

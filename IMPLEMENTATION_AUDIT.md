@@ -8,6 +8,13 @@
 > - 清理（P0-P2，commit `89fa630`）：删除 `src/` 空目录、`rule_engine/router.py`、`rule_engine/sensor_simulator.py`、根目录 phase0 脚本；`kg/mcp_server.py` 复用 `kg_adapter` 的 Neo4j 客户端；`tests/conftest.py` 取代各测试文件的 sys.path 样板；`results/` 移出 git 跟踪（.gitignore 保留，产物仅存本地）。
 > - 当前状态以 `README.md` 与 `context/CURRENT_SPRINT.md` 为准。
 
+> **更新（2026-09-20）**：Phase 3/4 评测战役已完成主体（Challenge Set v1 + 3 seeds 验证 + 真实 Agent + 稳定性/压力测试/预检）。
+> - 单元测试现为 **267 passed**（2026-09-20 实测，README 中 222 已过时）。
+> - 关键发现：C1（完整 ACIS）在 Challenge Set 上未显著优于 C0（裸基线），R3 排名跨 seed 翻转；
+>   R2 中 191/216 次 judge 回退 rules（`APIConnectionError`）；R4 预检 FAIL（harness vs 真实链路置信度偏移 > 0.3）。
+> - 结论待架构师裁决（Phase 5 扩展评测 vs Phase 6 架构重设计）；详见 `context/CURRENT_SPRINT.md` 与 `reports/`。
+> - 本报告正文仍为 2026-08-07/08 快照，仅在需要时更新。
+
 ---
 
 ## 一、全景

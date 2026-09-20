@@ -14,5 +14,18 @@
   - `information_gathering` 依赖 planner/judge 文本关键词启发式，提示词变更后需重新校准
   - `sensor_cross_validation` 要求真实传感器异常或 `sensor_verify` 工具请求，
     仅存在传感器数据不得分
-- **venv dev tools**: pytest（9.1.1）/ ruff（0.16.2）/ mypy（2.3.0）均已装入 `.venv`（2026-08-08）
+- **Judge endpoint / connectivity（Phase 4.2-R2）**: 真实 Agent 运行中 191/216 次 judge 回退 rules
+  （`APIConnectionError: Connection error.`）；可重建配置为 `api.deepseek.com` + `deepseek-chat`，
+  而审计声明使用 opencode 免费网关 `opencode.ai/zen/go/v1` + `deepseek-v4-flash`。
+  2026-08-13 探针：免费网关可用，付费端点返回 402 Insufficient Balance。
+  需统一端点配置与重试策略后重跑，否则真实 Agent 结果不可用。Priority: High。
+- **Harness vs 真实 Agent 一致性（Phase 4.2-R4）**: 预检 FAIL（C0 置信度偏移 0.320、
+  C2 0.750 > 0.3；C2 标签 ABSTAIN vs 叶霉病）。评测器口径与真实链路需对齐后才能出具架构结论。
+  Priority: High。
+- **核心结论未决（Phase 4.1 ~ 4.2-R3）**: C1（完整 ACIS）在 Challenge Set 上未优于 C0（裸基线），
+  ECE 亦未改善；R3 排名跨 seed 翻转、方差大（24 案例 × 3 seed）。
+  需架构决策：Phase 5（扩展评测补足证据）或 Phase 6（架构重设计）。Priority: High。
+- **未提交产物（Phase 4.2-R）**: 仓库根 `phase4_2_*.txt`、`reports/phase4_2_r*.json|md`、
+  `scripts/stress_test_judge.py`，以及 `agents/judge_agent.py` 的诊断日志改动尚未提交。
+- **venv dev tools**: pytest（9.1.1）/ ruff（0.16.2）/ mypy（2.3.0）均已装入 `.venv`（2026-08-08）；pytest 当前 267 passed（2026-09-20）
 - **src/ 空目录**: 已移除（2026-08-08，清理 commit 89fa630）

@@ -6,19 +6,21 @@ LangGraph 不可用或执行失败时自动回退规则编排。
 
 主图流程：`context → perception → memory → experts → debate → critic → judge`（含多轮辩论条件循环 `rebuttal`）。
 
-## 当前状态（2026-08-08）
+## 当前状态（2026-09-20）
 
 | 项目 | 状态 |
 |---|---|
-| 版本 | ACIS 2.1E — Evidence Platform；Sprint 01 ~ 06 已完成（Sprint 05 Experiment Manager、Sprint 06 Research Evaluation Infrastructure） |
+| 版本 | ACIS 2.1E — Evidence Platform；Sprint 01 ~ 06 已完成；当前处于 **Phase 4.2-R（Challenge Set 真实 Agent 评测）**，等待架构决策（Phase 5 扩展评测 / Phase 6 架构重设计） |
 | 模块冻结 | Planner / Judge / Debate / Critic / Tool Router / Memory / DecisionOutput / Unified Trace / Perception Agents 冻结 2.1（详见 `context/ARCHITECTURE_STATE.md`） |
-| 单元测试 | `pytest`：**222 passed**（15 个测试文件 + `conftest.py`） |
+| 单元测试 | `pytest`：**267 passed**（2026-09-20 实测） |
 | 回归 | `evals/smoke_eval.py`（3 套 × 3 场景）、`evals/fixture_eval.py`（12 场景）全绿 |
 | 基准 | `benchmarks/` 9 个数据集 / **64 案例**（52 已标注能力，一致性检查 52/52）；enriched 18 例 accuracy 1.00 |
 | 能力度量 | 7 种认知能力均可由 Trace 自动打分（0-1），见 `results/summary.md` 的 “Capability Performance” |
 | 消融 | 7 组合消融已产出（`results/ablation/`），含能力分数消融（cap_smoke） |
 | 实验管理 | `experiments/` 实验管理器：YAML 定义 / 多 seed 运行 / manifest 可复现归档 / 统计分析与论文图（见 `results/experiments/`） |
-| 已知债务 | 12 个难度案例按设计未标注（待审查）；能力打分严格度问题 3 例（详见 `context/KNOWN_DEBT.md`） |
+| 评测战役 | Challenge Set v1（24 案例）+ Phase 4.1 pilot（72 calls）+ Phase 4.2 验证（216 calls）+ 真实 Agent（216 calls）+ 稳定性/压力测试/预检（`reports/`） |
+| 关键发现 | C1（完整 ACIS）在 Challenge Set 上未显著优于 C0（裸基线），R3 排名跨 seed 翻转；R2 中 191/216 次 judge 回退 rules；R4 预检 FAIL |
+| 已知债务 | 12 个难度案例按设计未标注（待审查）；judge 端点/连接性、harness 与真实 Agent 不一致、C1≤C0 结论未决（详见 `context/KNOWN_DEBT.md`） |
 
 ## 版本演进
 
@@ -34,6 +36,18 @@ LangGraph 不可用或执行失败时自动回退规则编排。
 - **Sprint 05 — Experiment Manager**：`experiments/`（manager / schema / catalog / archive / analysis / figures），YAML 实验定义、多 seed 运行、`config.yaml` / `manifest.json` 可复现归档、`list` / `compare` / `latest` CLI（详见 `docs/EXPERIMENT_MANAGER_SPRINT_05_REPORT.md`）。
 - **Sprint 06 — Research Evaluation Infrastructure**：`experiments/analysis.py` + `figures.py` 统计检验（bootstrap 置信区间）与论文图；归档新增 `dataset_sha256` 指纹、`analysis.json`、`figures/`（详见 `docs/RESEARCH_EVAL_SPRINT_06_REPORT.md`）。
 
+### Phase 4 — Challenge Set 评测战役（2026-08-09 ~ 2026-08-31）
+
+针对"架构是否带来真实能力增量"的问题，建立 Challenge Set v1（24 案例，5 类挑战）并做多轮评测：
+
+- **Phase 4.1 pilot（2026-08-09）**：3 configs × 24 cases = 72 calls；accuracy C0 0.5611 / C1 0.5451 / C2 0.5062；仅 ECE C1 略优（0.4571）。
+- **Phase 4.2 验证（2026-08-10）**：3 seeds（42/43/44）× 3 configs × 24 cases = 216 calls；C1/C2 相对 C0 弃权率下降（41/33/31）、平均置信度上升（0.39/0.50/0.52），但 accuracy 未显著改善；1 条 malformed output。
+- **Phase 4.2-R 真实 Agent（2026-08-12）**：216 次真实链路执行中 191 次 judge 回退 rules（`APIConnectionError`）；R2 诊断定位为端点/连接性配置不一致（`reports/phase4_2_real_agent/diagnosis_judge_fallback.md`）。
+- **R3 稳定性（2026-08-16/17，rule-engine coherence judge）**：C0 accuracy 0.3623±0.1624 > C1 0.2799±0.1505、C2 0.2975±0.1247；排名跨 seed 翻转（seed42 C0>C2>C1；seed43 C1>C0>C2；seed44 C2>C1>C0）。
+- **R3 压力测试（2026-08-13）**：C1 / seed 42 / `amb_tomato_mold_blind_leaf` 30/30 PASS（单次 87.7–369.5s，均值 179.8s）。
+- **R4 预检（2026-08-30）**：harness 与真实 Agent 决策对比 **FAIL**（C0 置信度偏移 0.320、C2 0.750 且标签为 ABSTAIN vs 叶霉病）。
+
+**当前结论**：现有证据**不支持**"完整 ACIS 架构优于裸基线"；需架构师在 Phase 5（扩展评测、补足证据）与 Phase 6（架构重设计）之间做决策，决策前先解决 judge 端点配置、harness/真实一致性、评分口径三项。
 ### ACIS 2.1（2026-07-25）
 
 - Planner（`planner/`：任务分解、工具调用规划）
