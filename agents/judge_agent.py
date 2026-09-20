@@ -7,12 +7,15 @@ ACIS 2.0 增强：
 """
 from __future__ import annotations
 import json
+import logging
 import os
 from dataclasses import asdict
 from typing import Any
 from agents.types import AgentOutput, RequestContext, DebateResult, DecisionOutput
 from kg_adapter import query_kg, propose_triple, load_draft_triples
 from utils.omission import apply_omission_penalty, omission_action, omission_reason, omission_score
+
+_logger = logging.getLogger(__name__)
 
 class JudgeAgent:
     def __init__(self, use_llm: bool = False):
@@ -222,8 +225,14 @@ class JudgeAgent:
         payload = self._build_judge_payload(context, outputs, debate, kg)
         client = OpenAI(api_key=api_key, base_url=os.environ.get("DEEPSEEK_BASE_URL", "https://api.deepseek.com"))
         model = os.environ.get("AGRI_AI_JUDGE_MODEL") or os.environ.get("DEEPSEEK_MODEL", "deepseek-chat")
-        resp = client.chat.completions.create(model=model, messages=[{"role": "system", "content": self._judge_system_prompt()}, {"role": "user", "content": json.dumps(payload, ensure_ascii=False)}], temperature=0.1, response_format={"type": "json_object"})
-        llm = json.loads(resp.choices[0].message.content or "{}")
+        _logger.info(f"Judge request: base_url={client.base_url}, model={model}, temperature=0.1")
+        try:
+            resp = client.chat.completions.create(model=model, messages=[{"role": "system", "content": self._judge_system_prompt()}, {"role": "user", "content": json.dumps(payload, ensure_ascii=False)}], temperature=0.1, response_format={"type": "json_object"})
+            llm = json.loads(resp.choices[0].message.content or "{}")
+        except Exception as exc:
+            _logger.error(f"Judge exception: type={type(exc).__name__}, msg={exc!s}, cause={exc.__cause__}, base_url={client.base_url}, model={model}")
+            raise
+        _logger.info(f"Judge response: status=success, usage={self._extract_token_usage(resp)}")
         token_usage = self._extract_token_usage(resp)
         fb = self._run_rule_judge(context, outputs, debate, kg, debate_round)
         decision = str(llm.get("final_diagnosis") or llm.get("decision") or fb.decision)

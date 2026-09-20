@@ -32,6 +32,7 @@ import json
 import os
 import re
 import sys
+import time
 from dataclasses import dataclass
 from datetime import datetime, timezone
 from pathlib import Path
@@ -76,6 +77,9 @@ CONFIG_ARMS: dict[str, dict[str, Any]] = {
 
 DEFAULT_SEEDS: tuple[int, ...] = (42, 43, 44)
 CONFIG_ORDER: tuple[str, ...] = ("C0", "C1", "C2")
+
+#: Phase 4.2-R3: forced request interval (seconds) between arm runs.
+DELAY_SECONDS: float = 3.0
 
 #: Disease names present in the Challenge Set (for label normalization).
 _DISEASE_NAMES: tuple[str, ...] = (
@@ -425,6 +429,10 @@ def run_full(
                 )
             if completed % 25 == 0:
                 _write_aggregate(output_path, manifest, records)
+            # Phase 4.2-R3: forced request-interval (3s) between arm runs to
+            # lower request density; skipped after the final arm.
+            if not (seed == seeds[-1] and spec.label == configs[-1]):
+                time.sleep(DELAY_SECONDS)
 
     manifest["finished"] = datetime.now(timezone.utc).isoformat()
     manifest["completed_calls"] = completed

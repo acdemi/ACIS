@@ -46,6 +46,13 @@ from openmetaphysics.evaluation.challenge_scorer import (
 #: Config labels in a fixed display order.
 CONFIG_ORDER: tuple[str, ...] = ("C0", "C1", "C2")
 
+#: Config label -> pilot reference arm name.
+CONFIG_ARM_MAP: dict[str, str] = {
+    "C0": "c0_bare_baseline",
+    "C1": "c1_all_on",
+    "C2": "c2_no_memory",
+}
+
 #: Metrics aggregated (lower is better for ECE; the report records raw
 #: orders and the direction note for the others without judgment).
 METRICS: tuple[str, ...] = (
@@ -73,7 +80,7 @@ def _std(values: list[float]) -> float:
     return statistics.pstdev(values) if values else 0.0
 
 
-def _case_metrics(record: dict[str, Any], *, use_llm: bool) -> dict[str, float]:
+def _case_metrics(record: dict[str, Any], *, use_llm: bool) -> dict[str, Any]:
     """Phase 4 metrics for one record (factor-coverage based)."""
     factors = list(record.get("expected_key_factors") or [])
     output = {
@@ -99,11 +106,30 @@ def _case_metrics(record: dict[str, Any], *, use_llm: bool) -> dict[str, float]:
     }
 
 
-def aggregate_seed_config(
-    records: list[dict[str, Any]], *, use_llm: bool
+def scored_index(
+    results: list[dict[str, Any]], *, use_llm: bool
+) -> dict[tuple[int, str, int], dict[str, Any]]:
+    """Score every record exactly once; key = (seed, config, case_index).
+
+    One LLM coverage judgment per record; all aggregations below reuse the
+    cache so the number of API calls stays equal to the record count.
+    """
+    index: dict[tuple[int, str, int], dict[str, Any]] = {}
+    for record in results:
+        key = (
+            int(record["seed"]),
+            str(record["config"]),
+            int(record.get("case_index", 0)),
+        )
+        index[key] = _case_metrics(record, use_llm=use_llm)
+    return index
+
+
+def aggregate_scored(
+    scored: list[dict[str, Any]],
 ) -> dict[str, float]:
-    """Aggregate one (seed, config) group into the four Phase 4 metrics."""
-    scored = [_case_metrics(record, use_llm=use_llm) for record in records]
+    """Aggregate one group's per-case metrics into the four Phase 4
+    metrics."""
     if not scored:
         return {
             "accuracy": 0.0,
@@ -132,6 +158,15 @@ def aggregate_seed_config(
         "abstention_rate": round(abstention, 2),
         "coherence": round(coherence, 4),
     }
+
+
+def _record_key(record: dict[str, Any]) -> tuple[int, str, int]:
+    """Cache key for one record: (seed, config, case_index)."""
+    return (
+        int(record["seed"]),
+        str(record["config"]),
+        int(record.get("case_index", 0)),
+    )
 
 
 def group_records(
@@ -182,6 +217,7 @@ def render_report(
     Mean ± Std breakdown across seeds.
     """
     grouped = group_records(results)
+    index = scored_index(results, use_llm=use_llm)
     seeds = sorted({key[0] for key in grouped})
     pilot_configs = pilot.get("configs", {})
     pilot_rankings = pilot.get("observed_rankings", {})
@@ -217,7 +253,9 @@ def render_report(
             records = grouped.get((seed, config), [])
             if not records:
                 continue
-            aggregate = aggregate_seed_config(records, use_llm=use_llm)
+            aggregate = aggregate_scored(
+                [index[_record_key(record)] for record in records]
+            )
             for metric in METRICS:
                 per_config_values[config][metric].append(aggregate[metric])
     for config in CONFIG_ORDER:
@@ -249,8 +287,8 @@ def render_report(
                     ]
                     if not records:
                         continue
-                    aggregate = aggregate_seed_config(
-                        records, use_llm=use_llm
+                    aggregate = aggregate_scored(
+                        [index[_record_key(record)] for record in records]
                     )
                     for metric in METRICS:
                         per_metric_values[metric].append(
@@ -287,7 +325,9 @@ def render_report(
                 records = grouped.get((seed, config), [])
                 if not records:
                     continue
-                aggregate = aggregate_seed_config(records, use_llm=use_llm)
+                aggregate = aggregate_scored(
+                    [index[_record_key(record)] for record in records]
+                )
                 seed_values[config] = aggregate[metric]
             ranking = _rank(seed_values, metric=metric)
             ranking_per_seed[metric].append(ranking)
@@ -383,9 +423,9 @@ def render_report(
         "|---|---|---|---|---|",
     ]
     for config in CONFIG_ORDER:
-        values = pilot_configs.get(config, {})
+        values = pilot_configs.get(CONFIG_ARM_MAP[config], {})
         lines.append(
-            f"| {config} | {values.get('accuracy', '-'):} | "
+            f"| {config} | {values.get('accuracy', '-')} | "
             f"{values.get('ece', '-')} | "
             f"{values.get('abstention_rate', '-')} | "
             f"{values.get('coherence', '-')} |"
