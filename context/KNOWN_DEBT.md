@@ -27,5 +27,7 @@
   需架构决策：Phase 5（扩展评测补足证据）或 Phase 6（架构重设计）。Priority: High。
 - **未提交产物（Phase 4.2-R）**: 仓库根 `phase4_2_*.txt`、`reports/phase4_2_r*.json|md`、
   `scripts/stress_test_judge.py`，以及 `agents/judge_agent.py` 的诊断日志改动尚未提交。
+- **judge_agent.py ruff（既有）**: `ruff check` 报 I001（imports 排序）+ 4×BLE001 + S110（宽泛 `except`），
+  与 Phase 4.2-R 诊断改动前版本一致（未引入新问题）；属冻结 Judge 模块既有风格问题，待架构评审后统一处理。
 - **venv dev tools**: pytest（9.1.1）/ ruff（0.16.2）/ mypy（2.3.0）均已装入 `.venv`（2026-08-08）；pytest 当前 267 passed（2026-09-20）
 - **src/ 空目录**: 已移除（2026-08-08，清理 commit 89fa630）
