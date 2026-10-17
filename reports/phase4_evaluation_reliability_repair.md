@@ -1,7 +1,7 @@
 # Phase 4 Evaluation Reliability Repair
 
-> Date: 2026-10-17  
-> Branch: `fix/phase4-eval-reliability`  
+> Date: 2026-10-17
+> Branch: `work/20261017-phase4-eval-reliability`
 > Scope: Judge configuration observability, fallback semantics, retry ownership,
 > and harness/real-agent decision semantics. No benchmark case was modified and
 > no large evaluation was run.
