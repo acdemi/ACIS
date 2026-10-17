@@ -209,6 +209,9 @@ def run_arm(
             else {}
         )
         judge = _judge_payload(trace)
+        judge_confidence: Any = judge.get("confidence")
+        if judge_confidence is None:
+            judge_confidence = row.confidence
         payload = {
             "arm": arm.name,
             "arm_label": arm.label,
@@ -222,12 +225,13 @@ def run_arm(
             "intent": case.get("intent"),
             "trace_id": row.trace_id,
             "decision": str(judge.get("decision") or row.decision),
-            "confidence": float(judge.get("confidence", row.confidence)),
+            "confidence": float(judge_confidence),
             "judge_mode": judge.get("judge_mode", "rules"),
             "judge_runtime": (
                 judge.get("judge_analysis", {}).get("judge_runtime", {})
             ),
             "reasoning_trace": judge.get("reasoning_trace", ""),
+            "summary": judge.get("summary", ""),
             "action_plan": judge.get("action_plan", []),
             "runtime_seconds": row.runtime_seconds,
             "trace": trace,

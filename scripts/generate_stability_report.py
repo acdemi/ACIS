@@ -37,6 +37,7 @@ for _path in (ROOT, SRC):
     if str(_path) not in sys.path:
         sys.path.insert(0, str(_path))
 
+from decision_semantics import decision_correctness
 from openmetaphysics.evaluation.challenge_scorer import (
     calc_abstention_rate,
     calc_confidence_calibration,
@@ -55,11 +56,33 @@ CONFIG_ARM_MAP: dict[str, str] = {
 
 #: Metrics aggregated (lower is better for ECE; the report records raw
 #: orders and the direction note for the others without judgment).
-METRICS: tuple[str, ...] = (
+RANK_METRICS: tuple[str, ...] = (
     "accuracy",
     "ece",
     "abstention_rate",
     "coherence",
+)
+
+#: Human-facing names for the historical keys. ``accuracy`` means factor
+#: coverage in this report and ``coherence`` means its quantized 0-3 level.
+METRIC_LABELS: dict[str, str] = {
+    "label_accuracy": "label_accuracy",
+    "accuracy": "factor_coverage (legacy accuracy)",
+    "coherence": "factor_coverage_level (legacy coherence)",
+    "label_ece": "label_ece",
+    "ece": "factor_ece (legacy ece)",
+    "abstention_rate": "abstention_rate",
+}
+
+#: Metrics shown in the per-configuration measurement table. Only the
+#: historical ranking keys are compared with the Phase 4.1 pilot.
+METRICS: tuple[str, ...] = (
+    "label_accuracy",
+    "accuracy",
+    "ece",
+    "abstention_rate",
+    "coherence",
+    "label_ece",
 )
 
 #: Metric direction as recorded in the Phase 4.1 pilot reference
@@ -72,91 +95,136 @@ METRIC_DIRECTION: dict[str, str] = {
 }
 
 
-def _mean(values: list[float]) -> float:
-    return statistics.fmean(values) if values else 0.0
+def _mean(values: list[float | None]) -> float | None:
+    present = [value for value in values if value is not None]
+    return statistics.fmean(present) if present else None
 
 
-def _std(values: list[float]) -> float:
-    return statistics.pstdev(values) if values else 0.0
+def _std(values: list[float | None]) -> float | None:
+    present = [value for value in values if value is not None]
+    return statistics.pstdev(present) if present else None
+
+
+def _fmt(value: float | None, digits: int = 4) -> str:
+    return "–" if value is None else f"{float(value):.{digits}f}"
 
 
 def _case_metrics(record: dict[str, Any], *, use_llm: bool) -> dict[str, Any]:
-    """Phase 4 metrics for one record (factor-coverage based)."""
+    """Compute separate decision, factor, abstention, and execution metrics."""
     factors = list(record.get("expected_key_factors") or [])
+    decision = str(record.get("decision") or "")
     output = {
-        "decision": record.get("decision", ""),
+        "decision": decision,
         "reasoning_trace": record.get("reasoning_trace", ""),
+        "summary": record.get("summary", ""),
+        "action_plan": record.get("action_plan", []),
     }
     if factors:
-        coverage, coherence = calc_factor_scores(
+        coverage, factor_level = calc_factor_scores(
             output, factors, use_llm=use_llm
         )
     else:
-        coverage, coherence = 0.0, 0
+        coverage, factor_level = None, None
+    ground_truth = record.get("ground_truth")
+    label_correct = (
+        decision_correctness(str(ground_truth), decision)
+        if ground_truth is not None and decision
+        else None
+    )
+    confidence_value = record.get("confidence")
+    try:
+        confidence = float(confidence_value) if confidence_value is not None else None
+    except (TypeError, ValueError):
+        confidence = None
+    runtime = record.get("judge_runtime") or {}
+    outcome = runtime.get("outcome")
+    fallback_state = True if outcome == "fallback" else False if outcome else None
     return {
-        "decision": record.get("decision", ""),
+        "decision": decision,
         "coverage": coverage,
-        "coherence": float(coherence),
-        "correct": coverage >= 1.0,
-        "confidence": float(record.get("confidence", 0.0)),
+        "coherence": float(factor_level) if factor_level is not None else None,
+        "label_correct": label_correct,
+        "confidence": confidence,
         "abstained": bool(
-            calc_abstention_rate([{"decision": record.get("decision", "")}])
-            > 0
-        ),
+            (calc_abstention_rate([{"decision": decision}]) or 0.0) > 0
+        )
+        if decision
+        else None,
+        "judge_mode": record.get("judge_mode"),
+        "fallback_state": fallback_state,
+        "fallback_reason": runtime.get("fallback_reason_code"),
     }
 
 
 def scored_index(
     results: list[dict[str, Any]], *, use_llm: bool
 ) -> dict[tuple[int, str, int], dict[str, Any]]:
-    """Score every record exactly once; key = (seed, config, case_index).
-
-    One LLM coverage judgment per record; all aggregations below reuse the
-    cache so the number of API calls stays equal to the record count.
-    """
+    """Score every record exactly once; key = (seed, config, case_index)."""
     index: dict[tuple[int, str, int], dict[str, Any]] = {}
     for record in results:
-        key = (
-            int(record["seed"]),
-            str(record["config"]),
-            int(record.get("case_index", 0)),
-        )
+        key = _record_key(record)
         index[key] = _case_metrics(record, use_llm=use_llm)
     return index
 
 
+def _mean_optional(values: list[float]) -> float | None:
+    return statistics.fmean(values) if values else None
+
+
 def aggregate_scored(
     scored: list[dict[str, Any]],
-) -> dict[str, float]:
-    """Aggregate one group's per-case metrics into the four Phase 4
-    metrics."""
+) -> dict[str, float | None]:
+    """Aggregate separate label, factor, calibration, and abstention metrics."""
     if not scored:
         return {
-            "accuracy": 0.0,
-            "ece": 0.0,
-            "abstention_rate": 0.0,
-            "coherence": 0.0,
+            "label_accuracy": None,
+            "accuracy": None,
+            "ece": None,
+            "abstention_rate": None,
+            "coherence": None,
+            "label_ece": None,
         }
-    accuracy = _mean([row["coverage"] for row in scored])
-    ece = calc_confidence_calibration(
-        [
-            {
-                "decision": row["decision"],
-                "confidence": row["confidence"],
-                "correct": row["correct"],
-            }
-            for row in scored
-        ]
-    )
-    abstention = calc_abstention_rate(
-        [{"decision": row["decision"]} for row in scored]
-    )
-    coherence = _mean([row["coherence"] for row in scored])
+    coverage = [float(row["coverage"]) for row in scored if row["coverage"] is not None]
+    levels = [float(row["coherence"]) for row in scored if row["coherence"] is not None]
+    label_values = [
+        1.0 if row["label_correct"] else 0.0
+        for row in scored
+        if row["label_correct"] is not None
+    ]
+    factor_pairs = [
+        {
+            "decision": row["decision"],
+            "confidence": row["confidence"],
+            "correct": float(row["coverage"]) >= 1.0,
+        }
+        for row in scored
+        if row["coverage"] is not None and row["confidence"] is not None
+    ]
+    label_pairs = [
+        {
+            "decision": row["decision"],
+            "confidence": row["confidence"],
+            "correct": row["label_correct"],
+        }
+        for row in scored
+        if row["label_correct"] is not None and row["confidence"] is not None
+    ]
+    abstention_values = [
+        1.0 if row["abstained"] else 0.0 for row in scored if row["abstained"] is not None
+    ]
+    factor_ece = calc_confidence_calibration(factor_pairs) if factor_pairs else None
+    label_ece = calc_confidence_calibration(label_pairs) if label_pairs else None
     return {
-        "accuracy": round(accuracy, 4),
-        "ece": round(ece, 4),
-        "abstention_rate": round(abstention, 2),
-        "coherence": round(coherence, 4),
+        "label_accuracy": _mean_optional(label_values),
+        "accuracy": _mean_optional(coverage),
+        "ece": factor_ece,
+        "abstention_rate": (
+            round(100.0 * (mean_abstention or 0.0), 2)
+            if (mean_abstention := _mean_optional(abstention_values)) is not None
+            else None
+        ),
+        "coherence": _mean_optional(levels),
+        "label_ece": label_ece,
     }
 
 
@@ -180,15 +248,18 @@ def group_records(
 
 
 def _rank(
-    values: dict[str, float], *, metric: str
+    values: dict[str, float | None], *, metric: str
 ) -> list[str]:
     """Order configs by one metric (direction from the reference notes)."""
     ascending = METRIC_DIRECTION.get(metric, "desc") == "asc"
-    return sorted(
-        values,
+    present = [config for config in values if values[config] is not None]
+    missing = [config for config in values if values[config] is None]
+    ordered = sorted(
+        present,
         key=lambda config: (values[config], config),
         reverse=not ascending,
     )
+    return ordered + sorted(missing)
 
 
 def load_pilot_reference(path: Path) -> dict[str, Any]:
@@ -244,7 +315,7 @@ def render_report(
         "| config | metric | mean | std |",
         "|---|---|---|---|",
     ]
-    per_config_values: dict[str, dict[str, list[float]]] = {}
+    per_config_values: dict[str, dict[str, list[float | None]]] = {}
     for config in CONFIG_ORDER:
         per_config_values[config] = {
             metric: [] for metric in METRICS
@@ -262,9 +333,52 @@ def render_report(
         for metric in METRICS:
             values = per_config_values[config][metric]
             lines.append(
-                f"| {config} | {metric} | {_mean(values):.4f} | "
-                f"{_std(values):.4f} |"
+                f"| {config} | {METRIC_LABELS[metric]} | "
+                f"{_fmt(_mean(values))} | {_fmt(_std(values))} |"
             )
+
+    lines += [
+        "",
+        "## 1a. Judge execution reliability",
+        "",
+        "| config | judge_mode distribution | fallback known | fallback rate | unknown | reasons |",
+        "|---|---|---|---|---|---|",
+    ]
+    for config in CONFIG_ORDER:
+        config_records = [
+            record for record in results if str(record.get("config")) == config
+        ]
+        if not config_records:
+            continue
+        modes: dict[str, int] = {}
+        reasons: dict[str, int] = {}
+        fallback_values: list[bool] = []
+        unknown = 0
+        for record in config_records:
+            mode = str(record.get("judge_mode") or "unknown")
+            modes[mode] = modes.get(mode, 0) + 1
+            row = index[_record_key(record)]
+            if row["fallback_state"] is None:
+                unknown += 1
+            else:
+                fallback_values.append(bool(row["fallback_state"]))
+                if row["fallback_state"]:
+                    reason = str(row["fallback_reason"] or "unknown")
+                    reasons[reason] = reasons.get(reason, 0) + 1
+        fallback_rate = (
+            100.0 * sum(fallback_values) / len(fallback_values)
+            if fallback_values
+            else None
+        )
+        mode_text = ", ".join(f"{key}={value}" for key, value in sorted(modes.items()))
+        reason_text = ", ".join(
+            f"{key}={value}" for key, value in sorted(reasons.items())
+        ) or "–"
+        lines.append(
+            f"| {config} | {mode_text} | {len(fallback_values)} | "
+            f"{'–' if fallback_rate is None else f'{fallback_rate:.2f}%'} | "
+            f"{unknown} | {reason_text} |"
+        )
 
     if group_by == "difficulty_category":
         lines += [
@@ -276,7 +390,7 @@ def render_report(
         ]
         for config in CONFIG_ORDER:
             for difficulty in (1, 2, 3):
-                per_metric_values: dict[str, list[float]] = {
+                per_metric_values: dict[str, list[float | None]] = {
                     metric: [] for metric in METRICS
                 }
                 for seed in seeds:
@@ -299,8 +413,8 @@ def render_report(
                     if not values:
                         continue
                     lines.append(
-                        f"| {config} | {difficulty} | {metric} | "
-                        f"{_mean(values):.4f} | {_std(values):.4f} |"
+                        f"| {config} | {difficulty} | {METRIC_LABELS[metric]} | "
+                        f"{_fmt(_mean(values))} | {_fmt(_std(values))} |"
                     )
 
     lines += [
@@ -316,11 +430,11 @@ def render_report(
         "|---|---|---|",
     ]
     ranking_per_seed: dict[str, list[list[str]]] = {
-        metric: [] for metric in METRICS
+        metric: [] for metric in RANK_METRICS
     }
     for seed in seeds:
-        for metric in METRICS:
-            seed_values: dict[str, float] = {}
+        for metric in RANK_METRICS:
+            seed_values: dict[str, float | None] = {}
             for config in CONFIG_ORDER:
                 records = grouped.get((seed, config), [])
                 if not records:
@@ -332,7 +446,8 @@ def render_report(
             ranking = _rank(seed_values, metric=metric)
             ranking_per_seed[metric].append(ranking)
             lines.append(
-                f"| run_{seed} | {metric} | {' > '.join(ranking)} |"
+                f"| run_{seed} | {METRIC_LABELS[metric]} | "
+                f"{' > '.join(ranking)} |"
             )
 
     lines += [
@@ -346,19 +461,23 @@ def render_report(
         "|---|---|---|",
     ]
     pairwise: dict[tuple[str, str, str], int] = {}
-    for metric in METRICS:
-        for left in CONFIG_ORDER:
-            for right in CONFIG_ORDER:
+    available_configs = sorted({config for rankings in ranking_per_seed.values() for ranking in rankings for config in ranking})
+    for metric in RANK_METRICS:
+        for left in available_configs:
+            for right in available_configs:
                 if left >= right:
                     continue
+                compared = 0
                 wins = 0
                 for ranking in ranking_per_seed[metric]:
-                    if ranking.index(left) < ranking.index(right):
-                        wins += 1
+                    if left in ranking and right in ranking:
+                        compared += 1
+                        if ranking.index(left) < ranking.index(right):
+                            wins += 1
                 pairwise[(metric, left, right)] = wins
                 lines.append(
-                    f"| {metric} | {left} vs {right} | "
-                    f"{left} ahead in {wins}/{len(seeds)} seeds |"
+                    f"| {METRIC_LABELS[metric]} | {left} vs {right} | "
+                    f"{left} ahead in {wins}/{compared} seeds |"
                 )
 
     # empirical majority ranking per metric
@@ -377,10 +496,11 @@ def render_report(
             "| metric | pilot observed ranking |",
             "|---|---|",
         ]
-        for metric in METRICS:
+        for metric in RANK_METRICS:
             pilot_ranking = pilot_rankings.get(metric, [])
             lines.append(
-                f"| {metric} | {' > '.join(pilot_ranking) or '-'} |"
+                f"| {METRIC_LABELS[metric]} | "
+                f"{' > '.join(pilot_ranking) or '-'} |"
             )
     else:
         lines += [
@@ -393,14 +513,12 @@ def render_report(
             ),
             "|---|---|---|---|",
         ]
-        for metric in METRICS:
+        for metric in RANK_METRICS:
             pilot_ranking = pilot_rankings.get(metric, [])
             majority: list[tuple[int, str]] = []
-            for config in CONFIG_ORDER:
-                rank_sum = sum(
-                    ranking.index(config)
-                    for ranking in ranking_per_seed[metric]
-                )
+            for config in available_configs:
+                rows = [ranking for ranking in ranking_per_seed[metric] if config in ranking]
+                rank_sum = sum(ranking.index(config) for ranking in rows)
                 majority.append((rank_sum, config))
             majority_ranking = [
                 config for _, config in sorted(majority)
@@ -411,7 +529,8 @@ def render_report(
                 else "FLIP"
             )
             lines.append(
-                f"| {metric} | {' > '.join(pilot_ranking) or '-'} | "
+                f"| {METRIC_LABELS[metric]} | "
+                f"{' > '.join(pilot_ranking) or '-'} | "
                 f"{' > '.join(majority_ranking)} | {match} |"
             )
 
@@ -419,7 +538,7 @@ def render_report(
         "",
         "## 4. Pilot reference values (Phase 4.1, recorded)",
         "",
-        "| config | accuracy | ECE | abstention rate | coherence |",
+        "| config | factor coverage (legacy accuracy) | factor ECE (legacy ece) | abstention rate | factor level (legacy coherence) |",
         "|---|---|---|---|---|",
     ]
     for config in CONFIG_ORDER:

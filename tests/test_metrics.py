@@ -285,7 +285,8 @@ def test_aggregate_metrics_means_and_sums():
     aggregate = aggregate_metrics([first, second, unlabeled])
     assert aggregate["cases"] == 3
     assert aggregate["scored_cases"] == 2
-    assert aggregate["accuracy"] == pytest.approx(0.5)
+    assert aggregate["label_accuracy"] == pytest.approx(0.5)
+    assert aggregate["accuracy"] == aggregate["label_accuracy"]
     assert aggregate["average_confidence"] == pytest.approx(0.72)
     assert aggregate["average_runtime"] == pytest.approx(2.0)
     assert aggregate["planner_usage"] == pytest.approx(1.0)
@@ -342,7 +343,7 @@ def test_write_summary_markdown(tmp_path: Path):
     assert "# Evaluation Summary" in text
     assert "## Configuration" in text
     assert "## Metrics" in text
-    assert "| accuracy |" in text
+    assert "| label_accuracy (legacy key: accuracy) |" in text
     assert "| planner | on |" in text
     assert "| debate | on |" in text
     assert "| memory | on |" in text
@@ -411,3 +412,11 @@ def test_accuracy_uses_final_judge_decision_not_pathology_claim():
     )
     assert compute_trace_metrics(trace, expected="叶霉病").accuracy == 0.0
     assert compute_trace_metrics(trace, expected="证据不足").accuracy == 1.0
+
+
+def test_missing_judge_event_is_unscored_not_wrong_or_zero_confidence() -> None:
+    trace = Trace(trace_id="missing-judge", timestamp=FIXED_TIME)
+    trace.append(_event("request", {"query": "番茄叶片黄斑"}))
+    row = compute_trace_metrics(trace, expected="叶霉病")
+    assert row.accuracy is None
+    assert row.confidence is None

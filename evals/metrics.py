@@ -33,7 +33,7 @@ class CaseMetrics:
     expected: str | None
     decision: str
     accuracy: float | None
-    confidence: float
+    confidence: float | None
     runtime_seconds: float
     planner_usage: float
     tool_usage: float
@@ -57,19 +57,29 @@ def compute_trace_metrics(
 ) -> CaseMetrics:
     """Derive one case's metrics from its unified Trace."""
     judge = _judge_payload(trace)
+    judge_present = bool(judge)
     metrics = _metrics_payload(trace)
     planner = metrics.get("planner", {})
     tool_router = metrics.get("tool_router", {})
     tool_requests = int(tool_router.get("requests", 0))
     token_usage = judge.get("token_usage") or {}
-    decision = str(judge.get("decision", ""))
+    decision = str(judge.get("decision", "")) if judge_present else ""
+    confidence_value = judge.get("confidence")
+    try:
+        confidence = (
+            float(confidence_value)
+            if judge_present and confidence_value is not None
+            else None
+        )
+    except (TypeError, ValueError):
+        confidence = None
     return CaseMetrics(
         case_id=case_id,
         trace_id=trace.trace_id,
         expected=expected,
         decision=decision,
-        accuracy=_accuracy(expected, decision),
-        confidence=float(judge.get("confidence", 0.0)),
+        accuracy=_accuracy(expected, decision or None),
+        confidence=confidence,
         runtime_seconds=max(0.0, runtime_seconds),
         planner_usage=1.0 if bool(planner.get("enabled")) else 0.0,
         tool_usage=1.0 if tool_requests > 0 else 0.0,
@@ -95,8 +105,11 @@ def aggregate_metrics(rows: list[CaseMetrics]) -> dict[str, float | int | None]:
     return {
         "cases": len(rows),
         "scored_cases": len(scored),
-        "accuracy": _mean(scored),
-        "average_confidence": _mean([row.confidence for row in rows]),
+        "label_accuracy": _mean(scored),
+        "accuracy": _mean(scored),  # compatibility alias; prefer label_accuracy
+        "average_confidence": _mean(
+            [row.confidence for row in rows if row.confidence is not None]
+        ),
         "average_runtime": _mean([row.runtime_seconds for row in rows]),
         "planner_usage": _mean([row.planner_usage for row in rows]),
         "tool_usage": _mean([row.tool_usage for row in rows]),

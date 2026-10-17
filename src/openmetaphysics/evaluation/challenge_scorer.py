@@ -7,8 +7,8 @@ Introduces three metrics that go beyond the saturated accuracy signal
   decision confidence vs. observed correctness.
 - :func:`calc_abstention_rate` — fraction of outputs that abstain
   (``证据不足`` / ``无法定论`` style decisions) instead of guessing.
-- :func:`calc_reasoning_coherence` — 0-3 score measuring whether the output
-  reasoning covers the case's expected key factors. Uses the existing
+- :func:`calc_reasoning_coherence` — legacy name for a 0-3 quantized
+  factor-coverage level. It does not measure logical consistency. Uses the existing
   ``deepseek-v4-flash`` model via the OpenAI-compatible gateway when
   ``DEEPSEEK_API_KEY`` is set, and falls back to a deterministic keyword
   rule engine over :data:`FACTOR_ALIASES` otherwise. The rule fallback keeps
@@ -26,6 +26,7 @@ configuration, or the Phase 3 benchmark cases.
 from __future__ import annotations
 
 import json
+import math
 import os
 from collections.abc import Mapping, Sequence
 from typing import Any
@@ -114,31 +115,37 @@ def calc_confidence_calibration(
     agent_outputs: Sequence[Any],
     *,
     bins: int = ECE_BINS,
-) -> float:
+) -> float | None:
     """Expected Calibration Error over agent outputs.
 
     Each output must carry a numeric ``confidence`` and a correctness label,
     given either directly as ``correct`` (bool) or derived from
     ``expected`` + ``decision`` (substring containment, matching the
     Phase 3 accuracy convention). Outputs without a label are excluded from
-    the estimate. Returns ``0.0`` when no labeled output remains.
+    the estimate. Returns ``None`` when no labeled output remains; missing
+    calibration data must not be interpreted as perfect calibration.
 
     Args:
         agent_outputs: sequence of dicts / dataclass-like outputs.
         bins: number of confidence bins (default 10).
 
     Returns:
-        ECE in ``[0.0, 1.0]`` — lower is better calibrated.
+        ECE in ``[0.0, 1.0]``, or ``None`` when no labeled output exists.
     """
-    labeled = [
-        (float(_confidence(out)), _correctness(out))
-        for out in agent_outputs
-        if _has_correctness(out)
-    ]
-    if not labeled:
-        return 0.0
     if bins < 1:
         raise ChallengeScoringError(f"bins must be >= 1, got {bins}")
+    labeled: list[tuple[float, bool]] = []
+    for out in agent_outputs:
+        if not _has_correctness(out):
+            continue
+        confidence = float(_confidence(out))
+        if not math.isfinite(confidence) or not 0.0 <= confidence <= 1.0:
+            raise ChallengeScoringError(
+                f"confidence must be finite and in [0,1], got {confidence!r}"
+            )
+        labeled.append((confidence, _correctness(out)))
+    if not labeled:
+        return None
     bin_size = 1.0 / bins
     bin_counts = [0] * bins
     bin_accs = [0.0] * bins
@@ -174,18 +181,28 @@ def normalize_decision_label(
     return _shared_normalize_decision_label(output, known_labels=known_labels)
 
 
-def calc_abstention_rate(agent_outputs: Sequence[Any]) -> float:
-    """Fraction of outputs that abstain instead of committing to a decision.
+def calc_abstention_rate(agent_outputs: Sequence[Any]) -> float | None:
+    """Fraction of valid outputs that abstain instead of committing.
 
     An output abstains when its ``abstained`` flag is truthy or its
     ``decision`` / ``claim`` text matches the abstention vocabulary
     (``证据不足``, ``无法定论``, ...). Returns a percentage in
-    ``[0.0, 100.0]``; an empty sequence yields ``0.0``.
+    ``[0.0, 100.0]``. Returns ``None`` when no output carries a decision
+    text or explicit abstention flag; missing output is not "no abstention".
     """
-    if not agent_outputs:
-        return 0.0
-    abstained = sum(1 for out in agent_outputs if _is_abstention(out))
-    return round(100.0 * abstained / len(agent_outputs), 2)
+    valid = [
+        out
+        for out in agent_outputs
+        if _decision_text(out).strip()
+        or (
+            isinstance(out, Mapping)
+            and out.get("abstained") is not None
+        )
+    ]
+    if not valid:
+        return None
+    abstained = sum(1 for out in valid if _is_abstention(out))
+    return round(100.0 * abstained / len(valid), 2)
 
 
 def calc_factor_scores(
@@ -230,7 +247,7 @@ def calc_factor_coverage(
     Uses the same coverage judgment as :func:`calc_reasoning_coherence`
     (LLM judge with rule fallback) but returns the raw fraction in
     ``[0.0, 1.0]`` instead of the quantized 0-3 score. This is the
-    coverage-based accuracy of one case.
+    factor coverage fraction of one case. It is not a label-accuracy metric.
 
     Args:
         agent_output: a single dict / dataclass-like output.
@@ -255,8 +272,9 @@ def calc_reasoning_coherence(
     *,
     use_llm: bool = True,
 ) -> int:
-    """Score how well an output's reasoning covers the expected key factors.
+    """Legacy API: return the quantized factor-coverage level.
 
+    Despite the historical name, this does not measure logical consistency.
     Coverage is judged factor-by-factor, then mapped to a 0-3 scale with
     round-half-up on ``3 * covered / len(factors)``:
 
@@ -298,14 +316,29 @@ def _factor_coverage(
     *,
     use_llm: bool,
 ) -> dict[str, bool]:
-    """Per-factor coverage via the LLM judge with rule fallback."""
+    """Per-factor coverage of the final user-visible decision output.
+
+    ``action_plan`` is a formal structured output field, so a non-empty action
+    plan covers that factor without relying on keyword presence. Other factors
+    are judged from decision, reasoning, and action-plan text.
+    """
     output_text = _reasoning_text(agent_output)
     if use_llm and os.environ.get("DEEPSEEK_API_KEY", "").strip():
         try:
-            return _llm_factor_coverage(output_text, list(expected_factors))
+            coverage = _llm_factor_coverage(
+                output_text, list(expected_factors)
+            )
         except Exception:  # noqa: BLE001  fallback is the documented contract
-            return _rule_factor_coverage(output_text, expected_factors)
-    return _rule_factor_coverage(output_text, expected_factors)
+            coverage = _rule_factor_coverage(output_text, expected_factors)
+    else:
+        coverage = _rule_factor_coverage(output_text, expected_factors)
+    if "action_plan" in expected_factors:
+        data = _as_dict(agent_output)
+        action_plan = data.get("action_plan")
+        coverage["action_plan"] = isinstance(action_plan, list) and any(
+            isinstance(item, str) and item.strip() for item in action_plan
+        )
+    return coverage
 
 
 # ---------------------------------------------------------------------------
@@ -327,6 +360,7 @@ def _as_dict(output: Any) -> dict[str, Any]:
             "abstained",
             "reasoning_trace",
             "summary",
+            "action_plan",
         )
         if hasattr(output, key)
     }
@@ -342,7 +376,13 @@ def _reasoning_text(output: Any) -> str:
     reasoning = str(
         data.get("reasoning_trace") or data.get("summary") or ""
     )
-    return f"{decision} {reasoning}"
+    action_plan = data.get("action_plan")
+    action_text = (
+        " ".join(str(item) for item in action_plan if str(item).strip())
+        if isinstance(action_plan, list)
+        else ""
+    )
+    return f"{decision} {reasoning} {action_text}".strip()
 
 
 def _confidence(output: Any) -> float:

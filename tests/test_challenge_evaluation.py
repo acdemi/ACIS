@@ -262,7 +262,9 @@ def test_challenge_run_skips_completed_arm(
 # ---------------------------------------------------------------------------
 
 
-def _write_fake_raw(arm_dir: Path, raw: dict[str, Any]) -> None:
+def _write_fake_raw(
+    arm_dir: Path, raw: dict[str, Any], *, use_llm_judge: bool | None = None
+) -> None:
     arm_dir.mkdir(parents=True, exist_ok=True)
     (arm_dir / "run_manifest.json").write_text(
         json.dumps(
@@ -271,6 +273,7 @@ def _write_fake_raw(arm_dir: Path, raw: dict[str, Any]) -> None:
                 "label": "Fake",
                 "description": "fake arm",
                 "seed": 42,
+                "use_llm_judge": use_llm_judge,
             },
             ensure_ascii=False,
         ),
@@ -337,10 +340,11 @@ def test_report_generates_markdown_table(tmp_path: Path) -> None:
     build = challenge_report.build_report(raw_dir, output, use_llm=False)
     assert build == output
     text = output.read_text(encoding="utf-8")
-    assert "Aggregate Results" in text
+    assert "Aggregate Metrics" in text
     assert "c1_all_on" in text
     assert "c0_bare_baseline" in text
-    assert "accuracy" in text
+    assert "label accuracy" in text
+    assert "factor coverage" in text
     assert "Per-Group Breakdown" in text
     assert "incomplete" in text
 
@@ -377,3 +381,167 @@ def test_report_no_raw_outputs_errors(tmp_path: Path) -> None:
         challenge_report.build_report(
             tmp_path / "missing", tmp_path / "r.md", use_llm=False
         )
+
+
+def test_score_case_separates_label_accuracy_from_factor_coverage() -> None:
+    raw = _fake_raw_case(
+        "ms_tomato_blight_stem",
+        "multi_step",
+        ["concentric_ring", "action_plan"],
+        "病理判断首选：番茄早疫病",
+        0.75,
+    )
+    raw["ground_truth"] = "早疫病"
+    raw["reasoning_trace"] = ""
+    raw["action_plan"] = ["清理病残体"]
+
+    result = challenge_report.score_case(raw, use_llm=False)
+
+    assert result.label_correct is True
+    assert result.factor_coverage == 0.5
+    assert result.factor_coverage_level == 2
+
+
+def test_missing_output_is_unscored_not_zero(tmp_path: Path) -> None:
+    raw = _fake_raw_case(
+        "missing-output",
+        "incomplete",
+        ["evidence_insufficient"],
+        decision="",
+        confidence=0.0,
+    )
+    raw["reasoning_trace"] = ""
+    raw["action_plan"] = []
+    raw["ground_truth"] = None
+    result = challenge_report.score_case(raw, use_llm=False)
+    assert result.label_correct is None
+    assert result.factor_coverage is None
+    assert result.factor_coverage_level is None
+
+
+def test_judge_fallback_rate_and_reason_are_reported(tmp_path: Path) -> None:
+    raw_dir = tmp_path / "raw"
+    raw = _fake_raw_case(
+        "fallback-case",
+        "multi_step",
+        ["action_plan"],
+        "病理判断首选：番茄早疫病",
+        0.75,
+    )
+    raw["ground_truth"] = "早疫病"
+    raw["action_plan"] = ["清理病残体"]
+    raw["judge_runtime"] = {
+        "outcome": "fallback",
+        "fallback_reason_code": "authentication_error",
+    }
+    _write_fake_raw(raw_dir / "c1_all_on", raw, use_llm_judge=True)
+    output = challenge_report.build_report(
+        raw_dir, tmp_path / "fallback.md", use_llm=False
+    )
+    text = output.read_text(encoding="utf-8")
+    assert "Judge Execution Reliability" in text
+    assert "100.00%" in text
+    assert "authentication_error=1" in text
+
+
+def test_legacy_rules_mode_is_inferred_fallback_when_llm_requested(tmp_path: Path) -> None:
+    raw_dir = tmp_path / "raw"
+    raw = _fake_raw_case(
+        "legacy-fallback",
+        "multi_step",
+        ["action_plan"],
+        "病理判断首选：番茄早疫病",
+        0.75,
+    )
+    raw["ground_truth"] = "早疫病"
+    raw["action_plan"] = ["清理病残体"]
+    raw["judge_runtime"] = {}
+    _write_fake_raw(raw_dir / "c1_all_on", raw, use_llm_judge=True)
+    result = challenge_report.score_case(raw, use_llm=False, llm_requested=True)
+    assert result.fallback_state is True
+    assert result.fallback_reason == "legacy_inferred_rules_fallback"
+
+
+def test_conflicting_reasoning_and_label_are_reported_separately() -> None:
+    raw = _fake_raw_case(
+        "contradictory",
+        "ambiguity",
+        ["concentric_ring", "high_humidity"],
+        "病理判断首选：番茄叶霉病",
+        0.9,
+    )
+    raw["ground_truth"] = "早疫病"
+    raw["reasoning_trace"] = "存在同心轮纹，且湿度高，但仍选择叶霉病。"
+    result = challenge_report.score_case(raw, use_llm=False)
+    assert result.label_correct is False
+    assert result.factor_coverage == 1.0
+
+
+def test_abstention_behavior_separates_correct_and_false_abstention() -> None:
+    expected_abstain = _fake_raw_case(
+        "inc_cucumber_unspecified",
+        "incomplete",
+        ["evidence_insufficient", "info_request"],
+        "无法定论，需要补充症状",
+        0.3,
+    )
+    expected_abstain["ground_truth"] = "证据不足"
+    false_abstain = _fake_raw_case(
+        "conf_tomato_blight_cool_rain",
+        "conflicting",
+        ["concentric_ring", "risk_priority"],
+        "证据不足，暂不诊断",
+        0.4,
+    )
+    false_abstain["ground_truth"] = "早疫病"
+    source = challenge_report.ArmSource(
+        arm="c1_all_on",
+        manifest={"label": "C1", "description": "test", "use_llm_judge": False},
+        cases=[expected_abstain, false_abstain],
+    )
+    aggregate = challenge_report.aggregate_arm(source, use_llm=False)
+    assert aggregate.abstention_rate == 100.0
+    assert aggregate.correct_abstention_rate == 100.0
+    assert aggregate.false_abstention_rate == 100.0
+    assert aggregate.label_accuracy == 0.5
+
+
+def test_replay_precheck_trace_under_metric_contract() -> None:
+    trace_path = (
+        Path(__file__).resolve().parent.parent
+        / "reports"
+        / "phase4_real_agent_consistency_20261017"
+        / "stop_probe_logs"
+        / "precheck_seed42"
+        / "c1_all_on"
+        / "runner"
+        / "traces"
+        / "d432f0d40e704dd89cab6dd508185913.json"
+    )
+    trace = json.loads(trace_path.read_text(encoding="utf-8"))
+    judge = trace["judge"][0]
+    raw = {
+        "arm": "c1_all_on",
+        "arm_label": "C1",
+        "case_id": "ms_tomato_blight_stem",
+        "group": "multi_step",
+        "ground_truth": "早疫病",
+        "expected_key_factors": [
+            "concentric_ring",
+            "stem_lesion",
+            "fruit_stage",
+            "action_plan",
+        ],
+        "decision": judge["decision"],
+        "confidence": judge["confidence"],
+        "judge_mode": judge["judge_mode"],
+        "judge_runtime": judge["judge_analysis"]["judge_runtime"],
+        "reasoning_trace": judge.get("reasoning_trace", ""),
+        "action_plan": judge.get("action_plan", []),
+    }
+    result = challenge_report.score_case(raw, use_llm=False, llm_requested=True)
+    assert result.label_correct is True
+    assert result.factor_coverage == 0.25
+    assert result.factor_coverage_level == 1
+    assert result.fallback_state is True
+    assert result.fallback_reason == "authentication_error"

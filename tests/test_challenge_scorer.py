@@ -107,15 +107,15 @@ def test_calibration_unlabeled_outputs_excluded() -> None:
         {"decision": "诊断B", "confidence": 0.1},  # no label
         {"confidence": 0.8},  # no decision, no label
     ]
-    assert calc_confidence_calibration(outputs) == 0.0
+    assert calc_confidence_calibration(outputs) is None
     # a single labeled output deviates by |acc - conf| only
     single = [{"decision": "诊断A", "confidence": 0.9, "correct": True}]
     assert calc_confidence_calibration(single) == 0.1
 
 
-def test_calibration_empty_inputs_zero() -> None:
-    assert calc_confidence_calibration([]) == 0.0
-    assert calc_confidence_calibration([{"decision": "x"}]) == 0.0
+def test_calibration_empty_inputs_are_unscored() -> None:
+    assert calc_confidence_calibration([]) is None
+    assert calc_confidence_calibration([{"decision": "x"}]) is None
 
 
 def test_calibration_rejects_non_numeric_confidence() -> None:
@@ -162,7 +162,7 @@ def test_abstention_rate_claim_field() -> None:
 def test_abstention_rate_all_or_none() -> None:
     assert calc_abstention_rate([{"decision": "不确定"}]) == 100.0
     assert calc_abstention_rate([{"decision": "诊断A"}, {"decision": "诊断B"}]) == 0.0
-    assert calc_abstention_rate([]) == 0.0
+    assert calc_abstention_rate([]) is None
 
 
 # ---------------------------------------------------------------------------
@@ -291,3 +291,36 @@ def test_abstention_label_is_not_reinterpreted_as_disease() -> None:
         known_labels=("叶霉病", "早疫病", "霜霉病"),
     )
     assert label == "ABSTAIN"
+
+
+def test_action_plan_factor_uses_structured_action_plan_field() -> None:
+    output = {
+        "decision": "病理判断首选：番茄叶霉病",
+        "reasoning_trace": "",
+        "action_plan": ["清理病残体", "通风降湿"],
+    }
+    from openmetaphysics.evaluation.challenge_scorer import calc_factor_coverage
+    assert calc_factor_coverage(output, ["action_plan"], use_llm=False) == 1.0
+
+
+def test_calibration_without_labels_is_unscored_not_perfect() -> None:
+    assert calc_confidence_calibration([]) is None
+    assert calc_confidence_calibration([{"decision": "x"}]) is None
+
+
+@pytest.mark.parametrize("confidence", [-0.1, 1.1, float("nan")])
+def test_calibration_rejects_out_of_contract_confidence(confidence: float) -> None:
+    with pytest.raises(ChallengeScoringError):
+        calc_confidence_calibration(
+            [{"decision": "x", "confidence": confidence, "correct": True}]
+        )
+
+
+def test_abstention_rate_without_valid_decisions_is_unscored() -> None:
+    assert calc_abstention_rate([]) is None
+    assert calc_abstention_rate([{"decision": ""}]) is None
+
+
+def test_calibration_rejects_invalid_bins_even_when_empty() -> None:
+    with pytest.raises(ChallengeScoringError):
+        calc_confidence_calibration([], bins=0)

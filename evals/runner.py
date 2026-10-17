@@ -357,7 +357,7 @@ def config_from_args(args: argparse.Namespace) -> EvalConfig:
 
 def _report_run(result: EvaluationResult) -> None:
     print(f"evaluation complete: {len(result.rows)} cases")
-    print(f"  accuracy={result.aggregate.get('accuracy')}")
+    print(f"  label_accuracy={result.aggregate.get('label_accuracy')}")
     print(f"  metrics.csv: {result.csv_path}")
     print(f"  summary.md:  {result.summary_path}")
     if result.trace_dir is not None:

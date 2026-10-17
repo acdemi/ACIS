@@ -98,8 +98,8 @@ def write_summary_markdown(
         "| metric | value |",
         "|---|---|",
         (
-            "| accuracy | "
-            f"{_fmt_rate(aggregate.get('accuracy'))} "
+            "| label_accuracy (legacy key: accuracy) | "
+            f"{_fmt_rate(aggregate.get('label_accuracy', aggregate.get('accuracy')))} "
             f"({aggregate.get('scored_cases', 0)}/{aggregate.get('cases', 0)} scored) |"
         ),
         f"| average_confidence | {_fmt_rate(aggregate.get('average_confidence'))} |",
@@ -138,7 +138,7 @@ def write_summary_markdown(
         "## Per-case",
         "",
         (
-            "| case_id | accuracy | confidence | runtime_s | planner | tool | "
+            "| case_id | label_accuracy | confidence | runtime_s | planner | tool | "
             "memory_hits | rounds | counterfactual | omission | expected | decision |"
         ),
         "|---|---|---|---|---|---|---|---|---|---|---|---|",
@@ -158,7 +158,7 @@ def _row_dict(row: CaseMetrics) -> dict[str, Any]:
         "expected": row.expected if row.expected is not None else "",
         "decision": row.decision,
         "accuracy": _cell(row.accuracy),
-        "confidence": round(row.confidence, 4),
+        "confidence": _cell(row.confidence),
         "runtime_seconds": round(row.runtime_seconds, 4),
         "planner_usage": round(row.planner_usage, 4),
         "tool_usage": round(row.tool_usage, 4),
@@ -196,7 +196,7 @@ def _aggregate_row(aggregate: dict[str, float | int | None]) -> dict[str, Any]:
 
 def _case_table_row(row: CaseMetrics) -> str:
     return (
-        f"| {row.case_id} | {_fmt_rate(row.accuracy)} | {row.confidence:.2f} | "
+        f"| {row.case_id} | {_fmt_rate(row.accuracy)} | {_fmt_rate(row.confidence)} | "
         f"{row.runtime_seconds:.3f} | {row.planner_usage:.2f} | {row.tool_usage:.2f} | "
         f"{row.memory_hits} | {row.debate_rounds} | {row.counterfactual_count} | "
         f"{row.collective_omission_count} | "

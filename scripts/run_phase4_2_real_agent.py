@@ -207,6 +207,7 @@ def _real_record(
         "judge_mode": raw.get("judge_mode", "rules"),
         "judge_runtime": raw.get("judge_runtime", {}),
         "reasoning_trace": raw.get("reasoning_trace", ""),
+        "summary": raw.get("summary", ""),
         "action_plan": raw.get("action_plan", []),
         "runtime_seconds": raw.get("runtime_seconds", 0.0),
         "trace_id": raw.get("trace_id", ""),
@@ -277,6 +278,7 @@ def run_real_agent(
                     judge.get("judge_analysis", {}).get("judge_runtime", {})
                 )
                 raw["reasoning_trace"] = judge.get("reasoning_trace", "")
+                raw["summary"] = judge.get("summary", "")
                 raw["action_plan"] = judge.get("action_plan", [])
         records.append(
             _real_record(
@@ -493,6 +495,7 @@ def run_full(
     manifest: dict[str, Any] = {
         "mode": "full",
         "execution_semantics": "acis_real_agent",
+        "use_llm_judge": True,
         "decision_semantics": "final_judge_decision",
         "confidence_semantics": (
             "Judge confidence that the final decision label is correct"

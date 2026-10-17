@@ -70,12 +70,13 @@ ground_truth / crop / intent`。
 
 | 函数 | 输出 | 用途 |
 |---|---|---|
-| `calc_confidence_calibration(outputs)` | ECE ∈ [0,1]，10 bins | 奖励置信度-正确率一致性（Phase 3 观测到置信度变化但无指标承载） |
+| `calc_confidence_calibration(outputs)` | ECE ∈ [0,1]，10 bins | 置信度校准；Phase 4 report 的 historical `ECE` 以“因子全覆盖”为 correctness，标签 ECE 需单独报告 |
 | `calc_abstention_rate(outputs)` | 百分比 ∈ [0,100] | 奖励证据不足时的正确弃权（incomplete 组核心信号） |
-| `calc_reasoning_coherence(output, expected_factors)` | ∈ [0,3] | 用 deepseek-v4-flash 逐因子判定覆盖（LLM 不可用时规则回退，保证可运行） |
+| `calc_reasoning_coherence(output, expected_factors)` | ∈ [0,3] | **legacy 名称**：因子覆盖等级的 0-3 量化，不衡量逻辑一致性；正式报告使用 `factor_coverage_level` |
 
 关键性质：
 - 除模型 API 外无外部依赖；LLM 失败自动回退 `FACTOR_ALIASES` 规则引擎；
+- 2026-10-17 metric contract audit 明确：标签准确率与因子覆盖率分开报告；`action_plan` 是正式评分字段；缺失标签/因子/决策返回未评分而非 0。详见 `reports/phase4_evaluation_metric_contract_audit.md`。
 - 覆盖判定对"显式排除/说明缺失"同样计分（如"未见半边黄化"覆盖
   `half_leaf_yellowing`），与 ambiguity 组的否定式设计匹配；
 - 全部 24 个 case 的 `expected_key_factors` 均已纳入规则别名表
