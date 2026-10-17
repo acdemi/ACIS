@@ -4,7 +4,7 @@
   "status": "FAIL",
   "phase5_recommendation": false,
   "branch": "work/20261017-phase4-eval-reliability",
-  "head_commit": "198537b",
+  "head_commit": "f4be5b7",
   "repair_commit": "340857f",
   "dataset": {
     "path": "benchmarks/challenge_set_v1.json",

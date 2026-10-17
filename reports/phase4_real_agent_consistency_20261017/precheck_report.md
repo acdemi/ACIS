@@ -2,7 +2,7 @@
 
 > Date: 2026-10-17
 > Branch: `work/20261017-phase4-eval-reliability`
-> HEAD: `198537b` (repair commit `340857f`)
+> Precheck commit: `f4be5b7` (repair commit `340857f`)
 > Verdict: **FAIL**
 > Phase 5 recommendation: **No**
 
