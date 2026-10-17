@@ -24,7 +24,6 @@ from __future__ import annotations
 
 import argparse
 import json
-import os
 import sys
 from dataclasses import dataclass
 from datetime import datetime, timezone
@@ -36,6 +35,7 @@ if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
 from evals.config import EvalConfig
+from utils.judge_runtime import resolve_judge_config
 
 #: Challenge set source (Phase 4, frozen).
 CHALLENGE_PATH = ROOT / "benchmarks" / "challenge_set_v1.json"
@@ -224,6 +224,9 @@ def run_arm(
             "decision": str(judge.get("decision") or row.decision),
             "confidence": float(judge.get("confidence", row.confidence)),
             "judge_mode": judge.get("judge_mode", "rules"),
+            "judge_runtime": (
+                judge.get("judge_analysis", {}).get("judge_runtime", {})
+            ),
             "reasoning_trace": judge.get("reasoning_trace", ""),
             "action_plan": judge.get("action_plan", []),
             "runtime_seconds": row.runtime_seconds,
@@ -235,6 +238,7 @@ def run_arm(
         )
         written += 1
 
+    runtime = resolve_judge_config()
     manifest = {
         "arm": arm.name,
         "label": arm.label,
@@ -245,6 +249,12 @@ def run_arm(
         "use_langgraph": use_langgraph,
         "use_llm_judge": use_llm_judge,
         "judge_model": _judge_model(),
+        "judge_runtime_config": runtime.public_metadata(),
+        "execution_semantics": "acis_real_agent",
+        "decision_semantics": "final_judge_decision",
+        "confidence_semantics": (
+            "Judge confidence that the final decision label is correct"
+        ),
         "started": started,
         "finished": finished,
     }
@@ -260,11 +270,7 @@ def _arm_complete(arm_dir: Path, cases: list[dict[str, Any]]) -> bool:
 
 
 def _judge_model() -> str:
-    return (
-        os.environ.get("AGRI_AI_JUDGE_MODEL")
-        or os.environ.get("DEEPSEEK_MODEL")
-        or "deepseek-chat"
-    )
+    return resolve_judge_config().model
 
 
 # ---------------------------------------------------------------------------
@@ -341,6 +347,7 @@ def main(argv: list[str] | None = None) -> int:
             force=args.force,
         )
 
+    runtime = resolve_judge_config()
     root_manifest = {
         "challenge_set": str(CHALLENGE_PATH),
         "challenge_set_version": "v1",
@@ -349,6 +356,12 @@ def main(argv: list[str] | None = None) -> int:
         "seed": args.seed,
         "use_langgraph": use_langgraph,
         "use_llm_judge": use_llm_judge,
+        "judge_runtime_config": runtime.public_metadata(),
+        "execution_semantics": "acis_real_agent",
+        "decision_semantics": "final_judge_decision",
+        "confidence_semantics": (
+            "Judge confidence that the final decision label is correct"
+        ),
         "created": datetime.now(timezone.utc).isoformat(),
     }
     (output_dir / "run_manifest.json").write_text(

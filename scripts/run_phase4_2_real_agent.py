@@ -29,8 +29,6 @@ from __future__ import annotations
 
 import argparse
 import json
-import os
-import re
 import sys
 import time
 from dataclasses import dataclass
@@ -43,6 +41,8 @@ if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
 from _env import load_env
+from decision_semantics import normalize_decision_label
+from utils.judge_runtime import resolve_judge_config
 
 #: Configurations -> (arm name, module toggles).
 CONFIG_ARMS: dict[str, dict[str, Any]] = {
@@ -94,6 +94,59 @@ _DISEASE_NAMES: tuple[str, ...] = (
 
 #: Pre-check pass criterion: max |real confidence - harness confidence|.
 CONFIDENCE_OFFSET_TOLERANCE: float = 0.3
+
+
+@dataclass(frozen=True)
+class DecisionComparison:
+    """Semantic comparison of one real output and one reference output."""
+
+    real_label: str
+    reference_label: str
+    labels_match: bool
+    confidence_offset: float
+    confidence_comparable: bool
+    verdict: str
+
+
+def compare_decision_outputs(
+    *,
+    real_decision: str,
+    real_confidence: float,
+    real_judge_mode: str,
+    reference_decision: str,
+    reference_confidence: float,
+    reference_execution_semantics: str,
+) -> DecisionComparison:
+    """Compare decisions without treating unlike execution paths as equal.
+
+    Confidence values are comparable only when both outputs came from the
+    same execution semantics and the real Judge completed the LLM path.
+    Label and abstention semantics are compared for every pair.
+    """
+    real_label = normalize_label(real_decision)
+    reference_label = normalize_label(reference_decision)
+    labels_match = real_label == reference_label
+    offset = round(abs(float(real_confidence) - float(reference_confidence)), 3)
+    same_execution = reference_execution_semantics == "acis_real_agent"
+    comparable = same_execution and real_judge_mode == "deepseek"
+    if real_judge_mode != "deepseek":
+        verdict = "real_judge_fallback"
+    elif not same_execution:
+        verdict = "incomparable"
+    elif not labels_match:
+        verdict = "label_mismatch"
+    elif offset > CONFIDENCE_OFFSET_TOLERANCE:
+        verdict = "confidence_offset"
+    else:
+        verdict = "match"
+    return DecisionComparison(
+        real_label=real_label,
+        reference_label=reference_label,
+        labels_match=labels_match,
+        confidence_offset=offset,
+        confidence_comparable=comparable,
+        verdict=verdict,
+    )
 
 
 @dataclass(frozen=True)
@@ -152,6 +205,7 @@ def _real_record(
         "decision": raw.get("decision", ""),
         "confidence": float(raw.get("confidence", 0.0)),
         "judge_mode": raw.get("judge_mode", "rules"),
+        "judge_runtime": raw.get("judge_runtime", {}),
         "reasoning_trace": raw.get("reasoning_trace", ""),
         "action_plan": raw.get("action_plan", []),
         "runtime_seconds": raw.get("runtime_seconds", 0.0),
@@ -219,6 +273,9 @@ def run_real_agent(
                 raw["decision"] = judge.get("decision", raw["decision"])
                 raw["confidence"] = judge.get("confidence", raw["confidence"])
                 raw["judge_mode"] = judge.get("judge_mode", "rules")
+                raw["judge_runtime"] = (
+                    judge.get("judge_analysis", {}).get("judge_runtime", {})
+                )
                 raw["reasoning_trace"] = judge.get("reasoning_trace", "")
                 raw["action_plan"] = judge.get("action_plan", [])
         records.append(
@@ -237,24 +294,19 @@ def run_real_agent(
 # ---------------------------------------------------------------------------
 
 
-def _abstained(text: str) -> bool:
-    return bool(re.search(r"证据不足|无法定论|不能确诊|不能下结论|不确定", text))
-
-
 def normalize_label(decision: str) -> str:
-    """Map a decision string to a canonical label: disease name or ABSTAIN."""
-    if _abstained(decision):
-        return "ABSTAIN"
-    for name in _DISEASE_NAMES:
-        if name in decision:
-            return name
-    return decision.strip()[:40] or "EMPTY"
+    """Map a decision to the shared ABSTAIN/disease-label semantics."""
+    return normalize_decision_label(decision, known_labels=_DISEASE_NAMES)
+
+
+def load_harness_payload(path: Path) -> dict[str, Any]:
+    """Load the full Phase 4.2 harness payload, including its manifest."""
+    return json.loads(path.read_text(encoding="utf-8"))
 
 
 def load_harness_results(path: Path) -> list[dict[str, Any]]:
     """Load the Phase 4.2 harness aggregate results file."""
-    data = json.loads(path.read_text(encoding="utf-8"))
-    return list(data.get("results", []))
+    return list(load_harness_payload(path).get("results", []))
 
 
 def run_precheck(
@@ -274,7 +326,14 @@ def run_precheck(
     if case_id < 1 or case_id > len(cases):
         raise ValueError(f"case id {case_id} out of range (1-{len(cases)})")
     selected = [dict(cases[case_id - 1], case_id=case_id)]
-    harness = load_harness_results(harness_path)
+    harness_payload = load_harness_payload(harness_path)
+    harness = list(harness_payload.get("results", []))
+    harness_manifest = dict(harness_payload.get("manifest", {}))
+    reference_semantics = str(
+        harness_manifest.get(
+            "execution_semantics", "direct_llm_baseline_legacy"
+        )
+    )
 
     lines: list[str] = [
         "# Phase 4.2-R Pre-check Report",
@@ -282,15 +341,18 @@ def run_precheck(
         f"> Generated: {datetime.now(timezone.utc).isoformat()}",
         f"> Case: {selected[0]['id']} | seed: {seed} | configs: {configs}",
         f"> Harness reference: {harness_path}",
+        f"> Reference execution semantics: `{reference_semantics}`",
+        "> Real execution semantics: `acis_real_agent`",
         "",
         (
             "| config | real decision | real confidence | judge_mode | "
             "harness diagnosis | harness confidence | label match | "
-            "conf. offset |"
+            "conf. offset | comparison |"
         ),
-        "|---|---|---|---|---|---|---|---|",
+        "|---|---|---|---|---|---|---|---|---|",
     ]
     failed: list[str] = []
+    incomparable: list[str] = []
     for spec in config_specs(configs):
         records = run_real_agent(
             spec,
@@ -318,7 +380,7 @@ def run_precheck(
             )
             lines.append(
                 f"| {spec.label} | {real_decision[:30]} | {real_conf} | "
-                f"{judge_mode} | MISSING | - | - | - |"
+                f"{judge_mode} | MISSING | - | - | - | missing |"
             )
             continue
         harness_rec = harness_records[0]
@@ -328,42 +390,78 @@ def run_precheck(
         harness_conf = float(
             harness_rec.get("output", {}).get("confidence", 0.0)
         )
-        real_label = normalize_label(real_decision)
-        harness_label = normalize_label(harness_diagnosis)
-        match = "match" if real_label == harness_label else "DIFFERS"
-        offset = abs(real_conf - harness_conf)
-        if offset > CONFIDENCE_OFFSET_TOLERANCE:
+        comparison = compare_decision_outputs(
+            real_decision=real_decision,
+            real_confidence=real_conf,
+            real_judge_mode=str(judge_mode),
+            reference_decision=harness_diagnosis,
+            reference_confidence=harness_conf,
+            reference_execution_semantics=reference_semantics,
+        )
+        real_label = comparison.real_label
+        harness_label = comparison.reference_label
+        match = "match" if comparison.labels_match else "DIFFERS"
+        offset = comparison.confidence_offset
+        runtime = real.get("judge_runtime", {})
+        if comparison.verdict == "real_judge_fallback":
+            reason = runtime.get("fallback_reason_code", "unknown")
+            failed.append(
+                f"{spec.label}: real Judge fell back to rules [{reason}]"
+            )
+        elif comparison.verdict == "label_mismatch":
+            failed.append(
+                f"{spec.label}: label mismatch {real_label} vs {harness_label}"
+            )
+        elif comparison.verdict == "confidence_offset":
             failed.append(
                 f"{spec.label}: confidence offset {offset:.3f} > "
                 f"{CONFIDENCE_OFFSET_TOLERANCE}"
             )
+        elif comparison.verdict == "incomparable":
+            suffix = "" if comparison.labels_match else " (labels differ)"
+            incomparable.append(
+                f"{spec.label}: {reference_semantics} vs acis_real_agent"
+                f"{suffix}"
+            )
         lines.append(
             f"| {spec.label} | {real_decision[:30]} | {real_conf} | "
             f"{judge_mode} | {harness_diagnosis[:20]} | {harness_conf} | "
-            f"{match} ({real_label} vs {harness_label}) | {offset:.3f} |"
+            f"{match} ({real_label} vs {harness_label}) | {offset:.3f} | "
+            f"{comparison.verdict} |"
         )
 
     if failed:
         lines += ["", "## Verdict", "", "**FAIL** — " + "; ".join(failed), ""]
+    elif incomparable:
+        lines += [
+            "",
+            "## Verdict",
+            "",
+            "**INCOMPARABLE** — " + "; ".join(incomparable),
+            "",
+            (
+                "The reference was produced by a different execution path. "
+                "Confidence offsets are retained for diagnosis but are not "
+                "treated as equality gates."
+            ),
+            "",
+        ]
     else:
         lines += [
             "",
             "## Verdict",
             "",
             (
-                "**PASS** — outputs structurally comparable (decision/"
-                "confidence present; harness carries "
-                "diagnosis/confidence/coherence(1-5), real agent carries "
-                "judge_mode/reasoning_trace/action_plan; tool-call traces "
-                "are expected real-agent differences); no confidence offset "
-                "> 0.3."
+                "**PASS** — both outputs use the same execution semantics "
+                "and final-decision confidence definition; labels match and "
+                "the confidence offset is within tolerance."
             ),
             "",
         ]
     report_path.parent.mkdir(parents=True, exist_ok=True)
     report_path.write_text("\n".join(lines), encoding="utf-8")
     print(f"pre-check report -> {report_path}")
-    return 1 if failed else 0
+    return 1 if failed or incomparable else 0
 
 
 # ---------------------------------------------------------------------------
@@ -384,6 +482,7 @@ def run_full(
 
     cases = load_challenge_set()
     case_ids = _resolve_cases(case_range, max_id=len(cases))
+    runtime = resolve_judge_config()
     selected = [dict(cases[cid - 1], case_id=cid) for cid in case_ids]
 
     log_root.mkdir(parents=True, exist_ok=True)
@@ -393,8 +492,12 @@ def run_full(
     completed = 0
     manifest: dict[str, Any] = {
         "mode": "full",
-        "model_note": "real ACIS runner (evals.runner.run_evaluation) with "
-        "LLM judge; judge model from env (default deepseek-chat)",
+        "execution_semantics": "acis_real_agent",
+        "decision_semantics": "final_judge_decision",
+        "confidence_semantics": (
+            "Judge confidence that the final decision label is correct"
+        ),
+        "judge_runtime_config": runtime.public_metadata(),
         "configs": configs,
         "seeds": seeds,
         "case_ids": case_ids,
@@ -543,9 +646,9 @@ def build_parser() -> argparse.ArgumentParser:
 def main(argv: list[str] | None = None) -> int:
     args = build_parser().parse_args(argv)
     load_env()
-    api_key = os.environ.get("DEEPSEEK_API_KEY", "").strip()
-    if not api_key:
-        print("error: DEEPSEEK_API_KEY is not set")
+    runtime = resolve_judge_config()
+    if not runtime.configured:
+        print("error: Judge API key is not set")
         return 1
     if args.mode == "precheck":
         return run_precheck(

@@ -14,6 +14,8 @@ from dataclasses import dataclass, field
 from trace.types import Trace
 from typing import Any
 
+from decision_semantics import decision_correctness
+
 #: Memory-layer agent outputs at or above this confidence count as a
 #: retrieval / replay "hit". The agents emit ~0.25-0.3 for misses and
 #: >=0.5 for actual hits (RAG match, KG constraints, case replay).
@@ -60,12 +62,13 @@ def compute_trace_metrics(
     tool_router = metrics.get("tool_router", {})
     tool_requests = int(tool_router.get("requests", 0))
     token_usage = judge.get("token_usage") or {}
+    decision = str(judge.get("decision", ""))
     return CaseMetrics(
         case_id=case_id,
         trace_id=trace.trace_id,
         expected=expected,
-        decision=str(judge.get("decision", "")),
-        accuracy=_accuracy(expected, _pathology_claim(trace)),
+        decision=decision,
+        accuracy=_accuracy(expected, decision),
         confidence=float(judge.get("confidence", 0.0)),
         runtime_seconds=max(0.0, runtime_seconds),
         planner_usage=1.0 if bool(planner.get("enabled")) else 0.0,
@@ -149,21 +152,10 @@ def _metrics_payload(trace: Trace) -> dict[str, Any]:
     return {}
 
 
-def _pathology_claim(trace: Trace) -> str | None:
-    for event in trace.events:
-        if event.payload.get("agent") == "病理Agent":
-            claim = event.payload.get("claim")
-            if isinstance(claim, str):
-                return claim
-    return None
-
-
-def _accuracy(expected: str | None, claim: str | None) -> float | None:
-    if expected is None or claim is None:
+def _accuracy(expected: str | None, decision: str | None) -> float | None:
+    if expected is None or decision is None:
         return None
-    if expected == "证据不足":
-        return 1.0 if "病理证据不足" in claim else 0.0
-    return 1.0 if expected in claim else 0.0
+    return 1.0 if decision_correctness(expected, decision) else 0.0
 
 
 def _memory_hits(trace: Trace) -> int:

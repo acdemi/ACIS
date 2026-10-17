@@ -11,23 +11,23 @@ from __future__ import annotations
 import csv
 import json
 from pathlib import Path
+from trace import Trace, TraceEvent
 
 import pytest
 
-from evals.config import EvalConfig, load_dataset  # noqa: E402
-from evals.metrics import (  # noqa: E402
+from evals.config import EvalConfig, load_dataset
+from evals.metrics import (
     MEMORY_HIT_CONFIDENCE,
     CaseMetrics,
     aggregate_metrics,
     compute_trace_metrics,
 )
-from evals.report import (  # noqa: E402
+from evals.report import (
     AGGREGATE_CASE_ID,
     CSV_FIELDS,
     write_metrics_csv,
     write_summary_markdown,
 )
-from trace import Trace, TraceEvent  # noqa: E402
 
 FIXED_TIME = "2026-01-01T00:00:00+00:00"
 
@@ -159,6 +159,14 @@ def test_accuracy_insufficient_evidence_special_case():
     trace.events[4] = _event(
         "experts",
         _agent_payload("病理Agent", 0.4, "病理证据不足，需补充图像"),
+    )
+    trace.events[7] = _event(
+        "judge",
+        {
+            "decision": "无法定论（待实验室病原鉴定）",
+            "confidence": 0.4,
+            "judge_analysis": {},
+        },
     )
     assert compute_trace_metrics(trace, expected="证据不足").accuracy == 1.0
     assert compute_trace_metrics(trace, expected="叶霉病").accuracy == 0.0
@@ -385,3 +393,21 @@ def test_load_dataset_rejects_bad_case(tmp_path: Path):
     )
     with pytest.raises(ValueError):
         load_dataset(str(path))
+
+
+def test_accuracy_uses_final_judge_decision_not_pathology_claim():
+    trace = _base_trace()
+    trace.events[4] = _event(
+        "experts",
+        _agent_payload("病理Agent", 0.7, "病理判断首选：番茄叶霉病"),
+    )
+    trace.events[7] = _event(
+        "judge",
+        {
+            "decision": "无法定论（待实验室病原鉴定）",
+            "confidence": 0.2,
+            "judge_analysis": {},
+        },
+    )
+    assert compute_trace_metrics(trace, expected="叶霉病").accuracy == 0.0
+    assert compute_trace_metrics(trace, expected="证据不足").accuracy == 1.0

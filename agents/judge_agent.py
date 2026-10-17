@@ -6,16 +6,73 @@ ACIS 2.0 增强：
   争议分 +0.2 并适度下调置信度。
 """
 from __future__ import annotations
+
 import json
 import logging
 import os
 from dataclasses import asdict
 from typing import Any
-from agents.types import AgentOutput, RequestContext, DebateResult, DecisionOutput
-from kg_adapter import query_kg, propose_triple, load_draft_triples
-from utils.omission import apply_omission_penalty, omission_action, omission_reason, omission_score
+
+from agents.types import AgentOutput, DebateResult, DecisionOutput, RequestContext
+from kg_adapter import load_draft_triples, propose_triple, query_kg
+from utils.judge_runtime import (
+    JudgeRuntimeConfig,
+    classify_failure,
+    redact_error_detail,
+    resolve_judge_config,
+)
+from utils.omission import (
+    apply_omission_penalty,
+    omission_action,
+    omission_reason,
+    omission_score,
+)
 
 _logger = logging.getLogger(__name__)
+
+
+class JudgeConfigurationError(ValueError):
+    """Judge configuration prevents an LLM request from being attempted."""
+
+
+class JudgeResponseFormatError(ValueError):
+    """Provider response does not satisfy the Judge decision contract."""
+
+
+def classify_judge_failure(exc: Exception) -> str:
+    """Backward-compatible alias for the shared failure classifier."""
+    return classify_failure(exc)
+
+
+def judge_runtime_metadata(
+    config: JudgeRuntimeConfig,
+    *,
+    outcome: str,
+    reason_code: str | None = None,
+    detail: str = "",
+    retry_exhausted: bool = False,
+    token_usage: dict[str, int] | None = None,
+) -> dict[str, Any]:
+    """Build trace-safe Judge metadata without credentials or headers."""
+    metadata: dict[str, Any] = {
+        "outcome": outcome,
+        "judge_mode": "deepseek" if outcome == "success" else "rules",
+        **config.public_metadata(),
+        "retry_exhausted": retry_exhausted,
+    }
+    if reason_code:
+        metadata["fallback_reason_code"] = reason_code
+        metadata["fallback_detail"] = redact_error_detail(
+            detail, api_key=config.api_key
+        )
+    if token_usage is not None:
+        metadata["token_usage"] = dict(token_usage)
+    return metadata
+
+
+def _attach_judge_runtime(decision: DecisionOutput, metadata: dict[str, Any]) -> None:
+    """Store runtime observability inside the existing additive analysis dict."""
+    decision.judge_analysis["judge_runtime"] = metadata
 
 class JudgeAgent:
     def __init__(self, use_llm: bool = False):
@@ -27,7 +84,7 @@ class JudgeAgent:
         try:
             from utils.confidence_calibration import Calibrator
             return Calibrator()
-        except Exception:
+        except Exception:  # noqa: BLE001 - optional calibrator fallback
             class _Passthrough:
                 enabled = False
                 def calibrate(self, agent, raw):
@@ -38,14 +95,52 @@ class JudgeAgent:
 
     def run(self, context: RequestContext, outputs: list[AgentOutput], debate: DebateResult, debate_round: int = 1) -> DecisionOutput:
         kg = query_kg(context.crop, context.query)
+        runtime = resolve_judge_config()
         if self.use_llm:
             try:
-                return self._run_llm_judge(context, outputs, debate, kg, debate_round)
-            except Exception as exc:
+                return self._run_llm_judge(
+                    context, outputs, debate, kg, debate_round, runtime=runtime
+                )
+            except Exception as exc:  # noqa: BLE001 - single Judge fallback boundary
+                reason_code = classify_judge_failure(exc)
                 decision = self._run_rule_judge(context, outputs, debate, kg, debate_round)
-                decision.debate.missing_evidence.append(f"DeepSeek Judge 不可用，已回退规则裁决：{exc}")
+                detail = redact_error_detail(exc, api_key=runtime.api_key)
+                metadata = judge_runtime_metadata(
+                    runtime,
+                    outcome="fallback",
+                    reason_code=reason_code,
+                    detail=f"{type(exc).__name__}: {detail}",
+                    retry_exhausted=reason_code in {
+                        "connection_error", "timeout", "rate_limit", "server_error"
+                    },
+                )
+                _attach_judge_runtime(decision, metadata)
+                decision.debate.missing_evidence.append(
+                    f"LLM Judge 不可用，已回退规则裁决 "
+                    f"[{reason_code}] {type(exc).__name__}: {detail}"
+                )
+                _logger.warning(
+                    "Judge fallback: code=%s provider=%s endpoint=%s model=%s "
+                    "sdk_max_retries=%s detail=%s",
+                    reason_code,
+                    runtime.provider,
+                    runtime.endpoint_id,
+                    runtime.model,
+                    runtime.max_retries,
+                    detail,
+                )
                 return decision
-        return self._run_rule_judge(context, outputs, debate, kg, debate_round)
+        decision = self._run_rule_judge(context, outputs, debate, kg, debate_round)
+        _attach_judge_runtime(
+            decision,
+            judge_runtime_metadata(
+                runtime,
+                outcome="rules",
+                reason_code="disabled_by_configuration",
+                detail="JudgeAgent(use_llm=False)",
+            ),
+        )
+        return decision
 
     @staticmethod
     def _sensor_readings(outputs) -> dict[str, float]:
@@ -58,7 +153,8 @@ class JudgeAgent:
             v = readings.get(rk)
             if v is not None:
                 try: result[mk] = float(v)
-                except Exception: pass
+                except (TypeError, ValueError):
+                    pass
         return result
 
     def _kg_consistency(self, outputs, kg, sensor_readings):
@@ -218,26 +314,73 @@ class JudgeAgent:
             summary = f"【第二轮辩论后裁决】{summary}"
         return DecisionOutput(summary=summary, decision=decision, confidence=confidence, risk_level=debate.risk_level, action_plan=action_plan[:6], debate=debate, traces=outputs, judge_mode="rules", need_human_review=need_human_review, reasoning_trace="；".join(trace_parts), judge_analysis={"kg": {"diseases": consistency["kg_diseases"], "rules": kg.get("rules", []), "backend": kg.get("backend", "memory")}, "consistency": consistency, "sensor_readings": sensor_readings, "critic": debate.critic, "collective_omission": omission, "kg_evolution": kg_evo, "calibration": self.calibrator.status()})
 
-    def _run_llm_judge(self, context, outputs, debate, kg, debate_round=1):
-        api_key = os.environ.get("DEEPSEEK_API_KEY", "").strip()
-        if not api_key: raise ValueError("未设置 DEEPSEEK_API_KEY")
+    def _run_llm_judge(self, context, outputs, debate, kg, debate_round=1, *, runtime=None):
+        config = runtime or resolve_judge_config()
+        if not config.configured:
+            raise JudgeConfigurationError("未设置 Judge API Key")
         from openai import OpenAI
         payload = self._build_judge_payload(context, outputs, debate, kg)
-        client = OpenAI(api_key=api_key, base_url=os.environ.get("DEEPSEEK_BASE_URL", "https://api.deepseek.com"))
-        model = os.environ.get("AGRI_AI_JUDGE_MODEL") or os.environ.get("DEEPSEEK_MODEL", "deepseek-chat")
-        _logger.info(f"Judge request: base_url={client.base_url}, model={model}, temperature=0.1")
+        client = OpenAI(
+            api_key=config.api_key,
+            base_url=config.base_url,
+            timeout=config.timeout_seconds,
+            max_retries=config.max_retries,
+        )
+        _logger.info(
+            "Judge request: provider=%s endpoint=%s model=%s "
+            "timeout=%ss sdk_max_retries=%s temperature=0.1",
+            config.provider,
+            config.endpoint_id,
+            config.model,
+            config.timeout_seconds,
+            config.max_retries,
+        )
         try:
-            resp = client.chat.completions.create(model=model, messages=[{"role": "system", "content": self._judge_system_prompt()}, {"role": "user", "content": json.dumps(payload, ensure_ascii=False)}], temperature=0.1, response_format={"type": "json_object"})
-            llm = json.loads(resp.choices[0].message.content or "{}")
+            resp = client.chat.completions.create(model=config.model, messages=[{"role": "system", "content": self._judge_system_prompt()}, {"role": "user", "content": json.dumps(payload, ensure_ascii=False)}], temperature=0.1, response_format={"type": "json_object"})
         except Exception as exc:
-            _logger.error(f"Judge exception: type={type(exc).__name__}, msg={exc!s}, cause={exc.__cause__}, base_url={client.base_url}, model={model}")
+            _logger.error(
+                "Judge exception: type=%s code=%s provider=%s endpoint=%s model=%s",
+                type(exc).__name__,
+                classify_judge_failure(exc),
+                config.provider,
+                config.endpoint_id,
+                config.model,
+            )
             raise
-        _logger.info(f"Judge response: status=success, usage={self._extract_token_usage(resp)}")
+        try:
+            content = resp.choices[0].message.content
+        except (AttributeError, IndexError, TypeError) as exc:
+            raise JudgeResponseFormatError("响应缺少 choices[0].message.content") from exc
+        if not isinstance(content, str) or not content.strip():
+            raise JudgeResponseFormatError("Judge 返回了空响应")
+        try:
+            llm = json.loads(content)
+        except json.JSONDecodeError as exc:
+            raise JudgeResponseFormatError("Judge 响应不是有效 JSON") from exc
+        if not isinstance(llm, dict):
+            raise JudgeResponseFormatError("Judge 响应必须是 JSON 对象")
+        decision_text = llm.get("final_diagnosis") or llm.get("decision")
+        if not isinstance(decision_text, str) or not decision_text.strip():
+            raise JudgeResponseFormatError("缺少非空 final_diagnosis/decision")
+        raw_confidence = llm.get("final_confidence", llm.get("confidence"))
+        try:
+            confidence = float(raw_confidence)
+        except (TypeError, ValueError) as exc:
+            raise JudgeResponseFormatError("final_confidence/confidence 必须是数字") from exc
+        if not 0.0 <= confidence <= 1.0:
+            raise JudgeResponseFormatError("confidence 必须位于 [0,1]")
+        confidence = round(confidence, 2)
         token_usage = self._extract_token_usage(resp)
+        _logger.info(
+            "Judge response: status=success provider=%s endpoint=%s model=%s usage=%s",
+            config.provider,
+            config.endpoint_id,
+            config.model,
+            token_usage,
+        )
         fb = self._run_rule_judge(context, outputs, debate, kg, debate_round)
-        decision = str(llm.get("final_diagnosis") or llm.get("decision") or fb.decision)
+        decision = decision_text.strip()
         action_plan = self._clean_string_list(llm.get("action_plan")) or fb.action_plan
-        confidence = self._clean_confidence(llm.get("final_confidence", llm.get("confidence")), fb.confidence)
         risk_level = str(llm.get("risk_level") or fb.risk_level).lower()
         if risk_level not in {"low", "medium", "high"}: risk_level = fb.risk_level
         need_human_review = bool(llm.get("need_human_review", fb.need_human_review))
@@ -246,7 +389,16 @@ class JudgeAgent:
         if "DeepSeek" not in summary: summary = f"DeepSeek Judge 结构化裁决：{summary}"
         if debate_round >= 2: summary = f"【第二轮辩论后裁决】{summary}"
         omission = fb.judge_analysis.get("collective_omission", {})
-        return DecisionOutput(summary=summary, decision=decision, confidence=confidence, risk_level=risk_level, action_plan=action_plan[:6], debate=debate, traces=outputs, judge_mode="deepseek", need_human_review=need_human_review, reasoning_trace=str(llm.get("reasoning_trace") or fb.reasoning_trace), judge_analysis={"consistency_analysis": llm.get("consistency_analysis", {}), "evidence_scores": llm.get("evidence_scores", {}), "kg_contribution": llm.get("kg_contribution", ""), "kg": {"diseases": kg.get("diseases", []), "rules": kg.get("rules", []), "backend": kg.get("backend", "memory")}, "critic": debate.critic, "collective_omission": omission, "kg_evolution": fb.judge_analysis.get("kg_evolution", {}), "calibration": self.calibrator.status()}, token_usage=token_usage)
+        result = DecisionOutput(summary=summary, decision=decision, confidence=confidence, risk_level=risk_level, action_plan=action_plan[:6], debate=debate, traces=outputs, judge_mode="deepseek", need_human_review=need_human_review, reasoning_trace=str(llm.get("reasoning_trace") or fb.reasoning_trace), judge_analysis={"consistency_analysis": llm.get("consistency_analysis", {}), "evidence_scores": llm.get("evidence_scores", {}), "kg_contribution": llm.get("kg_contribution", ""), "kg": {"diseases": kg.get("diseases", []), "rules": kg.get("rules", []), "backend": kg.get("backend", "memory")}, "critic": debate.critic, "collective_omission": omission, "kg_evolution": fb.judge_analysis.get("kg_evolution", {}), "calibration": self.calibrator.status()}, token_usage=token_usage)
+        _attach_judge_runtime(
+            result,
+            judge_runtime_metadata(
+                config,
+                outcome="success",
+                token_usage=token_usage,
+            ),
+        )
+        return result
 
     def _build_judge_payload(self, context, outputs, debate, kg):
         sr = self._sensor_readings(outputs)
@@ -278,7 +430,8 @@ class JudgeAgent:
     @staticmethod
     def _clean_confidence(v, default):
         try: return round(min(0.95, max(0.1, float(v))), 2)
-        except Exception: return default
+        except (TypeError, ValueError):
+            return default
 
     @staticmethod
     def _extract_token_usage(resp: Any) -> dict[str, int] | None:

@@ -36,7 +36,6 @@ from __future__ import annotations
 
 import argparse
 import json
-import os
 import random
 import sys
 import time
@@ -49,6 +48,12 @@ if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
 from _env import load_env
+from decision_semantics import is_abstention, normalize_decision_label
+from utils.judge_runtime import (
+    classify_failure,
+    redact_error_detail,
+    resolve_judge_config,
+)
 
 #: Challenge set (read-only).
 CHALLENGE_PATH = ROOT / "benchmarks" / "challenge_set_v1.json"
@@ -66,8 +71,8 @@ DEFAULT_SEEDS: tuple[int, ...] = (42, 43, 44)
 #: Default case range (1-24).
 DEFAULT_CASES: tuple[int, int] = (1, 24)
 
-#: Model used for the direct API calls.
-DEFAULT_MODEL: str = "deepseek-v4-flash"
+#: Fallback model used only if the shared Judge resolver has no model set.
+DEFAULT_MODEL: str = "deepseek-chat"
 
 #: LLM sampling temperature (matches the system judge setting).
 TEMPERATURE: float = 0.1
@@ -231,6 +236,13 @@ def build_prompt(case: dict[str, Any], config: str) -> str:
     )
 
 
+def _seed_unsupported(exc: Exception) -> bool:
+    """Return true only for a provider rejection attributable to ``seed``."""
+    status = getattr(exc, "status_code", None)
+    text = str(exc).lower()
+    return status in {400, 422} and "seed" in text
+
+
 def call_deepseek_api(
     prompt: str,
     *,
@@ -238,39 +250,52 @@ def call_deepseek_api(
     model: str,
     base_url: str,
     api_key: str,
+    timeout_seconds: float = 60.0,
+    max_retries: int = 0,
 ) -> dict[str, Any]:
-    """One API call with seed pass-through.
+    """Call the configured endpoint with one explicit retry-owner policy.
 
-    The ``seed`` parameter is passed to the API when the endpoint accepts
-    it; on rejection the call is retried without ``seed`` and
-    ``seed_accepted`` is recorded as false (audit-relevant).
+    The harness owns transient retries (``MAX_ATTEMPTS``).  The OpenAI SDK is
+    configured with ``max_retries=0`` here so the two retry layers cannot
+    multiply.  A request without ``seed`` is attempted only when the provider
+    explicitly rejects ``seed``, and that fallback is recorded separately.
     """
     from openai import OpenAI
 
-    client = OpenAI(api_key=api_key, base_url=base_url)
+    client = OpenAI(
+        api_key=api_key,
+        base_url=base_url,
+        timeout=timeout_seconds,
+        max_retries=max_retries,
+    )
     messages = [
         {"role": "system", "content": SYSTEM_PROMPT},
         {"role": "user", "content": prompt},
     ]
     started = time.perf_counter()
     attempt: int | None = None
-    last_error: str | None = None
+    request_count = 0
+    last_exc: Exception | None = None
     for attempt_index in range(1, MAX_ATTEMPTS + 1):
         attempt = attempt_index
+        kwargs: dict[str, Any] = {
+            "model": model,
+            "messages": messages,
+            "temperature": TEMPERATURE,
+            "response_format": {"type": "json_object"},
+            "seed": seed,
+        }
+        seed_accepted = True
         try:
-            kwargs: dict[str, Any] = {
-                "model": model,
-                "messages": messages,
-                "temperature": TEMPERATURE,
-                "response_format": {"type": "json_object"},
-                "seed": seed,
-            }
             try:
+                request_count += 1
                 resp = client.chat.completions.create(**kwargs)
-                seed_accepted = True
-            except Exception:  # noqa: BLE001  seed may be unsupported
+            except Exception as exc:
+                if not _seed_unsupported(exc):
+                    raise
                 seed_accepted = False
                 kwargs.pop("seed", None)
+                request_count += 1
                 resp = client.chat.completions.create(**kwargs)
             latency = time.perf_counter() - started
             content = resp.choices[0].message.content or ""
@@ -287,19 +312,32 @@ def call_deepseek_api(
                 }
                 if usage is not None
                 else None,
+                "attempts": attempt,
+                "request_count": request_count,
+                "retry_count": max(0, request_count - 1),
+                "failure_code": None,
             }
-        except Exception as exc:  # noqa: BLE001  retried below
-            last_error = f"{type(exc).__name__}: {exc}"
-            if attempt_index < MAX_ATTEMPTS:
+        except Exception as exc:  # noqa: BLE001 - classified below
+            last_exc = exc
+            retryable = classify_failure(exc) in {
+                "connection_error", "timeout", "rate_limit", "server_error"
+            }
+            if retryable and attempt_index < MAX_ATTEMPTS:
                 time.sleep(2 * attempt_index)
+            else:
+                break
+    assert last_exc is not None
     return {
         "status": "error",
         "seed_accepted": False,
         "latency_seconds": round(time.perf_counter() - started, 3),
         "content": "",
         "usage": None,
-        "error": last_error,
+        "error": redact_error_detail(last_exc, api_key=api_key),
         "attempts": attempt,
+        "request_count": request_count,
+        "retry_count": max(0, request_count - 1),
+        "failure_code": classify_failure(last_exc),
     }
 
 
@@ -327,16 +365,14 @@ def _sanitize(prompt: str) -> str:
 def main(argv: list[str] | None = None) -> int:
     args = build_parser().parse_args(argv)
     load_env()
-    api_key = os.environ.get("DEEPSEEK_API_KEY", "").strip()
-    if not api_key:
-        print("error: DEEPSEEK_API_KEY is not set")
+    runtime = resolve_judge_config()
+    if not runtime.configured:
+        print("error: Judge API key is not set")
         return 1
-    base_url = os.environ.get("DEEPSEEK_BASE_URL", "https://api.deepseek.com")
-    model = (
-        os.environ.get("AGRI_AI_JUDGE_MODEL")
-        or os.environ.get("DEEPSEEK_MODEL")
-        or DEFAULT_MODEL
-    )
+    api_key = runtime.api_key
+    base_url = runtime.base_url
+    model = runtime.model
+    runtime_metadata = runtime.public_metadata()
 
     cases = load_cases()
     case_ids = _resolve_cases(args.cases)
@@ -353,17 +389,24 @@ def main(argv: list[str] | None = None) -> int:
 
     results: list[dict[str, Any]] = []
     manifest = {
-        "model": model,
+        **runtime_metadata,
         "temperature": TEMPERATURE,
-        "base_url": base_url,
+        "retry_owner": "harness",
+        "harness_max_attempts": MAX_ATTEMPTS,
         "configs": args.configs,
         "seeds": args.seeds,
         "case_ids": case_ids,
         "challenge_set": str(CHALLENGE_PATH),
+        "execution_semantics": "direct_llm_baseline",
+        "decision_semantics": "final_decision",
+        "confidence_semantics": (
+            "model self-assessment that the final diagnosis label is correct"
+        ),
         "started": datetime.now(timezone.utc).isoformat(),
         "note": (
-            "Standalone Phase 4.2 harness: direct DeepSeek API calls with "
-            "the Phase 4.2 baseline prompt; no agent code modified."
+            "Standalone Phase 4.2 harness: direct LLM API calls with the "
+            "Phase 4.2 baseline prompt. This is a separate execution path "
+            "from the real multi-agent ACIS Judge."
         ),
     }
     (log_root / "run_manifest.json").write_text(
@@ -384,12 +427,16 @@ def main(argv: list[str] | None = None) -> int:
                     model=model,
                     base_url=base_url,
                     api_key=api_key,
+                    timeout_seconds=runtime.timeout_seconds,
+                    max_retries=0,
                 )
                 parsed, error = (
                     parse_output(response["content"])
                     if response["status"] == "ok"
                     else (None, response.get("error"))
                 )
+                decision = str((parsed or {}).get("diagnosis", ""))
+                confidence = (parsed or {}).get("confidence")
                 record = {
                     "seed": seed,
                     "config": config,
@@ -400,12 +447,37 @@ def main(argv: list[str] | None = None) -> int:
                     "prompt": _sanitize(prompt),
                     "status": response["status"],
                     "seed_accepted": response["seed_accepted"],
+                    "attempts": response.get("attempts"),
+                    "request_count": response.get("request_count", 0),
+                    "retry_count": response.get("retry_count", 0),
+                    "failure_code": response.get("failure_code"),
                     "latency_seconds": response["latency_seconds"],
                     "usage": response["usage"],
                     "valid": parsed is not None,
                     "parse_error": error,
                     "output": parsed,
-                    "raw_content": response["content"],
+                    "decision": decision if parsed is not None else "",
+                    "confidence": confidence,
+                    "abstained": is_abstention(decision),
+                    "decision_label": normalize_decision_label(
+                        decision,
+                        known_labels=tuple(
+                            str(item.get("ground_truth"))
+                            for item in cases
+                            if item.get("ground_truth")
+                        ),
+                    ),
+                    "judge_mode": "direct_llm" if parsed is not None else "unavailable",
+                    "execution_semantics": "direct_llm_baseline",
+                    "judge_runtime": {
+                        **runtime_metadata,
+                        "outcome": "success" if parsed is not None else "error",
+                        "failure_code": response.get("failure_code"),
+                        "request_count": response.get("request_count", 0),
+                        "retry_count": response.get("retry_count", 0),
+                        "retry_owner": "harness",
+                    },
+                    "raw_content": _sanitize(response["content"]),
                     "timestamp": datetime.now(timezone.utc).isoformat(),
                 }
                 results.append(record)

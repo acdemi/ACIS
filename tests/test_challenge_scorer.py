@@ -28,6 +28,7 @@ from openmetaphysics.evaluation.challenge_scorer import (
     calc_abstention_rate,
     calc_confidence_calibration,
     calc_reasoning_coherence,
+    normalize_decision_label,
 )
 
 CHALLENGE_PATH = Path(__file__).resolve().parent.parent / "benchmarks" / (
@@ -280,3 +281,13 @@ def test_every_shipped_factor_has_rule_alias() -> None:
     }
     missing = sorted(factors - set(FACTOR_ALIASES))
     assert not missing, f"factors without rule aliases: {missing}"
+
+
+def test_abstention_label_is_not_reinterpreted_as_disease() -> None:
+    """R4 C2: an abstention must remain ABSTAIN even when it names a test."""
+    output = {"decision": "无法定论（待实验室病原鉴定）"}
+    label = normalize_decision_label(
+        output,
+        known_labels=("叶霉病", "早疫病", "霜霉病"),
+    )
+    assert label == "ABSTAIN"

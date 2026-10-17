@@ -27,9 +27,21 @@ from __future__ import annotations
 
 import json
 import os
-import re
 from collections.abc import Mapping, Sequence
 from typing import Any
+
+from decision_semantics import (
+    decision_correctness as _decision_correctness,
+)
+from decision_semantics import (
+    decision_text as _shared_decision_text,
+)
+from decision_semantics import (
+    is_abstention as _shared_is_abstention,
+)
+from decision_semantics import (
+    normalize_decision_label as _shared_normalize_decision_label,
+)
 
 #: Legal probe group labels for the challenge set (``benchmarks/
 #: challenge_set_v1.json``).
@@ -45,11 +57,6 @@ ECE_BINS: int = 10
 
 #: Model used for the reasoning-coherence factor judge unless overridden.
 DEFAULT_COHERENCE_MODEL: str = "deepseek-v4-flash"
-
-#: Decision texts that count as an abstention.
-_ABSTENTION_PATTERN = re.compile(
-    r"证据不足|无法定论|不能确诊|不能下结论|难以判断|待采集|继续采集|不确定"
-)
 
 #: Chinese evidence keywords per expected key factor. Used by the rule
 #: fallback of :func:`calc_reasoning_coherence` when the LLM judge is not
@@ -151,6 +158,20 @@ def calc_confidence_calibration(
         conf = bin_confs[index] / count
         error += (count / total) * abs(acc - conf)
     return round(error, 6)
+
+
+def is_abstention(output: Any) -> bool:
+    """Return whether an output semantically represents an abstention."""
+    return _shared_is_abstention(output)
+
+
+def normalize_decision_label(
+    output: Any,
+    *,
+    known_labels: Sequence[str] = (),
+) -> str:
+    """Map one decision to ``ABSTAIN``, a known label, or a short fallback."""
+    return _shared_normalize_decision_label(output, known_labels=known_labels)
 
 
 def calc_abstention_rate(agent_outputs: Sequence[Any]) -> float:
@@ -312,8 +333,7 @@ def _as_dict(output: Any) -> dict[str, Any]:
 
 
 def _decision_text(output: Any) -> str:
-    data = _as_dict(output)
-    return str(data.get("decision") or data.get("claim") or "")
+    return _shared_decision_text(output)
 
 
 def _reasoning_text(output: Any) -> str:
@@ -349,23 +369,16 @@ def _has_correctness(output: Any) -> bool:
 
 
 def _correctness(output: Any) -> bool:
-    """Correctness of one output: explicit ``correct`` or ``expected`` in
-    ``decision`` (substring containment, matching Phase 3 accuracy)."""
+    """Correctness using the canonical final-decision semantics."""
     data = _as_dict(output)
     explicit = data.get("correct")
     if explicit is not None:
         return bool(explicit)
-    expected = str(data.get("expected") or "")
-    if expected == "证据不足":
-        return "证据不足" in _decision_text(output)
-    return expected in _decision_text(output)
+    return _decision_correctness(data.get("expected"), output)
 
 
 def _is_abstention(output: Any) -> bool:
-    data = _as_dict(output)
-    if data.get("abstained"):
-        return True
-    return bool(_ABSTENTION_PATTERN.search(_decision_text(output)))
+    return _shared_is_abstention(output)
 
 
 # ---------------------------------------------------------------------------
@@ -460,4 +473,6 @@ __all__ = [
     "calc_factor_coverage",
     "calc_factor_scores",
     "calc_reasoning_coherence",
+    "is_abstention",
+    "normalize_decision_label",
 ]
