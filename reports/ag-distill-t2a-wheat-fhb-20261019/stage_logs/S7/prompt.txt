@@ -1,0 +1,520 @@
+你是独立审计员（另一岗位），对候选知识单元做质量与证据纪律审计。逐条给出 verdict，并给全局发现。审计要点：
+1. 单元是否原子（只表达一个主要结论）；
+2. 是否有未在 quantitative 登记的数字；是否有 value=null 却又写了具体数值的矛盾；
+3. 是否有编造文献/标准号/登记信息的迹象；needs-verification 是否被诚实保留；
+4. 病害风险与毒素风险是否被错误合并；rule 单元是否缺 conditions/failure_modes；
+5. 区域/品种适用性是否被过度通用化。
+输出单个 JSON：{"audits": [{"unit_id": "", "verdict": "pass|revise|reject", "reason": "<=30 字", "revisions_needed": [...]}, ...], "global_findings": [...]}
+候选单元清单：
+{
+ "S2": [
+  {
+   "unit_id": "WHE02-D-01",
+   "title": "小麦赤霉病病原分类认知",
+   "statement": "小麦赤霉病主要由镰刀菌属真菌引起，优势种因区域气候与作物轮作而异，并非单一物种。",
+   "knowledge_layer": "definition",
+   "provenance": "model-candidate",
+   "quantitative": []
+  },
+  {
+   "unit_id": "WHE02-D-02",
+   "title": "赤霉病症状类型：穗腐为主",
+   "statement": "赤霉病典型表现为穗腐，小穗基部出现水渍状褐变并向上扩展，潮湿时病部可见粉红色霉层。",
+   "knowledge_layer": "diagnostic",
+   "provenance": "model-candidate",
+   "quantitative": []
+  },
+  {
+   "unit_id": "WHE02-D-03",
+   "title": "赤霉病症状类型：茎基腐与秆腐",
+   "statement": "镰刀菌侵染还可引起茎基腐和秆腐，表现为茎基部或茎秆褐变、输导组织坏死，与穗腐属同一病原复合体的不同侵染类型。",
+   "knowledge_layer": "definition",
+   "provenance": "model-candidate",
+   "quantitative": []
+  },
+  {
+   "unit_id": "WHE02-D-04",
+   "title": "初侵染源：病残体与带菌种子",
+   "statement": "赤霉病初侵染源主要为田间残留的病残体（如玉米秸秆、麦茬）及带菌种子，病原在残体上越冬后产生子囊壳释放子囊孢子。",
+   "knowledge_layer": "mechanism",
+   "provenance": "model-candidate",
+   "quantitative": []
+  },
+  {
+   "unit_id": "WHE02-D-05",
+   "title": "传播途径：气流与雨水溅射",
+   "statement": "子囊孢子主要借气流远距离传播，分生孢子则依赖雨水溅射在穗层间再侵染，传播效率受风速与降雨事件影响。",
+   "knowledge_layer": "mechanism",
+   "provenance": "model-candidate",
+   "quantitative": []
+  },
+  {
+   "unit_id": "WHE02-D-06",
+   "title": "侵染部位与侵入途径",
+   "statement": "病原主要侵染花器，残存花药是重要侵入位点，也可经颖壳缝隙或伤口侵入，侵入后先在穗部组织内扩展。",
+   "knowledge_layer": "mechanism",
+   "provenance": "model-candidate",
+   "quantitative": []
+  },
+  {
+   "unit_id": "WHE02-D-07",
+   "title": "花期感病窗口机制",
+   "statement": "小麦抽穗扬花期花器开放、组织幼嫩且外露花药提供营养，是赤霉病最易感病的窗口期，窗口长短与开花持续时间和天气密切相关。",
+   "knowledge_layer": "mechanism",
+   "provenance": "model-candidate",
+   "quantitative": [
+    {
+     "metric": "感病窗口持续天数",
+     "value": null,
+     "unit": "天",
+     "value_status": "needs-verification"
+    }
+   ]
+  },
+  {
+   "unit_id": "WHE02-D-08",
+   "title": "潜育与显症过程",
+   "statement": "病原侵入后经潜育期在穗部组织内扩展，随后出现褐变与霉层，潜育期长短受温度与湿度调控，显症滞后于侵染。",
+   "knowledge_layer": "mechanism",
+   "provenance": "model-candidate",
+   "quantitative": [
+    {
+     "metric": "潜育期",
+     "value": null,
+     "unit": "天",
+     "value_status": "needs-verification"
+    }
+   ]
+  },
+  {
+   "unit_id": "WHE02-D-09",
+   "title": "病害流行条件依赖",
+   "statement": "赤霉病流行取决于菌源基数、花期降雨或高湿、以及感病品种三者叠加，任一条件缺失时流行程度显著降低。",
+   "knowledge_layer": "mechanism",
+   "provenance": "model-candidate",
+   "quantitative": []
+  },
+  {
+   "unit_id": "WHE02-D-10",
+   "title": "误区：症状轻不等于毒素风险低",
+   "statement": "穗部症状轻微或未见明显霉层，并不代表籽粒毒素污染风险低，症状严重度与毒素含量不能相互替代判断。",
+   "knowledge_layer": "failure-mode",
+   "provenance": "model-inference",
+   "quantitative": []
+  }
+ ],
+ "S3": [
+  {
+   "unit_id": "WHE02-R-01",
+   "title": "抽穗扬花期是赤霉病防治的关键时窗",
+   "statement": "小麦赤霉病药剂防治的核心时窗位于抽穗至扬花期，防治决策应围绕该时段而非全生育期平均安排。",
+   "knowledge_layer": "rule",
+   "provenance": "model-candidate",
+   "quantitative": []
+  },
+  {
+   "unit_id": "WHE02-R-02",
+   "title": "花期遇连阴雨应提前启动防治决策",
+   "statement": "抽穗扬花期若预报持续阴雨高湿，应将该天气信号作为提前启动防治决策的触发条件，而非等待可见病状。",
+   "knowledge_layer": "rule",
+   "provenance": "model-candidate",
+   "quantitative": [
+    {
+     "metric": "花期连阴雨持续天数阈值",
+     "value": null,
+     "unit": "天",
+     "value_status": "needs-verification"
+    }
+   ]
+  },
+  {
+   "unit_id": "WHE02-R-03",
+   "title": "初次防治加补治的节奏规则",
+   "statement": "赤霉病药剂防治宜采用初次防治加必要补治的节奏安排，补治依据花期持续阴雨与病情进展决定，而非固定次数。",
+   "knowledge_layer": "rule",
+   "provenance": "model-candidate",
+   "quantitative": [
+    {
+     "metric": "防治次数",
+     "value": null,
+     "unit": "次",
+     "value_status": "needs-verification"
+    },
+    {
+     "metric": "补治间隔",
+     "value": null,
+     "unit": "天",
+     "value_status": "needs-verification"
+    }
+   ]
+  },
+  {
+   "unit_id": "WHE02-R-04",
+   "title": "菌源削减应在抽穗前完成",
+   "statement": "秸秆与病残体带菌是赤霉病初侵染来源之一，菌源削减措施应在抽穗前完成，抽穗后实施对当季花期侵染的削减作用有限。",
+   "knowledge_layer": "rule",
+   "provenance": "model-candidate",
+   "quantitative": []
+  },
+  {
+   "unit_id": "WHE02-R-05",
+   "title": "排水降湿作为花期降险的配套措施",
+   "statement": "花期田间高湿延长病菌侵染时间，通过排水降湿改善田间微环境可作为药剂防治之外的配套降险措施。",
+   "knowledge_layer": "rule",
+   "provenance": "model-candidate",
+   "quantitative": []
+  },
+  {
+   "unit_id": "WHE02-R-06",
+   "title": "播期调节需权衡花期避雨与产量风险",
+   "statement": "通过调整播期使抽穗扬花期避开当地高频降雨时段可作为赤霉病区域性降险思路，但须同时评估晚播对产量与成熟期的负面影响。",
+   "knowledge_layer": "rule",
+   "provenance": "model-candidate",
+   "quantitative": []
+  },
+  {
+   "unit_id": "WHE02-R-07",
+   "title": "药剂防治时窗与收获安全间隔的衔接规则",
+   "statement": "花期药剂防治须与收获期保持安全间隔，防治节奏安排应保证最后一次施药距收获有足够间隔，避免籽粒农药残留风险。",
+   "knowledge_layer": "rule",
+   "provenance": "model-candidate",
+   "quantitative": [
+    {
+     "metric": "安全间隔期",
+     "value": null,
+     "unit": "天",
+     "value_status": "needs-verification"
+    }
+   ]
+  },
+  {
+   "unit_id": "WHE02-R-08",
+   "title": "扬花后补治的边际效益递减规则",
+   "statement": "扬花结束后补治对赤霉病侵染的阻断作用随灌浆推进而递减，补治决策应以花期是否已过为边界条件。",
+   "knowledge_layer": "rule",
+   "provenance": "model-inference",
+   "quantitative": []
+  }
+ ],
+ "S4": [
+  {
+   "unit_id": "WHE02-K-01",
+   "title": "病穗率与籽粒DON污染非充分关系",
+   "statement": "田间病穗率或严重度升高提示赤霉病流行，但不能据此单向推定最终籽粒DON污染必然超标；病害流行等级只是毒素风险的指示性前因之一。",
+   "knowledge_layer": "risk-chain",
+   "provenance": "model-inference",
+   "quantitative": [
+    {
+     "metric": "病穗率与DON污染的定量关系",
+     "value": null,
+     "unit": "",
+     "value_status": "needs-verification"
+    }
+   ]
+  },
+  {
+   "unit_id": "WHE02-K-02",
+   "title": "毒素风险由病粒率与污染梯度承载",
+   "statement": "粮粒毒素风险应以病粒率、污染梯度及检测限量框架来表征，而非以田间病穗率或严重度替代；二者属不同观测对象与不同决策依据。",
+   "knowledge_layer": "risk-chain",
+   "provenance": "model-inference",
+   "quantitative": [
+    {
+     "metric": "DON限量值",
+     "value": null,
+     "unit": "",
+     "value_status": "needs-verification"
+    }
+   ]
+  },
+  {
+   "unit_id": "WHE02-K-03",
+   "title": "病害控制不等同毒素控制",
+   "statement": "降低田间赤霉病病穗率与严重度的防治措施，不必然同步等比例降低籽粒毒素含量；病害控制与毒素控制是需分别评价的两个目标。",
+   "knowledge_layer": "risk-chain",
+   "provenance": "model-inference",
+   "quantitative": [
+    {
+     "metric": "防效与毒素降低率的对应关系",
+     "value": null,
+     "unit": "",
+     "value_status": "needs-verification"
+    }
+   ]
+  },
+  {
+   "unit_id": "WHE02-K-04",
+   "title": "防治决策与毒素检测决策不同源",
+   "statement": "田间防治决策依据天气、花期与病情预测，而毒素风险管理决策依据籽粒检测与限量框架；两套决策信息源不同，不能相互替代。",
+   "knowledge_layer": "risk-chain",
+   "provenance": "model-inference",
+   "quantitative": []
+  },
+  {
+   "unit_id": "WHE02-K-05",
+   "title": "误合并病害与毒素风险的失败模式",
+   "statement": "将病害风险与毒素风险合并为单一指标进行判断，会导致防治决策与粮食安全判定同时失真，属需明确规避的失败模式。",
+   "knowledge_layer": "failure-mode",
+   "provenance": "model-inference",
+   "quantitative": []
+  }
+ ],
+ "S5": [
+  {
+   "unit_id": "WHE02-F-01",
+   "title": "白穗不等于赤霉病：需排除虫害与其他根茎病害",
+   "statement": "抽穗后出现的白穗可由赤霉病、麦茎蜂等虫害、全蚀病或纹枯病枯孕白穗等多种原因造成，仅凭白穗外观不能判定为赤霉病，须结合穗部霉层、小穗基部变色与茎秆/根系症状区分。",
+   "knowledge_layer": "diagnostic",
+   "provenance": "model-inference",
+   "quantitative": []
+  },
+  {
+   "unit_id": "WHE02-F-02",
+   "title": "花期未见雨不等于无需防治的边界",
+   "statement": "赤霉病流行取决于花期降雨/高湿与菌源量的组合，花期无雨且菌源低时防治必要性下降，但若预报显示花后短期内有降雨或田间湿度持续偏高，仍不能以“未见雨”为由放弃预防。",
+   "knowledge_layer": "rule",
+   "provenance": "model-inference",
+   "quantitative": []
+  },
+  {
+   "unit_id": "WHE02-F-03",
+   "title": "雨后抢晴喷药的失败面",
+   "statement": "花期遇雨后在雨隙抢喷常因叶面未干、药液被冲刷或错过侵染关键期而防效下降，抢晴喷药不能等同于有效预防，需评估施药时距降雨的间隔与植株表面干燥程度。",
+   "knowledge_layer": "failure-mode",
+   "provenance": "model-inference",
+   "quantitative": []
+  },
+  {
+   "unit_id": "WHE02-F-04",
+   "title": "品种“耐病”误读为不需防治",
+   "statement": "品种耐病通常指发病后产量损失相对较小，并不表示不发病、不带菌或不产生毒素，将耐病品种当作免防品种会放大毒素污染与穗腐风险。",
+   "knowledge_layer": "failure-mode",
+   "provenance": "model-inference",
+   "quantitative": []
+  },
+  {
+   "unit_id": "WHE02-F-05",
+   "title": "病害轻不等于毒素合格",
+   "statement": "赤霉病病穗率或病情指数偏低不能直接推断籽粒毒素含量符合限量，症状严重度与毒素积累并非一一对应，粮食是否合格须以毒素检测结果判定。",
+   "knowledge_layer": "risk-chain",
+   "provenance": "model-inference",
+   "quantitative": []
+  },
+  {
+   "unit_id": "WHE02-F-06",
+   "title": "储粮受潮后毒素继续升高的边界",
+   "statement": "收获时毒素未超标的小麦，若入库水分偏高或储存期受潮，籽粒上残留的产毒真菌仍可继续生长并累积毒素，储存环节的防潮控湿是毒素风险控制的独立环节。",
+   "knowledge_layer": "risk-chain",
+   "provenance": "model-inference",
+   "quantitative": []
+  },
+  {
+   "unit_id": "WHE02-F-07",
+   "title": "防效评价误用：把一次施药防效当作全程结论",
+   "statement": "单次施药试验得到的防效只反映该次处理在特定天气与菌源条件下的效果，不能外推为整个花期的防治结论，也不能据此推断毒素控制效果。",
+   "knowledge_layer": "failure-mode",
+   "provenance": "model-inference",
+   "quantitative": []
+  }
+ ],
+ "S6": [
+  {
+   "unit_id": "WHE02-Q-01",
+   "title": "赤霉病流行预警的气象触发阈值",
+   "statement": "抽穗扬花期连续阴雨或高湿且气温处于适宜区间时，可作为赤霉病流行预警的气象触发条件，其具体阈值需按当地预警模型核验。",
+   "knowledge_layer": "quantitative",
+   "provenance": "needs-verification",
+   "quantitative": [
+    {
+     "metric": "连续阴雨或高湿持续天数阈值",
+     "value": null,
+     "unit": "天",
+     "value_status": "needs-verification"
+    },
+    {
+     "metric": "预警触发日均气温下限",
+     "value": null,
+     "unit": "摄氏度",
+     "value_status": "needs-verification"
+    }
+   ]
+  },
+  {
+   "unit_id": "WHE02-Q-02",
+   "title": "病穗率与病情指数的调查分级指标",
+   "statement": "赤霉病田间调查通常以病穗率和病情指数作为定量分级指标，其分级界限需依据现行调查规范核验。",
+   "knowledge_layer": "quantitative",
+   "provenance": "needs-verification",
+   "quantitative": [
+    {
+     "metric": "病穗率分级界限",
+     "value": null,
+     "unit": "%",
+     "value_status": "needs-verification"
+    },
+    {
+     "metric": "病情指数分级界限",
+     "value": null,
+     "unit": "无量纲",
+     "value_status": "needs-verification"
+    }
+   ]
+  },
+  {
+   "unit_id": "WHE02-Q-03",
+   "title": "病穗率与籽粒DON含量的相关性指标",
+   "statement": "病穗率与籽粒DON含量之间存在相关关系，但相关强度与换算关系需通过本地样品实测建立，不能直接以病穗率推断毒素是否合格。",
+   "knowledge_layer": "quantitative",
+   "provenance": "needs-verification",
+   "quantitative": [
+    {
+     "metric": "病穗率与DON含量相关系数",
+     "value": null,
+     "unit": "无量纲",
+     "value_status": "needs-verification"
+    },
+    {
+     "metric": "病穗率对应DON含量的换算斜率",
+     "value": null,
+     "unit": "微克每千克每百分点",
+     "value_status": "needs-verification"
+    }
+   ]
+  },
+  {
+   "unit_id": "WHE02-Q-04",
+   "title": "籽粒DON与ZEN的限量指标",
+   "statement": "小麦籽粒中DON与ZEN的限量属于食品安全标准规定内容，其具体限值须以现行国家标准文本为准。",
+   "knowledge_layer": "quantitative",
+   "provenance": "needs-verification",
+   "quantitative": [
+    {
+     "metric": "DON限量",
+     "value": null,
+     "unit": "微克每千克",
+     "value_status": "needs-verification"
+    },
+    {
+     "metric": "ZEN限量",
+     "value": null,
+     "unit": "微克每千克",
+     "value_status": "needs-verification"
+    }
+   ]
+  },
+  {
+   "unit_id": "WHE02-Q-05",
+   "title": "病粒率作为收购分类的定量指标",
+   "statement": "病粒率常被用作小麦收购环节的质量分类指标，其分级界限与判定口径需以现行收购质量标准文本核验。",
+   "knowledge_layer": "quantitative",
+   "provenance": "needs-verification",
+   "quantitative": [
+    {
+     "metric": "病粒率收购分级界限",
+     "value": null,
+     "unit": "%",
+     "value_status": "needs-verification"
+    }
+   ]
+  },
+  {
+   "unit_id": "WHE02-Q-06",
+   "title": "杀菌剂对赤霉病的田间防效区间",
+   "statement": "登记杀菌剂在抽穗扬花期施用的赤霉病防效存在区间波动，具体防效数值需以登记试验与本地田间试验结果核验。",
+   "knowledge_layer": "quantitative",
+   "provenance": "needs-verification",
+   "quantitative": [
+    {
+     "metric": "赤霉病田间防效",
+     "value": null,
+     "unit": "%",
+     "value_status": "needs-verification"
+    }
+   ]
+  },
+  {
+   "unit_id": "WHE02-Q-07",
+   "title": "施药时期对防效与毒素控制的定量影响",
+   "statement": "抽穗扬花期是赤霉病药剂防治的关键窗口，不同施药时期对防效和毒素控制的影响程度需通过分期施药试验量化。",
+   "knowledge_layer": "quantitative",
+   "provenance": "needs-verification",
+   "quantitative": [
+    {
+     "metric": "不同施药时期防效差异",
+     "value": null,
+     "unit": "百分点",
+     "value_status": "needs-verification"
+    },
+    {
+     "metric": "不同施药时期籽粒DON含量差异",
+     "value": null,
+     "unit": "微克每千克",
+     "value_status": "needs-verification"
+    }
+   ]
+  },
+  {
+   "unit_id": "WHE02-Q-08",
+   "title": "储粮水分安全界限",
+   "statement": "小麦收获后安全储存要求籽粒水分降至安全界限以下，具体界限值需按储粮技术规范与当地气候条件核验。",
+   "knowledge_layer": "quantitative",
+   "provenance": "needs-verification",
+   "quantitative": [
+    {
+     "metric": "安全储存水分界限",
+     "value": null,
+     "unit": "%",
+     "value_status": "needs-verification"
+    },
+    {
+     "metric": "短期储存允许水分上限",
+     "value": null,
+     "unit": "%",
+     "value_status": "needs-verification"
+    }
+   ]
+  },
+  {
+   "unit_id": "WHE02-Q-09",
+   "title": "收获后毒素增长的定量监测指标",
+   "statement": "收获后籽粒在水分与温度适宜时DON含量可能继续增长，其增长幅度需通过储存期定时取样检测量化。",
+   "knowledge_layer": "quantitative",
+   "provenance": "needs-verification",
+   "quantitative": [
+    {
+     "metric": "储存期DON含量增长幅度",
+     "value": null,
+     "unit": "微克每千克",
+     "value_status": "needs-verification"
+    },
+    {
+     "metric": "储存期毒素检测取样频次",
+     "value": null,
+     "unit": "次",
+     "value_status": "needs-verification"
+    }
+   ]
+  },
+  {
+   "unit_id": "WHE02-Q-10",
+   "title": "防效与毒素合格率的定量区分指标",
+   "statement": "病害防效与籽粒毒素合格率是两个独立定量指标，评价防控效果时应分别测定，不能以防效数值替代毒素合格判定。",
+   "knowledge_layer": "quantitative",
+   "provenance": "model-inference",
+   "quantitative": [
+    {
+     "metric": "毒素合格率",
+     "value": null,
+     "unit": "%",
+     "value_status": "needs-verification"
+    },
+    {
+     "metric": "防效与毒素合格率的差值",
+     "value": null,
+     "unit": "百分点",
+     "value_status": "needs-verification"
+    }
+   ]
+  }
+ ]
+}

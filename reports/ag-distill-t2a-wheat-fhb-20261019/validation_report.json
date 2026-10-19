@@ -1,0 +1,15 @@
+{
+  "package_id": "AG-DISTILL-T2A-WHE02-CANDIDATES-v1",
+  "structure_checks": "passed",
+  "errors": [],
+  "informational": [],
+  "units_count": 40,
+  "checks_performed": [
+    "unit_id 唯一性与阶段前缀一致",
+    "provenance/knowledge_layer 枚举合法",
+    "statement 无未登记数字",
+    "quantitative value 缺省纪律（null + needs-verification）",
+    "rule 单元 conditions 非空",
+    "审计覆盖全部单元"
+  ]
+}

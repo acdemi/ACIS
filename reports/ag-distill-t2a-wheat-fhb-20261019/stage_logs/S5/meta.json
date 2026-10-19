@@ -1,0 +1,20 @@
+{
+  "task_id": "AG-DISTILL-T2A",
+  "stage": "S5",
+  "prompt_version": "t2a-p1",
+  "attempt": 1,
+  "requested_model": "deepseek-chat",
+  "served_model": "deepseek-flash",
+  "usage": {
+    "prompt_tokens": 806,
+    "completion_tokens": 2402,
+    "total_tokens": 3208,
+    "prompt_tokens_details": {
+      "cached_tokens": 512
+    },
+    "prompt_cache_hit_tokens": 512,
+    "prompt_cache_miss_tokens": 294
+  },
+  "elapsed_sec": 14.9,
+  "timestamp": "2026-10-19T12:38:07.011426+00:00"
+}
