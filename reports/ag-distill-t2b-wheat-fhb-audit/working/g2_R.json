@@ -1,0 +1,520 @@
+[
+ {
+  "unit_id": "WHE02-R-01",
+  "title": "抽穗扬花期是赤霉病防治的关键时窗",
+  "statement": "小麦赤霉病药剂防治的核心时窗位于抽穗至扬花期，防治决策应围绕该时段而非全生育期平均安排。",
+  "knowledge_layer": "rule",
+  "provenance": "model-candidate",
+  "provenance_note": "基于花期侵染规律的通识性时窗规则，未绑定具体文献",
+  "main_triple": {
+   "subject": "小麦赤霉病药剂防治",
+   "predicate": "关键时窗位于",
+   "object": "抽穗至扬花期"
+  },
+  "conditions": [
+   "小麦已进入抽穗期并临近扬花",
+   "当地存在赤霉病流行风险（菌源与天气条件具备）",
+   "以防病为目的而非已发病后的补救"
+  ],
+  "failure_modes": [
+   "错过扬花前后时窗后施药，防效显著下降",
+   "抽穗期持续阴雨导致无法及时作业，时窗被动压缩",
+   "品种抽穗扬花不同步，统一时窗覆盖不全"
+  ],
+  "side_effects": [
+   "时窗集中导致施药机械与人力紧张",
+   "为抢时窗可能在不利天气下作业，增加药害与流失风险"
+  ],
+  "applicability": {
+   "growth_stage": "抽穗期至扬花期",
+   "region": null,
+   "production_system": null,
+   "variety_note": null
+  },
+  "quantitative": [],
+  "verification_methods": [
+   "田间分期施药对比试验，比较不同生育期施药的病穗率差异",
+   "结合花期观测记录与施药日期回溯分析"
+  ],
+  "related_units": [
+   "WHE02-R-02",
+   "WHE02-R-03"
+  ],
+  "uncertainties": [
+   "不同生态区抽穗扬花持续天数差异未量化",
+   "时窗具体天数边界需按当地品种与气候核定"
+  ],
+  "audit_t2a": {
+   "verdict": "revise",
+   "reason": "清单未展示规则条件与失效模式",
+   "revisions": [
+    {
+     "item": "补齐conditions和failure_modes",
+     "resolution": "verified_in_full_unit(结构与原文复核：conditions/failure_modes 均非空)"
+    },
+    {
+     "item": "明确适用花期、区域与品种前提",
+     "resolution": "open"
+    }
+   ]
+  }
+ },
+ {
+  "unit_id": "WHE02-R-02",
+  "title": "花期遇连阴雨应提前启动防治决策",
+  "statement": "抽穗扬花期若预报持续阴雨高湿，应将该天气信号作为提前启动防治决策的触发条件，而非等待可见病状。",
+  "knowledge_layer": "rule",
+  "provenance": "model-candidate",
+  "provenance_note": "天气触发规则属通识推断，阈值未定",
+  "main_triple": {
+   "subject": "花期连阴雨高湿天气",
+   "predicate": "触发",
+   "object": "提前启动赤霉病防治决策"
+  },
+  "conditions": [
+   "小麦处于抽穗扬花期",
+   "天气预报显示花期将出现持续阴雨或高湿时段",
+   "当地具备赤霉病病菌侵染的气候基础"
+  ],
+  "failure_modes": [
+   "仅依据可见病穗决定施药，错过侵染前保护窗口",
+   "天气预报失准导致误判，造成不必要的施药",
+   "排水不畅田块高湿持续时间超出预期"
+  ],
+  "side_effects": [
+   "预防性施药增加投入与农药使用量",
+   "连续预警可能诱发重复施药"
+  ],
+  "applicability": {
+   "growth_stage": "抽穗期至扬花期",
+   "region": null,
+   "production_system": null,
+   "variety_note": null
+  },
+  "quantitative": [
+   {
+    "metric": "花期连阴雨持续天数阈值",
+    "value": null,
+    "unit": "天",
+    "operator": null,
+    "applicable_conditions": "需按区域气候核定",
+    "comparison_baseline": null,
+    "value_status": "needs-verification"
+   }
+  ],
+  "verification_methods": [
+   "对比预警触发施药与常规施药的病穗率与产量差异",
+   "气象站花期降雨记录与病情指数相关分析"
+  ],
+  "related_units": [
+   "WHE02-R-01",
+   "WHE02-R-04"
+  ],
+  "uncertainties": [
+   "连阴雨天数与降雨量阈值未确定",
+   "不同区域气候差异需分别标定"
+  ],
+  "audit_t2a": {
+   "verdict": "revise",
+   "reason": "阈值null诚实，但规则条件未展示",
+   "revisions": [
+    {
+     "item": "补齐conditions和failure_modes",
+     "resolution": "verified_in_full_unit(结构与原文复核：conditions/failure_modes 均非空)"
+    },
+    {
+     "item": "保留连阴雨阈值null并注明按当地预警核验",
+     "resolution": "open"
+    }
+   ]
+  }
+ },
+ {
+  "unit_id": "WHE02-R-03",
+  "title": "初次防治加补治的节奏规则",
+  "statement": "赤霉病药剂防治宜采用初次防治加必要补治的节奏安排，补治依据花期持续阴雨与病情进展决定，而非固定次数。",
+  "knowledge_layer": "rule",
+  "provenance": "model-candidate",
+  "provenance_note": "节奏规则为通识性表述，次数与间隔留空",
+  "main_triple": {
+   "subject": "赤霉病药剂防治",
+   "predicate": "宜采用",
+   "object": "初次防治加必要补治的节奏"
+  },
+  "conditions": [
+   "花期持续时间较长或期间出现多次降雨过程",
+   "初次防治后仍存在侵染风险",
+   "所选药剂持效期不足以覆盖整个花期"
+  ],
+  "failure_modes": [
+   "机械执行固定次数导致漏防或过量施药",
+   "补治间隔过短造成重复用药与抗性压力",
+   "花期短且天气干燥时补治无必要，增加成本"
+  ],
+  "side_effects": [
+   "增加施药次数带来的成本与环境负荷",
+   "多次施药提高病菌抗药性选择压力"
+  ],
+  "applicability": {
+   "growth_stage": "抽穗期至灌浆初期",
+   "region": null,
+   "production_system": null,
+   "variety_note": null
+  },
+  "quantitative": [
+   {
+    "metric": "防治次数",
+    "value": null,
+    "unit": "次",
+    "operator": null,
+    "applicable_conditions": "依花期长度与降雨过程确定",
+    "comparison_baseline": null,
+    "value_status": "needs-verification"
+   },
+   {
+    "metric": "补治间隔",
+    "value": null,
+    "unit": "天",
+    "operator": null,
+    "applicable_conditions": "依药剂持效期确定",
+    "comparison_baseline": null,
+    "value_status": "needs-verification"
+   }
+  ],
+  "verification_methods": [
+   "设置不同补治策略的田间对比试验",
+   "记录花期降雨过程与各次施药日期的对应关系"
+  ],
+  "related_units": [
+   "WHE02-R-01",
+   "WHE02-R-02"
+  ],
+  "uncertainties": [
+   "防治次数与间隔的具体数值需按药剂与区域核定",
+   "补治的判定指标尚未量化"
+  ],
+  "audit_t2a": {
+   "verdict": "revise",
+   "reason": "规则条件与失效模式未展示",
+   "revisions": [
+    {
+     "item": "补齐conditions和failure_modes",
+     "resolution": "verified_in_full_unit(结构与原文复核：conditions/failure_modes 均非空)"
+    },
+    {
+     "item": "补治间隔与次数按登记标签或本地试验核验",
+     "resolution": "open"
+    }
+   ]
+  }
+ },
+ {
+  "unit_id": "WHE02-R-04",
+  "title": "菌源削减应在抽穗前完成",
+  "statement": "秸秆与病残体带菌是赤霉病初侵染来源之一，菌源削减措施应在抽穗前完成，抽穗后实施对当季花期侵染的削减作用有限。",
+  "knowledge_layer": "rule",
+  "provenance": "model-candidate",
+  "provenance_note": "农艺降险通识规则，效果量未量化",
+  "main_triple": {
+   "subject": "菌源削减措施",
+   "predicate": "应在",
+   "object": "抽穗前完成"
+  },
+  "conditions": [
+   "田块及周边存在秸秆或病残体带菌",
+   "以降低当季初侵染菌量为目标",
+   "小麦尚未进入抽穗期"
+  ],
+  "failure_modes": [
+   "抽穗后才处理残体，对当季花期侵染几乎无作用",
+   "秸秆还田方式不当反而增加地表菌源",
+   "周边田块菌源未同步处理，效果被抵消"
+  ],
+  "side_effects": [
+   "秸秆清除或深埋增加作业成本",
+   "过度清除秸秆影响土壤有机质归还"
+  ],
+  "applicability": {
+   "growth_stage": "播种至抽穗前",
+   "region": null,
+   "production_system": null,
+   "variety_note": null
+  },
+  "quantitative": [],
+  "verification_methods": [
+   "对比不同残体处理方式田块的初侵染菌量与病穗率",
+   "花期前调查地表病残体带菌率"
+  ],
+  "related_units": [
+   "WHE02-R-05",
+   "WHE02-R-06"
+  ],
+  "uncertainties": [
+   "菌源削减对病情的贡献比例未量化",
+   "不同还田方式的效果差异需分区验证"
+  ],
+  "audit_t2a": {
+   "verdict": "revise",
+   "reason": "规则条件与失效模式未展示",
+   "revisions": [
+    {
+     "item": "补齐conditions和failure_modes",
+     "resolution": "verified_in_full_unit(结构与原文复核：conditions/failure_modes 均非空)"
+    },
+    {
+     "item": "限定菌源削减方式与抽穗前时点",
+     "resolution": "open"
+    }
+   ]
+  }
+ },
+ {
+  "unit_id": "WHE02-R-05",
+  "title": "排水降湿作为花期降险的配套措施",
+  "statement": "花期田间高湿延长病菌侵染时间，通过排水降湿改善田间微环境可作为药剂防治之外的配套降险措施。",
+  "knowledge_layer": "rule",
+  "provenance": "model-candidate",
+  "provenance_note": "微环境调控通识规则，降湿幅度未量化",
+  "main_triple": {
+   "subject": "田间排水降湿",
+   "predicate": "作为",
+   "object": "花期赤霉病配套降险措施"
+  },
+  "conditions": [
+   "田块排水不畅或地下水位偏高",
+   "花期遭遇降雨或持续高湿",
+   "已配套药剂防治或其他降险措施"
+  ],
+  "failure_modes": [
+   "仅靠排水降湿替代药剂防治，防效不足",
+   "排水设施在花期前未疏通，降雨时无法发挥作用",
+   "地势低洼区域排水能力有限，降湿效果不明显"
+  ],
+  "side_effects": [
+   "排水工程投入与维护成本",
+   "过度排水可能影响后期灌浆水分供应"
+  ],
+  "applicability": {
+   "growth_stage": "抽穗期至灌浆期",
+   "region": null,
+   "production_system": null,
+   "variety_note": null
+  },
+  "quantitative": [],
+  "verification_methods": [
+   "对比排水处理与对照田块的田间湿度与病穗率",
+   "花期田间小气候观测记录"
+  ],
+  "related_units": [
+   "WHE02-R-04",
+   "WHE02-R-02"
+  ],
+  "uncertainties": [
+   "排水降湿对病情的独立贡献难以分离",
+   "不同土壤类型效果差异未验证"
+  ],
+  "audit_t2a": {
+   "verdict": "revise",
+   "reason": "规则条件与失效模式未展示",
+   "revisions": [
+    {
+     "item": "补齐conditions和failure_modes",
+     "resolution": "verified_in_full_unit(结构与原文复核：conditions/failure_modes 均非空)"
+    },
+    {
+     "item": "说明排水降湿仅作配套而非替代药剂",
+     "resolution": "open"
+    }
+   ]
+  }
+ },
+ {
+  "unit_id": "WHE02-R-06",
+  "title": "播期调节需权衡花期避雨与产量风险",
+  "statement": "通过调整播期使抽穗扬花期避开当地高频降雨时段可作为赤霉病区域性降险思路，但须同时评估晚播对产量与成熟期的负面影响。",
+  "knowledge_layer": "rule",
+  "provenance": "model-candidate",
+  "provenance_note": "播期避病为通识思路，区域适配未验证",
+  "main_triple": {
+   "subject": "播期调节",
+   "predicate": "用于",
+   "object": "使花期避开高频降雨时段"
+  },
+  "conditions": [
+   "当地花期降雨分布具有明显的时段规律",
+   "品种生育期可调且不影响安全成熟",
+   "具备灌溉等配套条件以弥补播期调整影响"
+  ],
+  "failure_modes": [
+   "盲目推迟播期导致灌浆期遇高温逼熟或秋霜风险",
+   "品种感病性差异大，播期调整无法覆盖全部田块",
+   "降雨规律年际波动大，调整后仍可能花期遇雨"
+  ],
+  "side_effects": [
+   "播期改变影响群体结构与产量构成",
+   "晚播可能增加后期病虫害叠加风险"
+  ],
+  "applicability": {
+   "growth_stage": "播种期决策",
+   "region": null,
+   "production_system": null,
+   "variety_note": null
+  },
+  "quantitative": [],
+  "verification_methods": [
+   "多年多点不同播期试验，比较花期降雨遭遇率与病穗率",
+   "结合当地气象资料分析花期降雨概率分布"
+  ],
+  "related_units": [
+   "WHE02-R-02",
+   "WHE02-R-05"
+  ],
+  "uncertainties": [
+   "各区域适宜播期窗口未标定",
+   "播期调整的产量代价需分品种评估"
+  ],
+  "audit_t2a": {
+   "verdict": "revise",
+   "reason": "规则条件未展示且区域性强",
+   "revisions": [
+    {
+     "item": "补齐conditions和failure_modes",
+     "resolution": "verified_in_full_unit(结构与原文复核：conditions/failure_modes 均非空)"
+    },
+    {
+     "item": "绑定区域降雨模式并评估晚播产量风险",
+     "resolution": "open"
+    }
+   ]
+  }
+ },
+ {
+  "unit_id": "WHE02-R-07",
+  "title": "药剂防治时窗与收获安全间隔的衔接规则",
+  "statement": "花期药剂防治须与收获期保持安全间隔，防治节奏安排应保证最后一次施药距收获有足够间隔，避免籽粒农药残留风险。",
+  "knowledge_layer": "rule",
+  "provenance": "model-candidate",
+  "provenance_note": "安全间隔属标签规定范畴，具体数值留空",
+  "main_triple": {
+   "subject": "花期药剂防治",
+   "predicate": "须衔接",
+   "object": "收获安全间隔要求"
+  },
+  "conditions": [
+   "花期实施了药剂防治",
+   "所用药剂标签规定有安全间隔期",
+   "收获期临近或已确定"
+  ],
+  "failure_modes": [
+   "为追求防效在灌浆后期仍施药，导致残留超标",
+   "忽视标签安全间隔，凭经验安排最后施药时间",
+   "不同药剂混用时间隔要求未分别核算"
+  ],
+  "side_effects": [
+   "为满足间隔要求可能放弃后期补治，影响防效",
+   "延长间隔可能压缩可用防治时窗"
+  ],
+  "applicability": {
+   "growth_stage": "扬花期至灌浆期",
+   "region": null,
+   "production_system": null,
+   "variety_note": null
+  },
+  "quantitative": [
+   {
+    "metric": "安全间隔期",
+    "value": null,
+    "unit": "天",
+    "operator": null,
+    "applicable_conditions": "依具体药剂标签规定",
+    "comparison_baseline": null,
+    "value_status": "needs-verification"
+   }
+  ],
+  "verification_methods": [
+   "核对农药标签安全间隔规定",
+   "收获期籽粒农药残留检测"
+  ],
+  "related_units": [
+   "WHE02-R-03"
+  ],
+  "uncertainties": [
+   "具体药剂安全间隔数值须以登记标签为准，本单元不填",
+   "残留限量标准需查现行国家标准文本"
+  ],
+  "audit_t2a": {
+   "verdict": "revise",
+   "reason": "安全间隔阈值null，规则条件未展示",
+   "revisions": [
+    {
+     "item": "补齐conditions和failure_modes",
+     "resolution": "verified_in_full_unit(结构与原文复核：conditions/failure_modes 均非空)"
+    },
+    {
+     "item": "安全间隔期须按具体药剂登记标签核验",
+     "resolution": "open"
+    }
+   ]
+  }
+ },
+ {
+  "unit_id": "WHE02-R-08",
+  "title": "扬花后补治的边际效益递减规则",
+  "statement": "扬花结束后补治对赤霉病侵染的阻断作用随灌浆推进而递减，补治决策应以花期是否已过为边界条件。",
+  "knowledge_layer": "rule",
+  "provenance": "model-inference",
+  "provenance_note": "由侵染窗口推断的边际效益规则，未量化",
+  "main_triple": {
+   "subject": "扬花后补治",
+   "predicate": "边际效益随",
+   "object": "灌浆推进而递减"
+  },
+  "conditions": [
+   "小麦已完成扬花进入灌浆期",
+   "前期防治存在遗漏或花期遇雨",
+   "评估是否值得追加施药"
+  ],
+  "failure_modes": [
+   "扬花后仍按花期节奏多次施药，收益低且增加残留风险",
+   "将补治作为已错失时窗的等效替代",
+   "病害已显症后施药，无法挽回已发生的侵染"
+  ],
+  "side_effects": [
+   "无效施药增加成本与环境负荷",
+   "延误对已发病田块的其他管理措施"
+  ],
+  "applicability": {
+   "growth_stage": "灌浆期",
+   "region": null,
+   "production_system": null,
+   "variety_note": null
+  },
+  "quantitative": [],
+  "verification_methods": [
+   "设置扬花后不同时间施药处理的防效对比",
+   "病穗率与施药时间的关系曲线分析"
+  ],
+  "related_units": [
+   "WHE02-R-01",
+   "WHE02-R-03"
+  ],
+  "uncertainties": [
+   "边际效益递减的具体拐点未确定",
+   "不同品种扬花持续期差异影响边界判定"
+  ],
+  "audit_t2a": {
+   "verdict": "revise",
+   "reason": "规则条件与失效模式未展示",
+   "revisions": [
+    {
+     "item": "补齐conditions和failure_modes",
+     "resolution": "verified_in_full_unit(结构与原文复核：conditions/failure_modes 均非空)"
+    },
+    {
+     "item": "明确扬花结束边界与补治失效条件",
+     "resolution": "open"
+    }
+   ]
+  }
+ }
+]
