@@ -191,7 +191,7 @@ python orchestrator.py --llm-judge --llm-critic "温室A甜菜叶片圆形褐色
 ## 测试与评估
 
 ```powershell
-# 单元测试（222 个，15 个测试文件 + conftest.py）
+# 单元测试（267 个，18 个测试文件 + conftest.py）
 python -m pytest -q
 
 # 轻量回归：主图 / 规则 / LLM Judge 回退（3 套 × 3 场景）

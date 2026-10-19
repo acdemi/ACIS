@@ -1,6 +1,6 @@
 # ACIS Architecture State
 
-> Last updated: 2026-09-20
+> Last updated: 2026-10-19
 > This file is the single source of truth for module stability.
 
 ## Module Status
@@ -8,7 +8,7 @@
 | Module | Status | Version | Notes |
 |--------|--------|---------|-------|
 | Planner | Frozen | 2.1 | |
-| Judge | Frozen | 2.1 | 诊断日志改动未提交（Phase 4.2-R） |
+| Judge | Frozen | 2.1 | 诊断日志已提交（2851bb9，Phase 4.2-R） |
 | Debate | Frozen | 2.1 | |
 | Critic | Frozen | 2.1 | |
 | Tool Router | Frozen | 2.1 | |
@@ -24,7 +24,7 @@
 | Capability Framework | Frozen | 2.1E | Sprint 04.5A-04.5B complete（52 annotated / 52:52 consistent；接口冻结） |
 | Benchmark Datasets | Frozen | 2.1E | JSON 只读基线（Sprint 04.5B 后冻结） |
 | Experiment Manager | Frozen | 2.1E | Sprint 05-06 complete（experiments/：YAML、多 seed、manifest、统计与论文图） |
-| Challenge Evaluation Harness | Active | Phase 4 | `scripts/run_phase4_2*.py` + `src/openmetaphysics/evaluation/`；等待架构决策 |
+| Challenge Evaluation Harness | Active | Phase 4 | 评测可靠性修复 + 指标契约修复完成（2026-10-17：`utils/judge_runtime.py`、`decision_semantics.py`）；真实 Judge 恢复 BLOCKED（凭证 401）；等待架构决策 |
 | Executor | Not Started | 2.2 | |
 | Learning Runtime | Not Started | 2.2 | |
 

@@ -1,5 +1,34 @@
 # ACIS Changelog
 
+## [Phase 4 Reliability & Contract Repair] — 2026-10-17/18
+
+### Added
+- `utils/judge_runtime.py`：Judge 配置集中解析（key / base URL / model / 超时 / SDK 重试预算），
+  每个 Judge 决策记录脱敏 `judge_runtime` 元数据（outcome、mode、provider、端点 ID、失败码、token usage 等）
+- 失败码分类：`missing_credentials` / `authentication_error` / `billing_error` / `rate_limit` / `timeout` /
+  `connection_error` / `response_format_error` / `server_error` / `api_http_error` / `provider_error`
+- `decision_semantics.py`：评测与 Phase 4 适配器共享的决策语义规范（ABSTAIN 是状态不是标签；
+  accuracy 对比最终 Judge 决策；期望「证据不足」仅在弃权时判对）
+- 评测层指标契约修复（d9fcb7b）：factor coverage 计入 formal action_plan、abstention 判定、
+  fallback 分层与缺失事件不计分等口径修复；新增评测层单测
+- 报告：`reports/phase4_evaluation_reliability_repair.md`、`reports/phase4_evaluation_metric_contract_audit.md`、
+  `reports/phase4_real_agent_consistency_20261017/`、`reports/phase4_real_judge_recovery_20261018/`
+
+### Findings
+- 历史 "label accuracy=1.00 / factor coverage=0.00 / coherence=0" 三元组为三个不同因素叠加
+  （指标口径不同 + action_plan 被丢弃 + coherence 实为量化覆盖率非逻辑一致性）；
+  同一 trace 契约修复后 factor coverage 0.00 → 0.25，label accuracy 保持 1.00
+- 重试归属修复：JudgeAgent 单次 SDK 调用交由 SDK 重试预算；legacy harness `max_retries=0`，
+  仅在 provider 明确拒绝 `seed`（HTTP 400/422）时重试
+- 真实 Judge 凭证无效：真实 trace 记录 HTTP 401 `authentication_error`、`judge_mode=rules`；
+  `AGRI_AI_JUDGE_API_KEY` 不存在 → 恢复 BLOCKED（2026-10-18）
+
+### Known Issues
+- `DEEPSEEK_API_KEY` 待经正常 `.env` 渠道更新后重做 judge 认证验证与六次最小预检
+- Phase 5（扩展评测）vs Phase 6（架构重设计）架构决策仍未决
+
+---
+
 ## [Phase 4.2-R] — 2026-08-31
 
 ### Added
