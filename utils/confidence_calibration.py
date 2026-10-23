@@ -128,6 +128,12 @@ class Calibrator:
 # ---------------------------------------------------------------------------
 DECISION_DATA_PATH = Path(__file__).parent / 'decision_calibration_data.json'
 
+# Calibration is only trusted once it has seen enough labelled samples: with a
+# handful of samples isotonic regression collapses into a step function that
+# destroys the discrimination it is meant to preserve (measured 2026-10-24:
+# ECE 0.104 -> 0.175 and corr 0.539 -> 0.508 after a 13-sample fit).
+MIN_CALIBRATION_SAMPLES = 50
+
 
 def parse_signed_delta(value: Any) -> float:
     """Parse +0.15 / -0.10 / 15% / 0.15 into a bounded float delta."""
@@ -231,12 +237,9 @@ def combine_decision_score(signals: dict[str, Any]) -> float:
         degradation = 0.65
     else:
         # Agreement is the only signal shown to separate correct from wrong
-        # decisions (corr 0.78 on the 2026-10-24 probe), so it dominates.
-        score = (
-            0.65 * float(consistency)
-            + 0.20 * float(signals.get("self_report", 0.5))
-            + 0.15 * float(signals.get("evidence_strength", 0.5))
-        )
+        # decisions (seed42 corr 0.78, seed43 corr 0.54).  Blending in the
+        # uninformative features measurably hurt, so agreement is used as-is.
+        score = float(consistency)
         degradation = 1.0
     score += float(signals.get("kg_contribution", 0.0))
     score -= 0.02 * min(int(signals.get("conflict_count", 0)), 3)
@@ -270,7 +273,7 @@ class DecisionCalibrator:
         self._samples: list[tuple[float, int]] = []
         self._model: tuple[str, Any] | None = None
         self._load()
-        if self.enabled and self._samples:
+        if self.enabled and len(self._samples) >= MIN_CALIBRATION_SAMPLES:
             self._model = Calibrator._fit_one(self._samples)
             if self._model is None and len({c for _, c in self._samples}) == 1:
                 self._model = ("constant", float(self._samples[0][1]))
@@ -313,6 +316,7 @@ class DecisionCalibrator:
         return {
             'enabled': self.enabled,
             'samples': len(self._samples),
+            'min_samples': MIN_CALIBRATION_SAMPLES,
             'model': self._model[0] if self._model else 'identity',
             'data_path': self.data_path.name,
         }
