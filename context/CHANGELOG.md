@@ -1,5 +1,23 @@
 # ACIS Changelog
 
+## [Phase 4 Real Judge Recovery] — 2026-10-19
+
+### Added
+- 真实 LLM Judge 恢复验证：单次受控验证探针（`logs/judge_auth_probe_20261019.py`，gitignored）
+  + 六次最小预检（`reports/phase4_judge_recovery_20261019/`：总结报告 + 3 案例 × seed 42/43 报告与 trace）
+
+### Findings
+- 凭证更新后 6/6 运行 `judge_mode=deepseek`、零 rules 回退、零 authentication_error；trace 记录 outcome=success 与完整 token usage
+- GT 标签 5/6：case14（弃权案例）seed42 误判为番茄早疫病，seed43 弃权——跨 seed 决策翻转，再次印证方差风险
+- 全部 6 轮 harness 对比按修复后契约判 INCOMPARABLE（执行语义不同）；置信度偏移 0.10–0.52 仅作诊断
+- 观察：API 响应 `model=deepseek-flash`（请求 `deepseek-chat`），服务端伺服型号命名
+
+### Known Issues
+- harness 与真实链路口径对齐（原 R4 FAIL）仍开放
+- Phase 5（扩展评测）vs Phase 6（架构重设计）架构决策仍未决
+
+---
+
 ## [Phase 4 Reliability & Contract Repair] — 2026-10-17/18
 
 ### Added

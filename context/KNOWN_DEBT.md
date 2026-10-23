@@ -31,10 +31,9 @@
   与 Phase 4.2-R 诊断改动前版本一致（未引入新问题）；属冻结 Judge 模块既有风格问题，待架构评审后统一处理。
 - **venv dev tools**: pytest（9.1.1）/ ruff（0.16.2）/ mypy（2.3.0）均已装入 `.venv`（2026-08-08）；pytest 当前 267 passed（2026-09-20）
 - **src/ 空目录**: 已移除（2026-08-08，清理 commit 89fa630）
-- **真实 Judge 凭证（2026-10-18）**: `DEEPSEEK_API_KEY` 无效（HTTP 401 `authentication_error`），
-  `AGRI_AI_JUDGE_API_KEY` 不存在；真实 Judge 恢复 BLOCKED。最小人工操作：经正常 `.env` 渠道更新密钥
-  （勿粘贴至聊天/报告），随后按 `reports/phase4_real_judge_recovery_20261018/blocked_precheck_report.md`
-  从 Step 1 重检。Priority: High（Blocker）。
+- **真实 Judge 凭证（2026-10-18 → 2026-10-19 已解决）**: 曾因 `DEEPSEEK_API_KEY` 401 BLOCKED；
+  用户经正常 `.env` 渠道更新凭证后，2026-10-19 按规程完成 1 次受控验证 + 六次最小预检，
+  6/6 `judge_mode=deepseek` 零回退。遗留观察：API 响应 `model=deepseek-flash`（请求 `deepseek-chat`）。
 - **factor coverage 契约边界（2026-10-17）**: 现行契约只对最终用户可见决策解释评分，
   不计隐藏专家证据（内部 trace 的 symptom factor 不计入）；全 trace 覆盖率为未来独立指标。
   Priority: Low（设计决定，待架构师确认）。
