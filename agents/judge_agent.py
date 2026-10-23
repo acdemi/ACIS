@@ -19,6 +19,7 @@ from utils.judge_runtime import (
     JudgeRuntimeConfig,
     classify_failure,
     redact_error_detail,
+    judge_default_headers,
     resolve_judge_config,
 )
 from utils.omission import (
@@ -325,6 +326,7 @@ class JudgeAgent:
             base_url=config.base_url,
             timeout=config.timeout_seconds,
             max_retries=config.max_retries,
+            default_headers=judge_default_headers(),
         )
         _logger.info(
             "Judge request: provider=%s endpoint=%s model=%s "

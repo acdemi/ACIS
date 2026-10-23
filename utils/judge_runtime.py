@@ -13,6 +13,7 @@ import json
 import math
 import os
 import re
+import uuid
 from collections.abc import Mapping
 from dataclasses import dataclass
 from urllib.parse import urlsplit
@@ -155,6 +156,38 @@ def infer_provider(base_url: str) -> str:
     return "openai-compatible"
 
 
+SESSION_HEADER = "x-opencode-session"
+_SESSION_ID: str | None = None
+
+
+def _session_id(env: Mapping[str, str]) -> str:
+    """Per-process stable opencode session identifier (env override wins)."""
+    global _SESSION_ID
+    explicit = env.get("AGRI_AI_JUDGE_SESSION_ID", "").strip()
+    if explicit:
+        return explicit
+    if _SESSION_ID is None:
+        _SESSION_ID = uuid.uuid4().hex
+    return _SESSION_ID
+
+
+def judge_default_headers(environ: Mapping[str, str] | None = None) -> dict[str, str]:
+    """Return provider-specific default headers for the Judge client.
+
+    The opencode zen gateway requires an x-opencode-session header on every
+    request (routing hint).  For opencode endpoints a per-process session
+    identifier is generated automatically (or pinned via the env variable
+    AGRI_AI_JUDGE_SESSION_ID).  Other providers get no extra headers unless
+    that variable is set explicitly.
+    """
+    env = os.environ if environ is None else environ
+    cfg = resolve_judge_config(env)
+    if "opencode" in cfg.provider or "opencode" in cfg.base_url.lower():
+        return {SESSION_HEADER: _session_id(env)}
+    explicit = env.get("AGRI_AI_JUDGE_SESSION_ID", "").strip()
+    return {SESSION_HEADER: explicit} if explicit else {}
+
+
 def sanitize_endpoint(base_url: str) -> str:
     """Return scheme/host/path only; drop credentials, query, and fragment."""
     try:
@@ -224,7 +257,9 @@ __all__ = [
     "MAX_TIMEOUT_SECONDS",
     "JudgeRuntimeConfig",
     "classify_failure",
+    "SESSION_HEADER",
     "infer_provider",
+    "judge_default_headers",
     "redact_error_detail",
     "resolve_judge_config",
     "sanitize_endpoint",
