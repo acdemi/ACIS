@@ -40,3 +40,13 @@ Step 1 配置重检 → Step 2 恰好一次受控 Judge 验证 → Step 3 六次
   `src/openmetaphysics/evaluation/challenge_report.py`、`tests/test_challenge_evaluation.py`、
   `tests/test_metrics.py`、`tests/fixtures/`），未纳入、未改写、未回退，归属其会话处置。
 - Merge / push：未执行，等待用户指示。
+
+## 事后补记（2026-10-23）
+
+- 六份预检报告（precheck_case{23,14,9}_seed{42,43}.md）的工作树原件在本轮提交（2d87113）之后、
+  2026-10-23 20:37 之前的窗口内被并行会话删除；其完整副本已由该会话保存在分支
+  `work/20261019-judge-provenance-verify`（提交 e09244f，同路径 + provenance_addendum.md +
+  closeout 归档）。本分支未恢复原件以避免双份真相，已在恢复报告与 CURRENT_SPRINT 产物索引中注记去向。
+- trace 证据（`logs/phase4_judge_recovery_20261019/` 12 个 JSON，gitignored）完好。
+- 本轮提交均未触及并行会话的未提交修改（decision_semantics.py / evals/metrics.py /
+  challenge_report.py / 两个测试文件 / tests/fixtures/）。

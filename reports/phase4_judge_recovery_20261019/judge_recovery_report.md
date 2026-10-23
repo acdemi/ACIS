@@ -37,6 +37,11 @@
 产出：`reports/phase4_judge_recovery_20261019/precheck_case{23,14,9}_seed{42,43}.md`，
 trace 于 `logs/phase4_judge_recovery_20261019/`。执行窗口 19:51–19:56，每轮约 1 分钟。
 
+> 事后注记（2026-10-23）：上述六份预检报告的工作树原件已由并行会话搬移，其完整副本保存于分支
+> `work/20261019-judge-provenance-verify`（提交 e09244f，同路径 `reports/phase4_judge_recovery_20261019/precheck_*.md`，
+> 另含 `provenance_addendum.md` 与 `context/archive/20261019-phase4-judge-provenance-closeout.md`）。
+> 完整数据亦保留在本节表格与 `logs/phase4_judge_recovery_20261019/` 的 12 个 trace JSON 中。
+
 | case | role | ground truth | seed | real decision | conf | GT 判定 | harness 参考 | conf offset |
 |---|---|---|---|---|---|---|---|---|
 | 23 `ms_tomato_blight_stem` | 确定性诊断 | 早疫病 | 42 | 番茄早疫病 | 0.72 | ✓ | 番茄早疫病 0.85 | 0.130 |

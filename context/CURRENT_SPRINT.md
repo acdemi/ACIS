@@ -51,7 +51,7 @@ Goal: Architecture impact assessment — Challenge Set multi-seed validation + r
 - `reports/phase4_evaluation_metric_contract_audit.md`（指标契约审计与修复，2026-10-17）
 - `reports/phase4_real_agent_consistency_20261017/`（真实 Agent 一致性预检产物）
 - `reports/phase4_real_judge_recovery_20261018/blocked_precheck_report.md`（Judge 恢复 BLOCKED 报告）
-- `reports/phase4_judge_recovery_20261019/`（Judge 恢复总结 + 六次预检报告，2026-10-19）
+- `reports/phase4_judge_recovery_20261019/`（Judge 恢复总结，2026-10-19；六份预检报告原件由并行会话移至 `work/20261019-judge-provenance-verify` e09244f，数据见总结报告第 3 节与 logs/ trace）
 
 ## Read Order
 
