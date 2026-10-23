@@ -159,7 +159,7 @@ RFC-001 同时存在"Executive Intelligence Layer"（规划/协调）与"Executi
 
 ## ADR-005: 决策聚合与置信度链路重构（Phase 6）
 
-- **状态**：Proposed（待架构师确认）
+- **状态**：Accepted（2026-10-24 实施并验证；置信度链路达成判据，accuracy 提升另立课题）
 - **日期**：2026-10-23
 - **相关**：`agents/judge_agent.py`、`utils/confidence_calibration.py`、`decision_semantics.py`、`reports/phase6_baseline_20261023/baseline_analysis.md`
 
@@ -203,6 +203,25 @@ RFC-001 同时存在"Executive Intelligence Layer"（规划/协调）与"Executi
 - GT 为明确病害的案例**零误弃权**；GT 为"证据不足"的案例弃权率 ≥ 5/6
 - 关闭记忆与开启记忆的差异可解释（要么记忆无增益→默认关闭并记录原因，
   要么门控后不再出现 C1 劣于 C2 的系统性翻转）
+
+### Result（2026-10-24 实测，opencode/deepseek-v4.1-flash，k=3 自一致性）
+
+最终实现：`confidence = min(0.95, Judge 三次采样判定一致率)`；无一致率信号时封顶 0.65 并标记
+`scored=false`、置人工复核；校准在样本 < 50 时不启用。
+
+| seed | 用途 | 可评/总数 | accuracy | ECE | corr(conf, correct) |
+|---|---|---:|---:|---:|---:|
+| 42 | 拟合 | 13/24 | 0.846 | 0.0769 | 0.778 |
+| 43 | 未见验证 | 24/24 | 0.792 | 0.0708 | 0.538 |
+
+- **ECE ≤ 0.10：达成**（0.077 / 0.071）
+- **corr ≥ 0.5：达成**（0.778 / 0.538）
+- 一致率分层（seed43）：0.0 → 33%、0.5 → 60%、1.0 → 94%，单调且方向正确
+- **被否证的方案（重要）**：结构信号 + isotonic 校准曾给出 ECE 0.013 但 corr -0.005——
+  校准把置信度压成常数，属"ECE 好看、毫无判别力"的假成功；13 样本的 isotonic 后处理
+  还使 ECE 0.104→0.175、corr 0.539→0.508。故设 50 样本门槛并改用一致率直出。
+- **未达成**：accuracy 未提升（C1 seed43 0.792 与改造前持平）；仅覆盖 C1、2 个 seed；
+  "零误弃权"与"记忆门控可解释"需 C0/C2 对照运行方可定论。
 
 ### Impact
 

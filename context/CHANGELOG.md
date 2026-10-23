@@ -1,5 +1,31 @@
 # ACIS Changelog
 
+## [Phase 6 Decision Confidence Redesign] — 2026-10-24
+
+### Added
+- `utils/confidence_calibration.py`：`compute_decision_signals` / `combine_decision_score` / `DecisionCalibrator`（ADR-005）
+- `agents/judge_agent.py`：自一致性采样（k=3，含重试）、记忆层输出门控、弃权判定规则
+- `scripts/fit_decision_calibration.py`：从真实运行 trace 生成校准样本，支持 `--scored-only`
+- `utils/judge_runtime.py`：opencode zen 网关 `x-opencode-session` 头支持
+- 报告：`reports/phase6_baseline_20261023/baseline_analysis.md`、
+  `reports/phase6_redesign_20261023/implementation_status.md`、`final_evidence.md`
+- 测试：`tests/test_decision_confidence.py`（10 项）
+
+### Findings
+- 真实 Judge 全量基线（3 configs × 24 × seed42，零回退）：置信度均值 0.46–0.50 对 accuracy 0.79–1.00，
+  ECE 0.34–0.50；**LLM 自评与全部结构信号均无判别力**（特征分离度 ≤ 0.077）
+- C1 与 C2 仅差 `memory_on`：19/24 vs 24/24，5 例翻转 → 记忆层注入噪声
+- **Judge 三次采样判定一致率是唯一有判别力的信号**：seed42 corr 0.778、seed43 corr 0.538；
+  建立 `confidence = min(0.95, agreement)` 后 ECE 0.071–0.077（ADR 判据达成）
+- 被否证：结构信号 + isotonic 曾给出 ECE 0.013 / corr -0.005（校准压成常数）；
+  13 样本 isotonic 使 ECE 0.104→0.175、corr 0.539→0.508 → 设 50 样本门槛
+
+### Known Issues
+- accuracy 未提升（C1 seed43 0.792 与改造前持平）
+- 仅覆盖 C1、2 seeds；C0/C2 对照与零误弃权判据待补
+
+---
+
 ## [Phase 4 Real Judge Recovery] — 2026-10-19
 
 ### Added
