@@ -56,7 +56,10 @@ def load_run(run_dir: Path):
             class _Debate:
                 conflicts = _conflicts
 
-            signals = compute_decision_signals(llm_like, analysis, _Debate())
+            design = analysis.get("confidence_design") or {}
+            sc = design.get("self_consistency") or {}
+            agreement = sc.get("agreement") if isinstance(sc, dict) else None
+            signals = compute_decision_signals(llm_like, analysis, _Debate(), agreement)
             score = combine_decision_score(signals)
             correct = 1 if float(row.get("accuracy") or 0) >= 1.0 else 0
             samples.append({
@@ -65,6 +68,7 @@ def load_run(run_dir: Path):
                 "score": score,
                 "correct": correct,
                 "self_report": signals["self_report"],
+                "agreement": agreement,
                 "confidence": float(row.get("confidence") or 0),
             })
     return samples
@@ -77,6 +81,12 @@ def main(argv):
     if not samples:
         print("no samples found in", run_dir)
         return 1
+    scored_only = "--scored-only" in argv
+    if scored_only:
+        samples = [s for s in samples if s.get("agreement") is not None]
+        if not samples:
+            print("no agreement-scored samples in", run_dir)
+            return 1
     payload = {
         "source_run": str(run_dir).replace("\\", "/"),
         "note": "fit on one seed, evaluate on another; see ADR-005",

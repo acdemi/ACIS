@@ -221,25 +221,31 @@ def combine_decision_score(signals: dict[str, Any]) -> float:
     """Deterministic structural score before calibration (documented weights)."""
     consistency = signals.get("self_consistency")
     if consistency is None:
+        # No agreement signal: the remaining features were measured to carry
+        # almost no information, so degrade instead of pretending confidence.
         score = (
-            0.45 * float(signals.get("self_report", 0.5))
+            0.40 * float(signals.get("self_report", 0.5))
             + 0.35 * float(signals.get("evidence_strength", 0.5))
-            + 0.20 * float(signals.get("kg_support", 0.0))
+            + 0.25 * float(signals.get("kg_support", 0.0))
         )
+        degradation = 0.65
     else:
+        # Agreement is the only signal shown to separate correct from wrong
+        # decisions (corr 0.78 on the 2026-10-24 probe), so it dominates.
         score = (
-            0.30 * float(signals.get("self_report", 0.5))
-            + 0.25 * float(signals.get("evidence_strength", 0.5))
-            + 0.15 * float(signals.get("kg_support", 0.0))
-            + 0.30 * float(consistency)
+            0.65 * float(consistency)
+            + 0.20 * float(signals.get("self_report", 0.5))
+            + 0.15 * float(signals.get("evidence_strength", 0.5))
         )
+        degradation = 1.0
     score += float(signals.get("kg_contribution", 0.0))
     score -= 0.02 * min(int(signals.get("conflict_count", 0)), 3)
     score -= 0.05 * min(int(signals.get("omission_count", 0)), 2)
     if signals.get("critic_escalate"):
         score -= 0.05
     score -= 0.05 * float(signals.get("kg_conflict_ratio", 0.0))
-    return round(max(0.05, min(0.95, score)), 4)
+    upper = 0.95 * degradation if degradation < 1.0 else 0.95
+    return round(max(0.05, min(upper, score)), 4)
 
 
 class DecisionCalibrator:

@@ -411,11 +411,17 @@ class JudgeAgent:
         consistency = self._sample_self_consistency(
             client, config, messages, decision_text.strip(), kg
         )
-        signals = compute_decision_signals(
-            llm, fb.judge_analysis, debate, consistency.get("agreement")
-        )
+        agreement = consistency.get("agreement")
+        signals = compute_decision_signals(llm, fb.judge_analysis, debate, agreement)
         structural_score = combine_decision_score(signals)
-        confidence = self.decision_calibrator.calibrate(structural_score)
+        if agreement is None:
+            # No agreement signal: the remaining features were measured to carry
+            # almost no information.  Do not fabricate a confident number.
+            confidence = round(min(0.65, structural_score), 4)
+            confidence_scored = False
+        else:
+            confidence = self.decision_calibrator.calibrate(structural_score)
+            confidence_scored = True
         decision, abstention_policy = self._apply_abstention_policy(
             decision_text.strip(), signals, outputs
         )
@@ -423,6 +429,8 @@ class JudgeAgent:
             "self_report": self_report,
             "structural_score": structural_score,
             "derived_confidence": confidence,
+            "scored": confidence_scored,
+            "agreement": agreement,
             "signals": signals,
             "abstention": abstention_policy,
             "self_consistency": consistency,
@@ -433,6 +441,7 @@ class JudgeAgent:
         if risk_level not in {"low", "medium", "high"}: risk_level = fb.risk_level
         need_human_review = bool(llm.get("need_human_review", fb.need_human_review))
         if abstention_policy.get("overridden"): need_human_review = True
+        if not confidence_scored: need_human_review = True
         if confidence > 0.9 and (need_human_review or debate.conflicts): confidence = 0.9; need_human_review = True
         summary = str(llm.get("summary") or fb.summary)
         if "DeepSeek" not in summary: summary = f"DeepSeek Judge 结构化裁决：{summary}"
@@ -470,7 +479,12 @@ class JudgeAgent:
         known = [str(d) for d in (kg.get("diseases") or []) if str(d).strip()]
         primary_label = _normalize_label({"decision": primary_decision}, known_labels=known)
         labels = []
-        for _ in range(k - 1):
+        attempts = 0
+        failures = 0
+        # Retry transient gateway failures: a missing sample silently weakens the
+        # only discriminative signal this system has.
+        while len(labels) < k - 1 and attempts < (k - 1) * 3:
+            attempts += 1
             try:
                 resp = client.chat.completions.create(
                     model=config.model,
@@ -479,18 +493,27 @@ class JudgeAgent:
                     response_format={"type": "json_object"},
                 )
                 data = json.loads(resp.choices[0].message.content)
-            except Exception:  # noqa: BLE001 - a failed sample only weakens the signal
+            except Exception:  # noqa: BLE001 - keep sampling, count the failure
+                failures += 1
                 continue
             text = data.get("final_diagnosis") or data.get("decision") or ""
             labels.append(_normalize_label({"decision": text}, known_labels=known))
         if not labels:
-            return {"k": k, "agreement": None, "labels": [], "primary_label": primary_label}
+            return {
+                "k": k,
+                "agreement": None,
+                "labels": [],
+                "primary_label": primary_label,
+                "failures": failures,
+            }
         agreement = sum(1 for label in labels if label == primary_label) / len(labels)
         return {
             "k": k,
             "agreement": round(agreement, 4),
             "labels": labels,
             "primary_label": primary_label,
+            "samples_used": len(labels),
+            "failures": failures,
         }
 
     @staticmethod
