@@ -14,7 +14,14 @@ from dataclasses import asdict
 from typing import Any
 
 from agents.types import AgentOutput, DebateResult, DecisionOutput, RequestContext
+from decision_semantics import is_abstention as _is_abstention
+from decision_semantics import decision_text as _decision_text
 from kg_adapter import load_draft_triples, propose_triple, query_kg
+from utils.confidence_calibration import (
+    DecisionCalibrator,
+    combine_decision_score,
+    compute_decision_signals,
+)
 from utils.judge_runtime import (
     JudgeRuntimeConfig,
     classify_failure,
@@ -79,6 +86,20 @@ class JudgeAgent:
     def __init__(self, use_llm: bool = False):
         self.use_llm = use_llm
         self.calibrator = self._load_calibrator()
+        self.decision_calibrator = self._load_decision_calibrator()
+
+    @staticmethod
+    def _load_decision_calibrator():
+        try:
+            return DecisionCalibrator()
+        except Exception:  # noqa: BLE001 - optional calibrator fallback
+            class _Passthrough:
+                enabled = False
+                def calibrate(self, score):
+                    return float(score)
+                def status(self):
+                    return {"enabled": False, "note": "decision calibrator unavailable"}
+            return _Passthrough()
 
     @staticmethod
     def _load_calibrator():
@@ -320,6 +341,7 @@ class JudgeAgent:
         if not config.configured:
             raise JudgeConfigurationError("未设置 Judge API Key")
         from openai import OpenAI
+        outputs, memory_gate = self._gate_memory_outputs(outputs)
         payload = self._build_judge_payload(context, outputs, debate, kg)
         client = OpenAI(
             api_key=config.api_key,
@@ -371,7 +393,7 @@ class JudgeAgent:
             raise JudgeResponseFormatError("final_confidence/confidence 必须是数字") from exc
         if not 0.0 <= confidence <= 1.0:
             raise JudgeResponseFormatError("confidence 必须位于 [0,1]")
-        confidence = round(confidence, 2)
+        self_report = round(confidence, 2)
         token_usage = self._extract_token_usage(resp)
         _logger.info(
             "Judge response: status=success provider=%s endpoint=%s model=%s usage=%s",
@@ -381,17 +403,31 @@ class JudgeAgent:
             token_usage,
         )
         fb = self._run_rule_judge(context, outputs, debate, kg, debate_round)
-        decision = decision_text.strip()
+        signals = compute_decision_signals(llm, fb.judge_analysis, debate)
+        structural_score = combine_decision_score(signals)
+        confidence = self.decision_calibrator.calibrate(structural_score)
+        decision, abstention_policy = self._apply_abstention_policy(
+            decision_text.strip(), signals, outputs
+        )
+        confidence_design = {
+            "self_report": self_report,
+            "structural_score": structural_score,
+            "derived_confidence": confidence,
+            "signals": signals,
+            "abstention": abstention_policy,
+            "calibration": self.decision_calibrator.status(),
+        }
         action_plan = self._clean_string_list(llm.get("action_plan")) or fb.action_plan
         risk_level = str(llm.get("risk_level") or fb.risk_level).lower()
         if risk_level not in {"low", "medium", "high"}: risk_level = fb.risk_level
         need_human_review = bool(llm.get("need_human_review", fb.need_human_review))
+        if abstention_policy.get("overridden"): need_human_review = True
         if confidence > 0.9 and (need_human_review or debate.conflicts): confidence = 0.9; need_human_review = True
         summary = str(llm.get("summary") or fb.summary)
         if "DeepSeek" not in summary: summary = f"DeepSeek Judge 结构化裁决：{summary}"
         if debate_round >= 2: summary = f"【第二轮辩论后裁决】{summary}"
         omission = fb.judge_analysis.get("collective_omission", {})
-        result = DecisionOutput(summary=summary, decision=decision, confidence=confidence, risk_level=risk_level, action_plan=action_plan[:6], debate=debate, traces=outputs, judge_mode="deepseek", need_human_review=need_human_review, reasoning_trace=str(llm.get("reasoning_trace") or fb.reasoning_trace), judge_analysis={"consistency_analysis": llm.get("consistency_analysis", {}), "evidence_scores": llm.get("evidence_scores", {}), "kg_contribution": llm.get("kg_contribution", ""), "kg": {"diseases": kg.get("diseases", []), "rules": kg.get("rules", []), "backend": kg.get("backend", "memory")}, "critic": debate.critic, "collective_omission": omission, "kg_evolution": fb.judge_analysis.get("kg_evolution", {}), "calibration": self.calibrator.status()}, token_usage=token_usage)
+        result = DecisionOutput(summary=summary, decision=decision, confidence=confidence, risk_level=risk_level, action_plan=action_plan[:6], debate=debate, traces=outputs, judge_mode="deepseek", need_human_review=need_human_review, reasoning_trace=str(llm.get("reasoning_trace") or fb.reasoning_trace), judge_analysis={"consistency_analysis": llm.get("consistency_analysis", {}), "evidence_scores": llm.get("evidence_scores", {}), "kg_contribution": llm.get("kg_contribution", ""), "kg": {"diseases": kg.get("diseases", []), "rules": kg.get("rules", []), "backend": kg.get("backend", "memory")}, "critic": debate.critic, "collective_omission": omission, "kg_evolution": fb.judge_analysis.get("kg_evolution", {}), "calibration": self.calibrator.status(), "confidence_design": confidence_design, "memory_gate": memory_gate}, token_usage=token_usage)
         _attach_judge_runtime(
             result,
             judge_runtime_metadata(
@@ -401,6 +437,86 @@ class JudgeAgent:
             ),
         )
         return result
+
+    @staticmethod
+    def _gate_memory_outputs(outputs):
+        """ADR-005 memory gate: drop low-confidence / no-match memory evidence.
+
+        Memory-layer outputs (RAG, KG, case history, outcome replay) are merged
+        into the Judge payload by the orchestrator.  Baseline evidence shows the
+        low-confidence ones inject noise (C1 19/24 vs C2 24/24, differing only in
+        memory).  Gating happens here, at aggregation, so no frozen module moves.
+        """
+        if os.environ.get("AGRI_AI_MEMORY_GATE", "1") in {"0", "false", "False"}:
+            return list(outputs), {"enabled": False, "dropped": [], "kept": 0}
+        try:
+            min_conf = float(os.environ.get("AGRI_AI_MEMORY_GATE_MIN_CONF", "0.45"))
+        except ValueError:
+            min_conf = 0.45
+        no_match = ("暂无", "未检索到", "无强匹配", "未命中")
+        kept, dropped = [], []
+        for output in outputs:
+            layer = str(getattr(output, "layer", "") or "")
+            if layer != "记忆层":
+                kept.append(output)
+                continue
+            claim = str(getattr(output, "claim", "") or "")
+            try:
+                confidence = float(getattr(output, "confidence", 0.0) or 0.0)
+            except (TypeError, ValueError):
+                confidence = 0.0
+            if confidence < min_conf or any(token in claim for token in no_match):
+                dropped.append({
+                    "agent": str(getattr(output, "agent", "")),
+                    "confidence": round(confidence, 3),
+                    "reason": "low_confidence" if confidence < min_conf else "no_match",
+                })
+                continue
+            kept.append(output)
+        return kept, {
+            "enabled": True,
+            "min_confidence": min_conf,
+            "kept": sum(1 for o in kept if str(getattr(o, "layer", "")) == "记忆层"),
+            "dropped": dropped,
+        }
+
+    @staticmethod
+    def _plurality_claim(outputs):
+        """Most frequent non-abstaining claim; used only to override false abstention."""
+        counts = {}
+        for output in outputs:
+            text = _decision_text(output).strip()
+            if not text or _is_abstention(output):
+                continue
+            counts[text[:40]] = counts.get(text[:40], 0) + 1
+        if not counts:
+            return ""
+        return max(counts.items(), key=lambda item: item[1])[0]
+
+    def _apply_abstention_policy(self, decision, signals, outputs):
+        """ADR-005: abstention must be earned by insufficient evidence."""
+        if not _is_abstention(decision):
+            return decision, {"abstained": False, "overridden": False}
+        sufficiency = 0.5 * float(signals.get("kg_support", 0.0)) + 0.5 * float(
+            signals.get("evidence_strength", 0.0)
+        )
+        try:
+            threshold = float(os.environ.get("AGRI_AI_ABSTAIN_MIN_SUFFICIENCY", "0.55"))
+        except ValueError:
+            threshold = 0.55
+        detail = {
+            "abstained": True,
+            "overridden": False,
+            "sufficiency": round(sufficiency, 4),
+            "threshold": threshold,
+        }
+        if signals.get("conflict_count", 0) > 0 or sufficiency < threshold:
+            return decision, detail
+        candidate = self._plurality_claim(outputs)
+        if not candidate:
+            return decision, detail
+        detail.update({"abstained": False, "overridden": True, "candidate": candidate})
+        return candidate, detail
 
     def _build_judge_payload(self, context, outputs, debate, kg):
         sr = self._sensor_readings(outputs)
