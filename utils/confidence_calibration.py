@@ -153,6 +153,7 @@ def compute_decision_signals(
     llm: dict[str, Any],
     fallback_analysis: dict[str, Any] | None = None,
     debate: Any = None,
+    self_consistency: float | None = None,
 ) -> dict[str, Any]:
     """Collect structural evidence signals around a Judge decision.
 
@@ -212,16 +213,26 @@ def compute_decision_signals(
         "critic_escalate": critic_escalate,
         "kg_contribution": parse_signed_delta(llm.get("kg_contribution")),
         "diagnoses": len(diagnoses),
+        "self_consistency": None if self_consistency is None else round(float(self_consistency), 4),
     }
 
 
 def combine_decision_score(signals: dict[str, Any]) -> float:
     """Deterministic structural score before calibration (documented weights)."""
-    score = (
-        0.45 * float(signals.get("self_report", 0.5))
-        + 0.35 * float(signals.get("evidence_strength", 0.5))
-        + 0.20 * float(signals.get("kg_support", 0.0))
-    )
+    consistency = signals.get("self_consistency")
+    if consistency is None:
+        score = (
+            0.45 * float(signals.get("self_report", 0.5))
+            + 0.35 * float(signals.get("evidence_strength", 0.5))
+            + 0.20 * float(signals.get("kg_support", 0.0))
+        )
+    else:
+        score = (
+            0.30 * float(signals.get("self_report", 0.5))
+            + 0.25 * float(signals.get("evidence_strength", 0.5))
+            + 0.15 * float(signals.get("kg_support", 0.0))
+            + 0.30 * float(consistency)
+        )
     score += float(signals.get("kg_contribution", 0.0))
     score -= 0.02 * min(int(signals.get("conflict_count", 0)), 3)
     score -= 0.05 * min(int(signals.get("omission_count", 0)), 2)

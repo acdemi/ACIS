@@ -16,6 +16,7 @@ from typing import Any
 from agents.types import AgentOutput, DebateResult, DecisionOutput, RequestContext
 from decision_semantics import is_abstention as _is_abstention
 from decision_semantics import decision_text as _decision_text
+from decision_semantics import normalize_decision_label as _normalize_label
 from kg_adapter import load_draft_triples, propose_triple, query_kg
 from utils.confidence_calibration import (
     DecisionCalibrator,
@@ -359,8 +360,12 @@ class JudgeAgent:
             config.timeout_seconds,
             config.max_retries,
         )
+        messages = [
+            {"role": "system", "content": self._judge_system_prompt()},
+            {"role": "user", "content": json.dumps(payload, ensure_ascii=False)},
+        ]
         try:
-            resp = client.chat.completions.create(model=config.model, messages=[{"role": "system", "content": self._judge_system_prompt()}, {"role": "user", "content": json.dumps(payload, ensure_ascii=False)}], temperature=0.1, response_format={"type": "json_object"})
+            resp = client.chat.completions.create(model=config.model, messages=messages, temperature=0.1, response_format={"type": "json_object"})
         except Exception as exc:
             _logger.error(
                 "Judge exception: type=%s code=%s provider=%s endpoint=%s model=%s",
@@ -403,7 +408,12 @@ class JudgeAgent:
             token_usage,
         )
         fb = self._run_rule_judge(context, outputs, debate, kg, debate_round)
-        signals = compute_decision_signals(llm, fb.judge_analysis, debate)
+        consistency = self._sample_self_consistency(
+            client, config, messages, decision_text.strip(), kg
+        )
+        signals = compute_decision_signals(
+            llm, fb.judge_analysis, debate, consistency.get("agreement")
+        )
         structural_score = combine_decision_score(signals)
         confidence = self.decision_calibrator.calibrate(structural_score)
         decision, abstention_policy = self._apply_abstention_policy(
@@ -415,6 +425,7 @@ class JudgeAgent:
             "derived_confidence": confidence,
             "signals": signals,
             "abstention": abstention_policy,
+            "self_consistency": consistency,
             "calibration": self.decision_calibrator.status(),
         }
         action_plan = self._clean_string_list(llm.get("action_plan")) or fb.action_plan
@@ -437,6 +448,50 @@ class JudgeAgent:
             ),
         )
         return result
+
+    @staticmethod
+    def _self_consistency_k() -> int:
+        try:
+            k = int(os.environ.get("AGRI_AI_JUDGE_SELF_CONSISTENCY_K", "3"))
+        except ValueError:
+            k = 3
+        return max(1, min(k, 5))
+
+    def _sample_self_consistency(self, client, config, messages, primary_decision, kg):
+        """ADR-005: sample the Judge k times and measure decision agreement.
+
+        Agreement across samples is the only signal in this system that has been
+        shown to carry information about correctness; the other aggregate signals
+        do not separate correct from wrong decisions.
+        """
+        k = self._self_consistency_k()
+        if k <= 1:
+            return {"k": 1, "agreement": None, "labels": []}
+        known = [str(d) for d in (kg.get("diseases") or []) if str(d).strip()]
+        primary_label = _normalize_label({"decision": primary_decision}, known_labels=known)
+        labels = []
+        for _ in range(k - 1):
+            try:
+                resp = client.chat.completions.create(
+                    model=config.model,
+                    messages=messages,
+                    temperature=0.7,
+                    response_format={"type": "json_object"},
+                )
+                data = json.loads(resp.choices[0].message.content)
+            except Exception:  # noqa: BLE001 - a failed sample only weakens the signal
+                continue
+            text = data.get("final_diagnosis") or data.get("decision") or ""
+            labels.append(_normalize_label({"decision": text}, known_labels=known))
+        if not labels:
+            return {"k": k, "agreement": None, "labels": [], "primary_label": primary_label}
+        agreement = sum(1 for label in labels if label == primary_label) / len(labels)
+        return {
+            "k": k,
+            "agreement": round(agreement, 4),
+            "labels": labels,
+            "primary_label": primary_label,
+        }
 
     @staticmethod
     def _gate_memory_outputs(outputs):
