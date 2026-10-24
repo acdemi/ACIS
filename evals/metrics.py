@@ -14,7 +14,7 @@ from dataclasses import dataclass, field
 from trace.types import Trace
 from typing import Any
 
-from decision_semantics import decision_correctness
+from decision_semantics import decision_correctness, validate_confidence
 
 #: Memory-layer agent outputs at or above this confidence count as a
 #: retrieval / replay "hit". The agents emit ~0.25-0.3 for misses and
@@ -65,13 +65,12 @@ def compute_trace_metrics(
     token_usage = judge.get("token_usage") or {}
     decision = str(judge.get("decision", "")) if judge_present else ""
     confidence_value = judge.get("confidence")
-    try:
-        confidence = (
-            float(confidence_value)
-            if judge_present and confidence_value is not None
-            else None
+    if judge_present and confidence_value is not None:
+        confidence = validate_confidence(
+            confidence_value,
+            context=f"case_id={case_id!r}, trace_id={trace.trace_id!r}",
         )
-    except (TypeError, ValueError):
+    else:
         confidence = None
     return CaseMetrics(
         case_id=case_id,

@@ -2,7 +2,7 @@
 
 > Date: 2026-10-19
 > Branch: `work/20261019-judge-recovery`（基于 `work/20261019-docs-sync-reliability` 4ecd5c7）
-> Procedure: `reports/phase4_real_judge_recovery_20261018/blocked_precheck_report.md`（Step 1 → Step 2 → Step 3）
+> Procedure: `reports/archive/phase4/blocked_precheck_report.md`（Step 1 → Step 2 → Step 3）
 > Verdict: **RECOVERED** — 真实 LLM Judge 认证与结构化决策验证通过，六次最小预检零回退
 > Phase 5: 仍未启动（架构决策未做）
 

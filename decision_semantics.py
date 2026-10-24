@@ -12,6 +12,7 @@ the challenge scorer, and Phase 4 adapters all use the same definitions:
 
 from __future__ import annotations
 
+import math
 import re
 from collections.abc import Mapping, Sequence
 from typing import Any
@@ -71,9 +72,39 @@ def decision_correctness(expected: str | None, output: Any) -> bool:
     return expected_text in decision_text(output)
 
 
+def validate_confidence(value: Any, *, context: str = "decision output") -> float:
+    """Return ``value`` as a float validated by the confidence contract.
+
+    The contract is a finite number in ``[0, 1]``. A missing value
+    (``None``) is legitimate and is handled by callers as unscored; only a
+    present value is validated here. A ``ValueError`` is raised for
+    malformed, non-finite, or out-of-range values; callers convert it to
+    their contract error type and keep the ``context`` in the message.
+
+    Args:
+        value: raw confidence from a decision record.
+        context: identifying text included in the error message.
+
+    Returns:
+        The parsed confidence as ``float``.
+    """
+    try:
+        parsed = float(value)
+    except (TypeError, ValueError):
+        raise ValueError(
+            f"malformed confidence {value!r} for {context}"
+        ) from None
+    if not math.isfinite(parsed) or not 0.0 <= parsed <= 1.0:
+        raise ValueError(
+            f"confidence must be finite and in [0,1], got {parsed!r} for {context}"
+        )
+    return parsed
+
+
 __all__ = [
     "decision_correctness",
     "decision_text",
     "is_abstention",
     "normalize_decision_label",
+    "validate_confidence",
 ]

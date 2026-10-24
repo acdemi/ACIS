@@ -1,8 +1,9 @@
-# Exact environment used for the 2026-10-24 delivery verification.
-# Generated on Windows with: python -m pip freeze
-# Recreate with: python -m venv .venv && pip install -r requirements-lock.txt
-# Note: a few entries are platform-specific (e.g. pywin32) and will not install
-# unchanged on Linux/macOS; for cross-platform use requirements.txt instead.
+# Environment used for the 2026-10-24 delivery verification.
+# Generated on Windows 11 (x64), Python 3.13.3, .venv, with: python -m pip freeze
+# Recreate the same platform with: python -m venv .venv && pip install -r requirements-lock.txt
+# IMPORTANT: this is a platform-specific snapshot, NOT a cross-platform lock.
+# Some entries are Windows-dependent (e.g. pywin32) and will not install unchanged
+# on Linux/macOS; for other platforms use requirements.txt and re-resolve.
 altair==6.2.2
 annotated-doc==0.0.4
 annotated-types==0.7.0

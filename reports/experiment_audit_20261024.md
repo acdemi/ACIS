@@ -66,9 +66,9 @@
 - `label_accuracy` 是单独字段，但 Phase 4.2-R 的稳定性报告主表未把它作为排名指标。
 
 因此：
-- `phase4_2_real_agent/stability_report.md` 的 "C0 accuracy 0.1893 / C1 0.1438" 与 `phase4_2_r3_stability_report.md` 的 "C0 0.3623 / C1 0.2799" 都是 **factor coverage**，不是"诊断准确率"。README 第 46 行把它们作为 accuracy 引用，属于口径错误，**不应写进简历**。
-- Phase 4.2 validation 报告（`reports/phase4_validation_report.md`）**没有 label accuracy**；只有调用数、ABSTAIN、诊断值分布、置信度、coherence。其 216 次调用中 215 有效、1 条 malformed JSON（seed44/C2/case8）。
-- 用 `decision_semantics` 对 Phase 4.2 validation 的 `output.diagnosis` 和 GT 做审计侧复算会得到另一组数字（C0 0.597 / C1 0.792 / C2 0.806），但**这不是原报告口径**，只能作为"若换用 label accuracy 会得到什么"的参考，不能替换报告结论或写进简历。
+- `phase4_2_real_agent/stability_report.md` 的 "C0 accuracy 0.1893 / C1 0.1438" 与 `phase4_2_r3_stability_report.md` 的 "C0 0.3623 / C1 0.2799" 都是 **factor coverage**，不是"诊断准确率"。这类引用属于口径错误，**不应作为公开结论**。
+- Phase 4.2 validation 报告（`reports/archive/phase4/phase4_validation_report.md`）**没有 label accuracy**；只有调用数、ABSTAIN、诊断值分布、置信度、coherence。其 216 次调用中 215 有效、1 条 malformed JSON（seed44/C2/case8）。
+- 用 `decision_semantics` 对 Phase 4.2 validation 的 `output.diagnosis` 和 GT 做审计侧复算会得到另一组数字（C0 0.597 / C1 0.792 / C2 0.806），但**这不是原报告口径**，只能作为"若换用 label accuracy 会得到什么"的参考，不能替换报告结论，也不能作为公开结论。
 
 ---
 
@@ -83,14 +83,14 @@
 
 ### 不能证明
 1. **不能证明"完整 ACIS（C1）优于裸基线（C0）"**：单 seed 差 1 例；R3 排名跨 seed 翻转；不同实验的 fallback 率差异巨大，accuracy 不可跨条件比较。
-2. **不能证明"关记忆（C2）更好"**：C2 24/24 仅 seed42；WIP seed43 C2 9/24 且 18 次回退，未形成报告。
+2. **不能证明"关记忆（C2）更好"**：C2 24/24 仅 seed42；另一份未提交的 C2 对照回退率很高，不能作为公开证据。
 3. **不能证明置信度校准具有普遍性**：只有 C1、2 seed、有效样本 13/24；指标依赖未入库 agreement。
 4. **不能证明生产可靠性/性能**：没有真实田间数据、没有并发/长时间运行、没有外部服务 SLA。
 5. **不能把 Phase 4.2-R 的 "accuracy" 当诊断准确率**：它是 factor coverage；且 191/216 是规则回退，模型未真正参与。
 
 ---
 
-## 6. 最小补充验证方案（若要把"架构收益"写进简历）
+## 6. 最小补充验证方案（若要形成可公开的架构收益结论）
 
 **E1（主实验，约 1–1.5 小时 / 约 216–432 次调用）**
 - 条件：同一 provider/model/temperature；C0/C1/C2 × 24 例 × 3 seeds；**要求记录每次调用**：
@@ -107,14 +107,14 @@
 
 ---
 
-## 7. 简历引用建议
+## 7. 公开表述建议
 
-可以写：
+可以公开说明：
 - "完成 24 例挑战集的 C0/C1/C2 真实 Judge 基线（seed42，72 次调用零回退），并如实记录 C1 未优于 C0。"
 - "实现/验证规则回退：在 216 次真实链路调用中统计到 191 次 API 连接失败回退，服务仍可用。"
 - "搭建统一 Trace、离线 12 例固定评测与故障注入流程。"
 
-不要写：
+不要作为公开结论：
 - "完整架构准确率提升 / 优于基线"；
 - "R3 accuracy 0.36 / Phase 4.2 accuracy 0.19"（口径是 factor coverage，不是诊断准确率）；
 - "置信度校准已解决"（只有 C1 两 seed、13–24 有效样本）；

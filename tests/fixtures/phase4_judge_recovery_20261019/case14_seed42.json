@@ -1,0 +1,67 @@
+{
+  "run": "case14_seed42",
+  "source_artifacts": {
+    "trace_path": "logs\\phase4_judge_recovery_20261019\\case14_seed42\\precheck_seed42\\c1_all_on\\runner\\traces\\c4b941f27c1043eeb034d0045b0041d4.json",
+    "trace_sha256_full": "9624d4c4cff2047f00c37084e744fabf19b8082e012a40e5537e85c3be815b03",
+    "flattened_sha256_full": "9a649cf8b2360bb5d1eb2ec1e90525483b6c66024ed654e3e858e888bb197f1b",
+    "metrics_csv_path": "logs\\phase4_judge_recovery_20261019\\case14_seed42\\precheck_seed42\\c1_all_on\\runner\\metrics.csv"
+  },
+  "trace_id": "c4b941f27c1043eeb034d0045b0041d4",
+  "case": {
+    "id": "inc_tomato_vague_spot",
+    "group": "incomplete",
+    "ground_truth": "证据不足",
+    "expected_key_factors": [
+      "evidence_insufficient",
+      "info_request",
+      "differential"
+    ]
+  },
+  "judge_projection": {
+    "decision": "番茄早疫病",
+    "confidence": 0.45,
+    "judge_mode": "deepseek",
+    "reasoning_trace": "病理Agent和RAG均首选番茄早疫病，症状匹配度高，但KG硬约束显示当前温度24.3°C略低于早疫病适宜范围（25-30°C），湿度68.7%低于80%阈值，环境条件不满足，降低置信度。历史案例库指向叶霉病，但叶霉病环境要求更不满足（湿度>85%），且症状匹配度低。视觉Agent无图像，证据不足。综合KG匹配度、专家共识和环境约束，早疫病为最可能诊断，但置信度中等，需人工复核。",
+    "summary": "DeepSeek Judge 结构化裁决：基于症状描述，番茄早疫病可能性较高，但环境条件不完全支持且缺乏图像证据，需人工复核。",
+    "action_plan": [
+      "采集叶片高清图像，重点观察病斑是否有同心轮纹、边缘褐色中央灰白等特征。",
+      "复核温室环境参数，特别是湿度和温度，确认是否满足病害高发条件。",
+      "取样送检进行病原鉴定，以明确诊断。",
+      "在确诊前，加强通风降湿，避免叶面结露。",
+      "若症状持续发展，可考虑预防性喷施保护性杀菌剂（如百菌清），但需注意生态影响。",
+      "参考历史案例#24（番茄叶霉病）的处置经验，但注意当前症状更符合早疫病。"
+    ],
+    "judge_runtime": {
+      "outcome": "success",
+      "judge_mode": "deepseek",
+      "provider": "deepseek",
+      "endpoint_id": "https://api.deepseek.com",
+      "model": "deepseek-chat",
+      "timeout_seconds": 60.0,
+      "sdk_max_retries": 2,
+      "config_sources": {
+        "api_key": "DEEPSEEK_API_KEY",
+        "base_url": "DEEPSEEK_BASE_URL",
+        "model": "default",
+        "provider": "default",
+        "timeout_seconds": "default",
+        "max_retries": "default"
+      },
+      "retry_exhausted": false,
+      "token_usage": {
+        "judge_prompt_tokens": 6709,
+        "judge_completion_tokens": 1364,
+        "judge_total_tokens": 8073
+      }
+    }
+  },
+  "runner_metrics_row": {
+    "case_id": "inc_tomato_vague_spot",
+    "trace_id": "c4b941f27c1043eeb034d0045b0041d4",
+    "expected": "证据不足",
+    "decision": "番茄早疫病",
+    "accuracy": "0.0",
+    "confidence": "0.45",
+    "judge_total_tokens": "8073"
+  }
+}

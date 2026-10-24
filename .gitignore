@@ -1,40 +1,86 @@
-# Local secrets and config (DEEPSEEK_API_KEY / NEO4J_PASSWORD)
-.env
+# ==============================================================================
+# ACIS — .gitignore
+#
+# Rule: ignore only what is (a) secret, (b) machine-local, or (c) regenerable.
+# Versioned knowledge stays tracked — docs/ context/ reports/ agents/
+# benchmarks/ evals/ experiments/ scripts/ src/ tests/ storage/ trace/.
+# Kept in sync with pytest.ini (norecursedirs) and .dockerignore.
+# ==============================================================================
 
-# Python
+# ------------------------------------------------------------------- secrets
+.env
+.env.*
+!.env.example
+
+# ---------------------------------------------------------------- Python env
 __pycache__/
 *.py[cod]
-*.pyc
+*.pyo
 .venv/
+venv/
+env/
+build/
+dist/
+*.egg-info/
+.eggs/
 
-# Neo4j runtime mount directories
-neo4j/logs/
-neo4j/import/
-neo4j/plugins/
-
-# Editors
-.vscode/
-.idea/
-
-# Runtime database
-data/
-
-# Filesystem lock files (mount leftovers)
-.fuse_hidden*
-
-# Cowork session context
-.context/
-# === Housekeeping 2026-08-08 ===
-# Type/lint/test caches (regenerable)
+# Python tooling caches (regenerable)
 .mypy_cache/
 .ruff_cache/
 .pytest_cache/
+.tox/
+.nox/
+.coverage
+.coverage.*
+coverage.xml
+htmlcov/
 
-# Claude Code worktrees
-.claude/
-
-# Experiment results (regenerable, kept locally)
+# -------------------------------------------------- local data & run output
+# Host-only datasets and databases — see pytest.ini and .dockerignore
+data/
+logs/
 results/
 
-# Experiment run logs (regenerable, kept locally)
-logs/
+# Pytest temp roots (pytest-of-<user>) and the torch inductor cache
+pytest-of-*/
+torchinductor_lkl/
+
+# FUSE mount leftovers observed under data/
+.fuse_hidden*
+
+# Local cleanup archives and audit copies kept outside the repo
+.local-archive/
+acis-local-archive/
+reports/document_cleanup_manifest.csv
+
+# Ad-hoc trace dumps (collector output)
+trace_*.json
+
+# ------------------------------------------------------------- Neo4j (docker)
+# /data lives in the neo4j_data named volume; these host dirs are runtime-only
+neo4j/logs/
+neo4j/import/
+neo4j/plugins/
+neo4j/data/
+neo4j/dumps/
+neo4j/run/
+
+# ------------------------------------------------- agent / cowork tool state
+.claude/
+.codex/
+.context/
+
+# ---------------------------------------------------------- editors and OS
+.vscode/
+.idea/
+*.swp
+*~
+.DS_Store
+Thumbs.db
+Desktop.ini
+._*
+
+# ----------------------------------------------------------- misc scratch
+*.log
+*.tmp
+*.bak

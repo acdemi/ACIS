@@ -1,0 +1,67 @@
+{
+  "run": "case14_seed43",
+  "source_artifacts": {
+    "trace_path": "logs\\phase4_judge_recovery_20261019\\case14_seed43\\precheck_seed43\\c1_all_on\\runner\\traces\\66ad4d9dd1f6435ead4a7aba8d0d742f.json",
+    "trace_sha256_full": "41ac4ec74b1a716c2a78ee1a94c79cddd4318a1e6edb657498954cff80562002",
+    "flattened_sha256_full": "9a649cf8b2360bb5d1eb2ec1e90525483b6c66024ed654e3e858e888bb197f1b",
+    "metrics_csv_path": "logs\\phase4_judge_recovery_20261019\\case14_seed43\\precheck_seed43\\c1_all_on\\runner\\metrics.csv"
+  },
+  "trace_id": "66ad4d9dd1f6435ead4a7aba8d0d742f",
+  "case": {
+    "id": "inc_tomato_vague_spot",
+    "group": "incomplete",
+    "ground_truth": "证据不足",
+    "expected_key_factors": [
+      "evidence_insufficient",
+      "info_request",
+      "differential"
+    ]
+  },
+  "judge_projection": {
+    "decision": "无法定论（番茄早疫病与番茄叶霉病均证据不足）",
+    "confidence": 0.35,
+    "judge_mode": "deepseek",
+    "reasoning_trace": "视觉Agent无图像输入，传感器正常，天气无预警。RAG和病理Agent首选早疫病（匹配度4.0），但环境温度24.2°C、湿度69.6%均不满足早疫病高发条件（25-30°C，>80%），硬约束违反。历史案例库指向叶霉病（人工确认），但环境湿度69.6%远低于叶霉病所需>85%，温度24.2°C虽在20-25°C范围内但湿度严重不足，硬约束违反。KG中两种病害均存在，但所有专家均未提及除早疫病和叶霉病外的其他病害，存在集体忽略风险。专家共识薄弱，证据权重低，故置信度下调。",
+    "summary": "DeepSeek Judge 结构化裁决：现有症状描述过于笼统，环境条件与两种候选病害的典型高发条件均不吻合，专家意见分歧且KG硬约束均未满足，建议补充图像和详细症状后重新诊断。",
+    "action_plan": [
+      "采集病叶高清图像（正反面）并送视觉Agent分析",
+      "详细记录病斑形状、颜色、有无轮纹或霉层等关键症状",
+      "复核温室环境传感器数据，确认温湿度准确性",
+      "人工取样送检进行病原鉴定",
+      "暂缓化学防治，优先采用环境调控（通风降湿）",
+      "参考历史案例#24，重点排查叶霉病可能性"
+    ],
+    "judge_runtime": {
+      "outcome": "success",
+      "judge_mode": "deepseek",
+      "provider": "deepseek",
+      "endpoint_id": "https://api.deepseek.com",
+      "model": "deepseek-chat",
+      "timeout_seconds": 60.0,
+      "sdk_max_retries": 2,
+      "config_sources": {
+        "api_key": "DEEPSEEK_API_KEY",
+        "base_url": "DEEPSEEK_BASE_URL",
+        "model": "default",
+        "provider": "default",
+        "timeout_seconds": "default",
+        "max_retries": "default"
+      },
+      "retry_exhausted": false,
+      "token_usage": {
+        "judge_prompt_tokens": 6708,
+        "judge_completion_tokens": 1361,
+        "judge_total_tokens": 8069
+      }
+    }
+  },
+  "runner_metrics_row": {
+    "case_id": "inc_tomato_vague_spot",
+    "trace_id": "66ad4d9dd1f6435ead4a7aba8d0d742f",
+    "expected": "证据不足",
+    "decision": "无法定论（番茄早疫病与番茄叶霉病均证据不足）",
+    "accuracy": "1.0",
+    "confidence": "0.35",
+    "judge_total_tokens": "8069"
+  }
+}

@@ -1,6 +1,6 @@
-# ACIS 3–5 分钟演示脚本（交付/答辩用）
+# ACIS 3–5 分钟演示脚本
 
-> 配套交付清单：`reports/delivery_audit_20261024/DELIVERY_CHECKLIST.md`
+> 配套验收记录：`reports/acceptance_20261024.md`
 > 目标：用 4 分钟左右演示 **正常任务 → 证据追溯 → 异常处理** 三件事，全部离线可跑、不依赖外网与付费 API。
 > 本脚本基于 2026-10-24 实测（`.venv` Python 3.13、TUI 12.2s 启动、每场景 1.4–1.7s）。
 
@@ -9,17 +9,17 @@
 ## 0. 演示前 5 分钟准备（不上台）
 
 ```powershell
-cd E:\knowledge_database\ACIS
+cd <ACIS 仓库根目录>
 $env:PYTHONIOENCODING='utf-8'
 $env:PYTHONPATH='.'
 $env:NO_PROXY='localhost,127.0.0.1'     # 必设：否则本机代理会把 localhost 打成 502，RAG 静默降级
 $env:HF_HUB_OFFLINE='1'                # 避免视觉/时序模型联网下载
-$py = 'E:\knowledge_database\ACIS\.venv\Scripts\python.exe'
+$py = '.\.venv\Scripts\python.exe'
 ```
 
 检查三件事：
 
-1. `.\.venv\Scripts\python.exe -V` → `Python 3.13.3`（仓库自带 venv，不要用系统 python）。
+1. `.\.venv\Scripts\python.exe -V` → `Python 3.13.3`（使用仓库自己的 `.venv`，不要用系统 python）。
 2. `& $py orchestrator.py --rules-only --seed 7 --trace-out logs/trace_demo.json "温室A番茄叶片出现黄斑，叶背有灰色霉层，如何处理？"` → 能出 `病理判断首选：番茄叶霉病`，并生成 `logs/trace_demo.json`（冷启动约 8–9s）。
 3. 开第二个终端预跑一遍演示命令，避免首次 import/模型预热占用演示时间。
 
@@ -43,7 +43,7 @@ $py = 'E:\knowledge_database\ACIS\.venv\Scripts\python.exe'
 
 讲（跟着画面走）：
 > "输入是真实中文咨询：番茄叶片黄斑、叶背灰色霉层。可以看到 12 条 Agent 轨迹逐条刷出：感知层三个 Agent → 记忆层 RAG/知识图谱/案例库 → 专家层病理/气象/栽培。"
-> "最终裁决是番茄叶霉病，置信度 75–85%，风险 medium；下面是 6 条行动建议，右侧是辩论共识与缺失证据（缺少图像证据）。"
+> "最终裁决是番茄叶霉病，置信度约 72–74%，风险 medium；下面是 6 条行动建议，右侧是辩论共识与缺失证据（缺少图像证据）。"
 
 关注点：Agent 轨迹、置信度条、`★ 最终裁决`、行动建议。
 
@@ -115,16 +115,16 @@ $env:AGRI_AI_JUDGE_MAX_RETRIES='0'
 
 ---
 
-## 4. 讲解口径（对应交付清单，避免被问倒）
+## 4. 讲解口径
 
 | 可能的问题 | 建议回答 |
 |---|---|
-| 为什么要规则 + Agent 混合？ | 规则保证确定性/离线/低延迟（预热后 1.4s），是故障回退底座；Agent 负责证据聚合与冲突暴露；LLM Judge 只在需要结构化融合时启用（单例 43–55s、9–11k tokens）。 |
-| 检索带来了什么？ | 病害知识召回 + KG 硬约束锚定，让结论可核对；消融可看到 memory_hits 31→0。代价是低置信检索会注入噪声，Challenge Set 上曾出现 C1 19/24 vs C2 24/24，因此加了记忆门控。 |
+| 为什么要规则 + Agent 混合？ | 规则保证确定性/离线/低延迟（预热后 1.4s），是故障回退底座；Agent 负责证据聚合与冲突暴露；LLM Judge 只在需要结构化融合时启用（单次调用约几十秒、约 1 万 tokens）。 |
+| 检索带来了什么？ | 病害知识召回 + KG 硬约束锚定，让结论可核对；消融可看到 memory_hits 31→0。代价是低置信检索会注入噪声，Challenge Set 单 seed 上曾出现 C1 19/24 vs C2 24/24，因此加了记忆门控；该差异不足以证明架构收益。 |
 | 多 Agent 真的更强吗？ | **不声称更强**：Challenge Set 上 C1 未优于 C0，排名跨 seed 翻转；我们把它定位为"可解释的证据聚合"，而不是"已证明的性能提升"。 |
 | 效果怎么验证？ | 固定 Challenge Set 24 例（4 组）+ 64 例 benchmark，标签/原始结果/评分脚本可对应；baseline 指标可复算；负向结果也如实保留。 |
 | 故障怎么办？ | Judge 8 类故障都有 reason_code + trace + 日志 + 脱敏；网络失败自动回退规则，进程不崩；已知缺口（持久化/图回退/采样失败静默）在审计报告里。 |
-| 环境怎么复现？ | 仓库自带 venv 可直接跑；配置 `.env` 后启用真实 Judge。已知限制：依赖未锁定、README 部分数字过期（审计报告 §2.2）。 |
+| 环境怎么复现？ | 按 README 创建 `.venv` 并安装依赖；配置 `.env` 后启用真实 Judge。已知限制：`requirements-lock.txt` 为 Windows 平台生成，普通环境未复跑全量测试。 |
 
 **不要说的话**：❌"准确率 1.00"（依赖服务与配置）❌"完整架构优于基线"（证据不支持）❌"所有故障都有记录"（仍有静默路径）❌"每次决策 <1s"（实测 1.4–2.7s，冷启动 8–9s）。
 

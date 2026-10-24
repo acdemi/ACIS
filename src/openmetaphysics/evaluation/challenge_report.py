@@ -50,9 +50,11 @@ for _path in (ROOT, SRC):
         sys.path.insert(0, str(_path))
 
 from decision_semantics import decision_correctness, is_abstention
+from decision_semantics import validate_confidence as _shared_validate_confidence
 from openmetaphysics.evaluation.challenge_scorer import (
     DEFAULT_COHERENCE_MODEL,
     VALID_GROUPS,
+    ChallengeScoringError,
     calc_confidence_calibration,
     calc_factor_scores,
 )
@@ -174,6 +176,33 @@ def _fallback_state(
     return None, None
 
 
+def _confidence_identity(raw: dict[str, Any]) -> str:
+    """Case/trace identity wording reused in actionable scoring errors."""
+    return (
+        f"case_id={raw.get('case_id')!r}, trace_id={raw.get('trace_id')!r}"
+    )
+
+
+def _validated_confidence(raw: dict[str, Any]) -> float | None:
+    """Parse raw confidence under the scorer confidence contract.
+
+    A missing value (``None``) stays ``None``: it is legitimate
+    missing/unscored data, never a malformed value. Any present value must
+    be a finite number in ``[0, 1]``; violations raise
+    :class:`ChallengeScoringError` naming the offending case and trace
+    instead of silently skipping or clamping the value.
+    """
+    value = raw.get("confidence")
+    if value is None:
+        return None
+    try:
+        return _shared_validate_confidence(
+            value, context=_confidence_identity(raw)
+        )
+    except ValueError as exc:
+        raise ChallengeScoringError(str(exc)) from None
+
+
 def score_case(
     raw: dict[str, Any],
     *,
@@ -217,11 +246,7 @@ def score_case(
         else None
     )
     abstained = is_abstention(decision) if decision else None
-    confidence_value = raw.get("confidence")
-    try:
-        confidence = float(confidence_value) if confidence_value is not None else None
-    except (TypeError, ValueError):
-        confidence = None
+    confidence = _validated_confidence(raw)
     fallback_state, fallback_reason = _fallback_state(
         raw, llm_requested=llm_requested
     )

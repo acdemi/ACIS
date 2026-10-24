@@ -1,0 +1,68 @@
+{
+  "run": "case23_seed43",
+  "source_artifacts": {
+    "trace_path": "logs\\phase4_judge_recovery_20261019\\case23_seed43\\precheck_seed43\\c1_all_on\\runner\\traces\\13ef138523ee4eafbbb6832081854fb8.json",
+    "trace_sha256_full": "63a857b7bfb970c486aed4baf7ce59edd8e58f19476a561627f3ac5346737bff",
+    "flattened_sha256_full": "8db127d276c7fae16db762baf992eb8abaf4149766eca44a25b3e9edf5768461",
+    "metrics_csv_path": "logs\\phase4_judge_recovery_20261019\\case23_seed43\\precheck_seed43\\c1_all_on\\runner\\metrics.csv"
+  },
+  "trace_id": "13ef138523ee4eafbbb6832081854fb8",
+  "case": {
+    "id": "ms_tomato_blight_stem",
+    "group": "multi_step",
+    "ground_truth": "早疫病",
+    "expected_key_factors": [
+      "concentric_ring",
+      "stem_lesion",
+      "fruit_stage",
+      "action_plan"
+    ]
+  },
+  "judge_projection": {
+    "decision": "番茄早疫病",
+    "confidence": 0.62,
+    "judge_mode": "deepseek",
+    "reasoning_trace": "KG中番茄早疫病症状与现场描述高度匹配（同心轮纹病斑、茎部病斑），病理Agent和RAG均首选早疫病，历史案例库指向叶霉病但症状匹配度低。硬约束检查：当前温度24.2°C在早疫病适宜范围25-30°C边缘，湿度69.6%未达>80%要求，违反湿度约束，但KG规则提示湿度偏低应降低置信度而非直接否决。叶霉病温度20-25°C符合，但湿度69.6%远低于>85%要求，且症状不匹配。专家间共识为早疫病，分歧小。视觉Agent缺失导致证据不完整。反事实审查：病理Agent排除叶霉病理由合理，但历史案例库的叶霉病诊断被集体忽略？KG中存在叶霉病，但所有专家反事实均未提及，视为集体忽略风险，下调置信度0.2。证据权重：病理Agent 9分，RAG 8分，历史案例库6分，传感器7分，天气7分，知识图谱7分，栽培6分，经济5分，生态5分，经验回放3分。KG贡献：+0.1（症状匹配提升），但湿度约束降低0.15，净-0.05。最终置信度融合：基础0.85（病理）*0.9（KG匹配度）*0.8（集体忽略下调）=0.612，取0.62。",
+    "summary": "【第二轮辩论后裁决】DeepSeek Judge 结构化裁决：综合KG与专家意见，番茄早疫病为首选诊断，但环境湿度偏低且缺乏图像证据，置信度中等，建议人工复核并补充图像。",
+    "action_plan": [
+      "立即采集病叶和茎部高清图像，送视觉Agent或人工复核确认同心轮纹病斑。",
+      "优先采用农业防治：清除病残体，加强通风降湿，避免叶面结露。",
+      "药剂防治：发病初期选用75%百菌清可湿性粉剂600倍液或64%杀毒矾可湿性粉剂500倍液，每7天喷一次，连喷3-4次，注意轮换用药。",
+      "生态替代：可配合枯草芽孢杆菌或木霉菌制剂，减少化学农药对天敌影响。",
+      "环境调控：将棚内湿度提升至80%以上？不，当前湿度69.6%低于早疫病高发条件，但防治仍需控制湿度在合理范围，避免过高引发其他病害；重点保持温度22-28°C，土壤湿度60-80%。",
+      "监测茎部病斑扩展和果实蒂部症状，记录发展过程，若加重则取样送检病原。"
+    ],
+    "judge_runtime": {
+      "outcome": "success",
+      "judge_mode": "deepseek",
+      "provider": "deepseek",
+      "endpoint_id": "https://api.deepseek.com",
+      "model": "deepseek-chat",
+      "timeout_seconds": 60.0,
+      "sdk_max_retries": 2,
+      "config_sources": {
+        "api_key": "DEEPSEEK_API_KEY",
+        "base_url": "DEEPSEEK_BASE_URL",
+        "model": "default",
+        "provider": "default",
+        "timeout_seconds": "default",
+        "max_retries": "default"
+      },
+      "retry_exhausted": false,
+      "token_usage": {
+        "judge_prompt_tokens": 8612,
+        "judge_completion_tokens": 1508,
+        "judge_total_tokens": 10120
+      }
+    }
+  },
+  "runner_metrics_row": {
+    "case_id": "ms_tomato_blight_stem",
+    "trace_id": "13ef138523ee4eafbbb6832081854fb8",
+    "expected": "早疫病",
+    "decision": "番茄早疫病",
+    "accuracy": "1.0",
+    "confidence": "0.62",
+    "judge_total_tokens": "10120"
+  }
+}

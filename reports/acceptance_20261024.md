@@ -1,6 +1,6 @@
 # ACIS MVP 端到端验收记录（2026-10-24）
 
-> 验收对象：MVP 实现提交 `work/20261024-mvp-delivery` @ `3b5cc99`；验收材料提交在本轮分支 `work/20261024-acceptance-portfolio`（代码与验收对象一致）。
+> 验收对象：MVP 实现提交 `3b5cc99`；验收材料在同代码树上执行。
 > 验收环境：Windows / `.venv` Python 3.13.3；本机 Neo4j/Qdrant 在线；未新增依赖。
 > 判定口径：**实际运行**，不以静态检查代替；外部模型调用单独标注；沙箱限制逐条记录。
 
@@ -15,7 +15,7 @@
 | 配置 | `.env.example` 提供完整模板；核心文本链无 key 可跑 |
 | 启动（CLI） | `python orchestrator.py --rules-only "..."` exit 0；冷启动约 8–9s，预热后约 1.4–2.7s |
 | 启动（API） | `TestClient` `/health` 200；真实 `uvicorn` 未起服务（避免占用端口），接口层已实测 |
-| 启动（TUI） | 本轮沙箱禁止 `Start-Process` 重定向，无法非交互回放；同环境上一轮实测 `python -m ui.tui` 12.2s 跑通场景 1；本轮未改 TUI 代码 |
+| 启动（TUI） | 本轮沙箱禁止 `Start-Process` 重定向，无法非交互回放；同环境上一轮实测 `python -m ui.tui` 12.2s 跑通场景 1；本次仅调整 TUI 文案，未改逻辑 |
 
 ---
 
@@ -83,7 +83,7 @@
 - Phase 6 baseline seed42：72/72 次真实 Judge 调用成功、0 回退；C0 20/24、C1 19/24、C2 24/24（单 seed，不能证明架构收益）。
 - SC：seed42 仅 13/24 可评（11 次 connection_error），seed43 24/24；ECE/corr 依赖 trace 中 agreement，committed raw 不能复算。
 - Phase 4.2-R 报告中的 "accuracy" 是 factor coverage，不是诊断准确率；191/216 为规则回退，不可作为模型效果。
-- 简历只能引用"链路可运行/回退可统计/固定评测可复现"，不能引用"架构优于基线"。
+- 公开表述只能引用"链路可运行/回退可统计/固定评测可复现"，不能引用"架构优于基线"。
 
 ---
 
@@ -91,8 +91,8 @@
 
 | 项 | 状态 |
 |---|---|
-| 沙箱 `tmp_path` ACL | 44+12 个用例在沙箱中报错；普通 Windows 环境预期通过，但**本轮无独立普通环境可验证** |
-| 沙箱子进程管道 | 3 个 `test_experiments.py` 用例失败；普通环境预期通过，未实测 |
+| 沙箱 `tmp_path` ACL | 56 个用例在沙箱中报错（收集阶段已修复）；**普通 Windows 环境未复跑，不能推断为通过** |
+| 沙箱子进程管道 | 3 个 `test_experiments.py` 用例失败；普通环境未实测 |
 | TUI 非交互回放 | 沙箱 `Start-Process` 重定向不可用；上轮同环境已实测 |
 | Docker | 未构建（本机无 Docker）；Dockerfile/compose 存在但未验证 |
 | 真实 LLM 多次/质量 | 仅 1 次受控调用；未做多 seed、多 prompt 质量评测 |

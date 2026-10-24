@@ -25,6 +25,7 @@ from evals.config import EvalCase, EvalConfig
 from evals.metrics import CaseMetrics
 from evals.runner import EvaluationResult
 from openmetaphysics.evaluation import challenge_report
+from openmetaphysics.evaluation.challenge_scorer import ChallengeScoringError
 from scripts import run_challenge_evaluation as run_script
 
 SCRIPT_SOURCES = (
@@ -545,3 +546,181 @@ def test_replay_precheck_trace_under_metric_contract() -> None:
     assert result.factor_coverage_level == 1
     assert result.fallback_state is True
     assert result.fallback_reason == "authentication_error"
+
+
+# --------------------------------------------------------------------------
+# report confidence contract: present values are validated, missing is None
+# --------------------------------------------------------------------------
+
+
+def test_score_case_rejects_out_of_contract_confidence_with_identity() -> None:
+    raw = _fake_raw_case(
+        "x-confidence-above-one",
+        "multi_step",
+        ["action_plan"],
+        "病理判断首选：番茄早疫病",
+        1.5,
+    )
+    raw["trace_id"] = "trace-out-of-contract"
+    with pytest.raises(
+        ChallengeScoringError, match=r"case_id='x-confidence-above-one'"
+    ) as excinfo:
+        challenge_report.score_case(raw, use_llm=False)
+    assert "trace_id='trace-out-of-contract'" in str(excinfo.value)
+
+
+def test_score_case_rejects_malformed_confidence_instead_of_silently_skipping() -> None:
+    raw = _fake_raw_case(
+        "x-confidence-malformed",
+        "multi_step",
+        ["action_plan"],
+        "病理判断首选：番茄早疫病",
+        "0.82x",
+    )
+    with pytest.raises(ChallengeScoringError) as excinfo:
+        challenge_report.score_case(raw, use_llm=False)
+    assert isinstance(excinfo.value, ChallengeScoringError)
+    assert "x-confidence-malformed" in str(excinfo.value)
+
+
+def test_score_case_rejects_nonfinite_confidence() -> None:
+    raw = _fake_raw_case(
+        "x-confidence-nan", "conflicting", ["risk_priority"], "番茄早疫病", "NaN"
+    )
+    with pytest.raises(ChallengeScoringError, match="finite"):
+        challenge_report.score_case(raw, use_llm=False)
+
+
+def test_score_case_missing_confidence_is_unscored_not_invalid() -> None:
+    raw = _fake_raw_case(
+        "x-confidence-missing",
+        "multi_step",
+        ["concentric_ring", "action_plan"],
+        "病理判断首选：番茄早疫病",
+        0.75,
+    )
+    raw["ground_truth"] = "早疫病"
+    del raw["confidence"]
+    raw["action_plan"] = ["清理病残体"]
+    result = challenge_report.score_case(raw, use_llm=False)
+    assert result.confidence is None
+    assert result.label_correct is True
+    assert result.factor_coverage is not None
+
+
+def test_aggregate_arm_rejects_invalid_confidence_before_aggregation() -> None:
+    raw = _fake_raw_case(
+        "x-aggregate-gate",
+        "multi_step",
+        ["action_plan"],
+        "病理判断首选：番茄早疫病",
+        1.5,
+    )
+    raw["ground_truth"] = "早疫病"
+    source = challenge_report.ArmSource(
+        arm="c1_all_on",
+        manifest={"label": "C1", "description": "test", "use_llm_judge": False},
+        cases=[raw],
+    )
+    with pytest.raises(ChallengeScoringError, match="x-aggregate-gate"):
+        challenge_report.aggregate_arm(source, use_llm=False)
+
+
+# --------------------------------------------------------------------------
+# six-trace replay under the real-Judge success contract (2026-10-19 runs)
+# --------------------------------------------------------------------------
+
+REPLAY_FIXTURES = (
+    Path(__file__).resolve().parent
+    / "fixtures"
+    / "phase4_judge_recovery_20261019"
+)
+
+REPLAY_EXPECTED = {
+    "case23_seed42": {"label_correct": True, "factor": 1.0, "level": 3, "conf": 0.72},
+    "case23_seed43": {"label_correct": True, "factor": 1.0, "level": 3, "conf": 0.62},
+    "case14_seed42": {"label_correct": False, "factor": pytest.approx(2 / 3), "level": 2, "conf": 0.45},
+    "case14_seed43": {"label_correct": True, "factor": 1.0, "level": 3, "conf": 0.35},
+    "case9_seed42": {"label_correct": True, "factor": 0.5, "level": 2, "conf": 0.62},
+    "case9_seed43": {"label_correct": True, "factor": 0.75, "level": 2, "conf": 0.55},
+}
+
+
+def _replay_raw_from_fixture(fx: dict[str, Any]) -> dict[str, Any]:
+    jp = fx["judge_projection"]
+    case = fx["case"]
+    return {
+        "arm": "c1_all_on",
+        "arm_label": "C1",
+        "case_id": case["id"],
+        "group": case["group"],
+        "ground_truth": case["ground_truth"],
+        "expected_key_factors": case["expected_key_factors"],
+        "trace_id": fx["trace_id"],
+        "decision": jp["decision"],
+        "confidence": jp["confidence"],
+        "judge_mode": jp["judge_mode"],
+        "judge_runtime": jp["judge_runtime"],
+        "reasoning_trace": jp["reasoning_trace"],
+        "summary": jp["summary"],
+        "action_plan": jp["action_plan"],
+    }
+
+
+def test_replay_six_real_judge_success_traces() -> None:
+    """The 2026-10-19 six-run set replays under the existing score_case boundary.
+
+    Fixtures are verbatim judge projections of the real traces under
+    ``logs/phase4_judge_recovery_20261019/`` (sha256 recorded per fixture)
+    plus the per-case runner ``metrics.csv`` row, so the replay stays
+    local and deterministic while remaining tied to the recorded artifacts.
+    """
+    raw_by_run: dict[str, dict[str, Any]] = {}
+    for path in sorted(REPLAY_FIXTURES.glob("*.json")):
+        fixture = json.loads(path.read_text(encoding="utf-8"))
+        run = fixture["run"]
+        runner_row = fixture["runner_metrics_row"]
+        assert fixture["trace_id"] == runner_row["trace_id"]
+        raw_by_run[run] = _replay_raw_from_fixture(fixture)
+
+    assert set(raw_by_run) == set(REPLAY_EXPECTED)
+    results = {
+        run: challenge_report.score_case(raw, use_llm=False)
+        for run, raw in raw_by_run.items()
+    }
+    for run, expected in REPLAY_EXPECTED.items():
+        result = results[run]
+        assert result.judge_mode == "deepseek"
+        assert result.fallback_state is False
+        assert result.fallback_reason is None
+        assert result.label_correct is expected["label_correct"]
+        assert result.factor_coverage == expected["factor"]
+        assert result.factor_coverage_level == expected["level"]
+        assert result.confidence == expected["conf"]
+        runner_row = json.loads(
+            (REPLAY_FIXTURES / f"{run}.json").read_text(encoding="utf-8")
+        )["runner_metrics_row"]
+        assert result.confidence == float(runner_row["confidence"])
+        assert (result.label_correct is True) == (
+            float(runner_row["accuracy"]) == 1.0
+        )
+
+    source = challenge_report.ArmSource(
+        arm="c1_all_on",
+        manifest={
+            "label": "C1",
+            "description": "six-trace replay",
+            "use_llm_judge": False,
+        },
+        cases=list(raw_by_run.values()),
+    )
+    aggregate = challenge_report.aggregate_arm(source, use_llm=False)
+    assert aggregate.n_cases == 6
+    assert aggregate.label_scored == 6
+    assert aggregate.factor_scored == 6
+    assert aggregate.label_accuracy == pytest.approx(5 / 6)
+    assert aggregate.factor_coverage == pytest.approx(0.8194444444444445)
+    assert aggregate.judge_fallback_rate == 0.0
+    assert aggregate.judge_fallback_unknown == 0
+    assert aggregate.judge_modes == {"deepseek": 6}
+    assert aggregate.fallback_reasons == {}

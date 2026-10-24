@@ -2,12 +2,13 @@
 rfc: 001
 title: System Architecture Specification
 status: Accepted
-version: 2.1.0
+version: 2.1.1
 author: Chief Architect
 maintainer: Chief Maintainer
 reviewers: []
 created: 2026-07
-last_updated: 2026-07-11
+last_updated: 2026-10-24
+implementation_status: MVP subset implemented; see "Implementation Status"
 depends_on:
   - ACIS.md
 supersedes:
@@ -31,6 +32,21 @@ priority: ★★★★★
 > It describes WHAT the architecture is, not how modules are implemented.
 > It formally supersedes architecture.md, whose content is incorporated here.
 > Every later RFC depends on this document. Any implementation must conform to this architecture unless an ADR explicitly changes it.
+
+## Implementation Status (2026-10-24)
+
+**This RFC is a specification, not a claim that every layer is implemented.** The current public
+repository is a text-only MVP subset of this architecture; README is the current fact source.
+
+| Status | Components |
+|---|---|
+| **Implemented (text path)** | LangGraph main graph + rules fallback; perception/memory/experts/debate/critic/judge; RAG (Qdrant/in-memory), KG (Neo4j/`DISEASE_DB`), SQLite case/outcome storage; unified 10-stage trace; CLI/TUI/FastAPI; rule Judge and optional LLM Judge/Critic; failure fallback. |
+| **Simulated / mock** | Sensor readings and weather are simulated; vision defaults to mock and its real-model quality is unverified; images are optional. |
+| **Optional / default off** | Planner (`ACIS_ENABLE_PLANNER=0` by default); LLM Judge/Critic require credentials and fall back to rules. |
+| **Reserved / not implemented** | World Model (L10); Executive Agent execution loop; tool execution (ToolRouter only produces requests); learning pipeline; production deployment/SLA; real field validation. |
+
+Experiment note: historical reports sometimes use `accuracy` for **factor coverage**, not diagnostic
+label accuracy; see `reports/experiment_audit_20261024.md` before citing numbers.
 
 ---
 
@@ -69,10 +85,10 @@ Rejected alternatives:
 # Non Goals
 
 This RFC does NOT specify:
-- Implementation details or coding style (see IMPLEMENTATION_AUDIT.md).
+- Implementation details or coding style (see historical implementation audit, kept outside the public tree).
 - Database schema or storage layout (see RFC-004, RFC-002).
 - Deployment, prompt engineering, or model selection (out of scope).
-- Roadmap timing (see ROADMAP).
+- Roadmap timing (see `docs/archive/roadmap.md`, historical).
 - Per-subsystem protocols, schemas, or state contracts (see RFC-002 through RFC-010).
 
 ACIS is intentionally NOT: a large language model, a database, a monolithic application, a rule engine, or an autonomous AGI. Those responsibilities belong to external systems.
@@ -89,7 +105,7 @@ Observe -> Understand -> Reason -> Debate -> Decide -> Execute -> Learn -> Impro
 
 Workflow State is the single source of truth shared by every layer. It is defined by RFC-002. Each layer participates in the workflow by reading and writing the state segments it owns (see State Ownership). Layers are composed top-down; no layer bypasses another to reach infrastructure (see Architectural Constraints).
 
-Generational evolution (1.x single agent -> 2.x multi-agent cognitive -> 3.x executive intelligence -> 4.x autonomous agricultural -> 5.x agricultural cognitive OS) is sequenced in the ROADMAP. The current generation is ACIS 2.0 (multi-agent cognitive decision-making). This RFC is generation-stable: the layer model is preserved across generations, with capabilities added incrementally rather than by rewrite.
+Generational evolution (1.x single agent -> 2.x multi-agent cognitive -> 3.x executive intelligence -> 4.x autonomous agricultural -> 5.x agricultural cognitive OS) is historical planning, not a delivery commitment. The current public implementation is the text-only MVP subset described in "Implementation Status"; the RFC layer model is preserved for future work, but reserved/execution/learning layers are not implemented.
 
 ---
 
@@ -147,7 +163,7 @@ ACIS comprises ten layers. Each has exactly one responsibility and owns specific
 
 ## L10 World Model (reserved)
 - Responsibility: maintain an internal representation of the agricultural world (crop growth, disease spread, weather evolution, market change, resource dynamics).
-- Status: RESERVED INTERFACE, not implemented in the current generation. Full Entity / Relationship / State / Causal / Prediction / Simulation capability is deferred to ACIS 3.0 per ROADMAP (RFC-010).
+- Status: RESERVED INTERFACE, not implemented in the current generation. Full Entity / Relationship / State / Causal / Prediction / Simulation capability is deferred to ACIS 3.0 per the historical roadmap (RFC-010).
 - The current cognitive loop does NOT depend on the World Model. Planner (RFC-008) and Learning (RFC-007) operate without it in ACIS 2.x.
 
 Terminology (C6): "Executive Intelligence Layer" (L1, planning and coordination) and "Execution Layer" (L8, action) are distinct layers with similar names. RFC-009 "Executive Agent" belongs to the Execution Layer (L8) despite its name; it performs runtime execution loops and recovery, not strategic planning. RFC-009 should reflect this mapping in its own document.
@@ -314,11 +330,11 @@ Priority: ★★★★★
 
 # Audit Checklist
 
-Conflicts C1 through C9 from the implementation audit, resolved where they belong to RFC-001:
+Conflicts C1 through C9 from the historical implementation audit, resolved where they belong to RFC-001:
 
 - [x] C1 - RFC-001 is the single architecture source; architecture.md is superseded (frontmatter supersedes field). Resolved.
 - [x] C2 - World Model is a reserved interface; the current cognitive loop does not depend on it, so its dependency ordering does not block Planner (RFC-008) or Learning (RFC-007). Resolved at architecture level. RFC-010 dependency wording remains for RFC-010 normalization.
-- [x] C3 - World Model positioning fixed: reserved architectural slot (L10), full capability deferred to ACIS 3.0 per ROADMAP. Resolved. RFC-010 "core foundation" wording remains for RFC-010 normalization.
+- [x] C3 - World Model positioning fixed: reserved architectural slot (L10), full capability deferred to ACIS 3.0 per the historical roadmap. Resolved. RFC-010 "core foundation" wording remains for RFC-010 normalization.
 - [x] C4 - State machine composition defined: RFC-002 workflow lifecycle is canonical; RFC-006 / RFC-008 / RFC-009 sub-lifecycles compose within workflow phases. Resolved at architecture level. Detailed phase mapping remains for RFC-002.
 - [x] C5 - Module boundaries fixed: Judge is a component of the Decision Pipeline (L7); Executive Agent is a subsystem of the Execution Layer (L8); action planning is separated by layer. Resolved at architecture level. Per-subsystem wording remains for RFC-006 / RFC-008 / RFC-009.
 - [x] C6 - "Executive" terminology disambiguated: L1 Executive Intelligence (planning) versus L8 Execution (action); RFC-009 Executive Agent mapped to L8. Resolved at architecture level. RFC-009 name clarification remains for RFC-009.

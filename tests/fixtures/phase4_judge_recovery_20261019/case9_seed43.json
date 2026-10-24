@@ -1,0 +1,68 @@
+{
+  "run": "case9_seed43",
+  "source_artifacts": {
+    "trace_path": "logs\\phase4_judge_recovery_20261019\\case9_seed43\\precheck_seed43\\c1_all_on\\runner\\traces\\d81fce0ecabd4a82901bfe53812dc2ee.json",
+    "trace_sha256_full": "6e30c7244b8d88e0702e10b4d1395f65b64d3cd3ac11e88d060de2eaff1dccd0",
+    "flattened_sha256_full": "ec3540924ed44977df375803831b2e795bccf5de0d48b8f4541ce5f91e7a1361",
+    "metrics_csv_path": "logs\\phase4_judge_recovery_20261019\\case9_seed43\\precheck_seed43\\c1_all_on\\runner\\metrics.csv"
+  },
+  "trace_id": "d81fce0ecabd4a82901bfe53812dc2ee",
+  "case": {
+    "id": "conf_tomato_blight_cool_rain",
+    "group": "conflicting",
+    "ground_truth": "早疫病",
+    "expected_key_factors": [
+      "concentric_ring",
+      "low_temp",
+      "high_humidity",
+      "risk_priority"
+    ]
+  },
+  "judge_projection": {
+    "decision": "番茄早疫病",
+    "confidence": 0.55,
+    "judge_mode": "deepseek",
+    "reasoning_trace": "知识图谱显示番茄早疫病典型症状为叶片同心轮纹病斑，与现场描述高度吻合，但环境条件（温度24.2°C，湿度69.6%）未完全满足其高发条件（25-30°C，湿度>80%），KG规则提示应降低置信度。专家间存在分歧：病理Agent和RAG支持早疫病，历史案例库支持叶霉病，但叶霉病症状匹配度低且环境更不匹配。硬约束检查显示两种病害的环境条件均未严格满足，但早疫病更接近。视觉Agent缺失，证据不完整。综合KG匹配度、专家证据权重及环境约束，早疫病为最可能诊断，但置信度中等，需人工复核。",
+    "summary": "DeepSeek Judge 结构化裁决：基于症状描述与知识图谱，番茄早疫病可能性较高，但环境条件不完全匹配且缺乏图像证据，建议人工复核并采样送检。",
+    "action_plan": [
+      "采集病叶图像，重点拍摄病斑同心轮纹特征，送视觉Agent复核。",
+      "取样送检进行病原鉴定，确认是否为茄链格孢。",
+      "加强温室通风，降低湿度至80%以下，控制温度在25-28°C。",
+      "若确认早疫病，可选用百菌清或杀毒矾进行防治，注意轮换用药。",
+      "监测叶霉病发生迹象，检查叶片背面是否有灰紫色霉层。",
+      "记录病情发展，7天后复查。"
+    ],
+    "judge_runtime": {
+      "outcome": "success",
+      "judge_mode": "deepseek",
+      "provider": "deepseek",
+      "endpoint_id": "https://api.deepseek.com",
+      "model": "deepseek-chat",
+      "timeout_seconds": 60.0,
+      "sdk_max_retries": 2,
+      "config_sources": {
+        "api_key": "DEEPSEEK_API_KEY",
+        "base_url": "DEEPSEEK_BASE_URL",
+        "model": "default",
+        "provider": "default",
+        "timeout_seconds": "default",
+        "max_retries": "default"
+      },
+      "retry_exhausted": false,
+      "token_usage": {
+        "judge_prompt_tokens": 6715,
+        "judge_completion_tokens": 1397,
+        "judge_total_tokens": 8112
+      }
+    }
+  },
+  "runner_metrics_row": {
+    "case_id": "conf_tomato_blight_cool_rain",
+    "trace_id": "d81fce0ecabd4a82901bfe53812dc2ee",
+    "expected": "早疫病",
+    "decision": "番茄早疫病",
+    "accuracy": "1.0",
+    "confidence": "0.55",
+    "judge_total_tokens": "8112"
+  }
+}

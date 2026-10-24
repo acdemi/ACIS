@@ -1,6 +1,6 @@
 """TUI 演示界面 — 农业 Agent v4 多智能体决策系统
 
-面试演示用交互式终端界面，基于 rich。
+交互式终端界面，用于演示完整诊断流程，基于 rich。
 单文件、零额外配置：自动加载 DeepSeek Key 与 Neo4j 连接，离线可跑。
 
 启动：
@@ -170,7 +170,7 @@ def _render_banner() -> None:
             Align.center(
                 Group(
                     Text("🌱 农业 Agent v4 — 多智能体决策系统", style="bold green"),
-                    Text("面试演示 · 感知 → 记忆 → 专家 → 辩论 → Critic → Judge", style="cyan"),
+                    Text("ACIS 演示 · 感知 → 记忆 → 专家 → 辩论 → Critic → Judge", style="cyan"),
                 )
             ),
             border_style="green",

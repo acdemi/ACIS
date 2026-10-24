@@ -420,3 +420,46 @@ def test_missing_judge_event_is_unscored_not_wrong_or_zero_confidence() -> None:
     row = compute_trace_metrics(trace, expected="叶霉病")
     assert row.accuracy is None
     assert row.confidence is None
+
+
+# --------------------- confidence contract (report boundary) ---------------
+@pytest.mark.parametrize(
+    "confidence",
+    [1.5, -0.1, float("nan"), float("inf"), "0.8x"],
+)
+def test_compute_trace_metrics_rejects_out_of_contract_confidence(
+    confidence: object,
+) -> None:
+    """Present-but-invalid confidence raises; it must not become unscored."""
+    trace = _base_trace()
+    trace.events[7] = _event(
+        "judge", {"decision": "d", "confidence": confidence}
+    )
+    with pytest.raises(ValueError, match="case-1"):
+        compute_trace_metrics(trace, case_id="case-1", expected="叶霉病")
+
+
+def test_compute_trace_metrics_confidence_error_names_case_and_trace() -> None:
+    trace = _base_trace()
+    trace.events[7] = _event(
+        "judge", {"decision": "d", "confidence": "high"}
+    )
+    with pytest.raises(ValueError, match="trace-1"):
+        compute_trace_metrics(trace, case_id="case-1", expected="叶霉病")
+
+
+def test_compute_trace_metrics_missing_confidence_stays_unscored() -> None:
+    trace = _base_trace()
+    trace.events[7] = _event("judge", {"decision": "d"})
+    row = compute_trace_metrics(trace, case_id="case-1", expected="叶霉病")
+    assert row.decision == "d"
+    assert row.confidence is None
+
+
+def test_compute_trace_metrics_confidence_stays_contract_valid() -> None:
+    trace = _base_trace()
+    trace.events[7] = _event(
+        "judge", {"decision": "d", "confidence": 0.72}
+    )
+    row = compute_trace_metrics(trace, case_id="case-1", expected="叶霉病")
+    assert row.confidence == 0.72

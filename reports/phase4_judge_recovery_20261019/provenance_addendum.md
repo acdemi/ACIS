@@ -33,7 +33,7 @@
   `logs/phase4_judge_recovery_20261019/<case>_<seed>/precheck_seed<seed>/c1_all_on/runner/{traces,metrics.csv,summary.md}`
   plus `…/precheck_seed<seed>/_flattened/challenge_set_v1_flattened.json`.
   The precheck invocation evidently used a per-run `--log-dir` (documented
-  invocation shape in `reports/phase4_real_judge_recovery_20261018/blocked_precheck_report.md` §1). This deviation is recorded, not corrected.
+  invocation shape in `reports/archive/phase4/blocked_precheck_report.md` §1). This deviation is recorded, not corrected.
 
 ## 4. Six-row evidence matrix
 
@@ -148,7 +148,7 @@ that classification or validates Phase 5 readiness.
 - Comparator/metric contracts at `4b4c898`: `decision_semantics.py`,
   `scripts/run_phase4_2_real_agent.py`, `tests/test_phase4_reliability.py`.
 - Historical bases: `reports/phase4_2_raw_results.json`,
-  `reports/phase4_real_judge_recovery_20261018/blocked_precheck_report.md`,
+  `reports/archive/phase4/blocked_precheck_report.md`,
   `reports/phase4_evaluation_metric_contract_audit.md`.
 
 No report, trace, log, configuration, source file, test, or dataset was

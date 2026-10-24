@@ -1,0 +1,2692 @@
+{
+  "manifest": {
+    "mode": "full",
+    "execution_semantics": "acis_real_agent",
+    "use_llm_judge": true,
+    "decision_semantics": "final_judge_decision",
+    "confidence_semantics": "Judge confidence that the final decision label is correct",
+    "judge_runtime_config": {
+      "provider": "opencode",
+      "endpoint_id": "https://opencode.ai/zen/go/v1",
+      "model": "deepseek-v4.1-flash",
+      "timeout_seconds": 60.0,
+      "sdk_max_retries": 2,
+      "config_sources": {
+        "api_key": "AGRI_AI_JUDGE_API_KEY",
+        "base_url": "AGRI_AI_JUDGE_BASE_URL",
+        "model": "AGRI_AI_JUDGE_MODEL",
+        "provider": "default",
+        "timeout_seconds": "default",
+        "max_retries": "default"
+      }
+    },
+    "configs": [
+      "C0",
+      "C2"
+    ],
+    "seeds": [
+      43
+    ],
+    "case_ids": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12,
+      13,
+      14,
+      15,
+      16,
+      17,
+      18,
+      19,
+      20,
+      21,
+      22,
+      23,
+      24
+    ],
+    "started": "2026-10-24T03:44:09.784939+00:00",
+    "finished": "2026-10-24T05:30:35.748031+00:00",
+    "completed_calls": 48
+  },
+  "results": [
+    {
+      "seed": 43,
+      "config": "C0",
+      "case_index": 1,
+      "case_id": "amb_tomato_mold_blind_leaf",
+      "group": "ambiguity",
+      "difficulty": 2,
+      "expected_key_factors": [
+        "backside_mold",
+        "yellow_spot",
+        "high_humidity",
+        "differential"
+      ],
+      "ground_truth": "叶霉病",
+      "decision": "无法定论（叶霉病症状支持但环境硬约束不满足）",
+      "confidence": 0.39,
+      "judge_mode": "deepseek",
+      "judge_runtime": {
+        "outcome": "success",
+        "judge_mode": "deepseek",
+        "provider": "opencode",
+        "endpoint_id": "https://opencode.ai/zen/go/v1",
+        "model": "deepseek-v4.1-flash",
+        "timeout_seconds": 60.0,
+        "sdk_max_retries": 2,
+        "config_sources": {
+          "api_key": "AGRI_AI_JUDGE_API_KEY",
+          "base_url": "AGRI_AI_JUDGE_BASE_URL",
+          "model": "AGRI_AI_JUDGE_MODEL",
+          "provider": "default",
+          "timeout_seconds": "default",
+          "max_retries": "default"
+        },
+        "retry_exhausted": false,
+        "token_usage": {
+          "judge_prompt_tokens": 4972,
+          "judge_completion_tokens": 4835,
+          "judge_total_tokens": 9807
+        }
+      },
+      "reasoning_trace": "病理Agent依据叶背灰霉层、正面淡黄斑给出叶霉病，症状与KG三联完全吻合；但传感器实测29.2℃、62%RH，违反叶霉病硬约束（20-25℃、>85%）及早疫病湿度>80%，且描述26℃/80%与实测不一致。硬约束下两病均不能直接确诊，故不强行站队。视觉缺失、无病原镜检，KG规则对叶霉病降权。最终判为无法定论，置信度0.42，建议补图像、冠层微气候与送检后复核。",
+      "summary": "DeepSeek Judge 结构化裁决：症状高度提示番茄叶霉病，但实测温湿度违反KG硬约束且与描述不一致，当前无法定论，需图像、微气候与病原复核。",
+      "action_plan": [
+        "立即补拍叶片正反面高清图像，重点记录霉层颜色、病斑是否有同心轮纹、发病部位（下部/上部）。",
+        "在冠层内不同位置复测温湿度并校准传感器，连续记录24小时，重点确认叶面结露与微环境湿度是否>85%。",
+        "采集病叶送检或镜检病原，区分黄枝孢霉与链格孢，避免仅凭症状误判。",
+        "暂缓大面积喷药；先摘除病叶并带出棚外销毁，加强通风降湿，避免叶面长时间结露。",
+        "若镜检/送检确认叶霉病，再按KG选用多菌灵/甲基托布津，并轮换枯草芽孢杆菌等低生态风险方案；确认早疫病则选百菌清/杀毒矾。",
+        "3-5天后复查症状扩展与温湿度记录，若环境仍不满足或症状加重，升级为人工专家复核。"
+      ],
+      "runtime_seconds": 126.08177920000026,
+      "trace_id": "56d5675728464c1d8d46d0974292225e",
+      "status": "ok",
+      "valid": true,
+      "timestamp": "2026-10-24T04:57:55.512847+00:00"
+    },
+    {
+      "seed": 43,
+      "config": "C0",
+      "case_index": 2,
+      "case_id": "amb_tomato_ring_before_gray",
+      "group": "ambiguity",
+      "difficulty": 2,
+      "expected_key_factors": [
+        "concentric_ring",
+        "brown_spot",
+        "gray_white_center",
+        "differential"
+      ],
+      "ground_truth": "早疫病",
+      "decision": "无法定论（疑似番茄早疫病，但当前环境条件不支持，需补充证据）",
+      "confidence": 0.8837,
+      "judge_mode": "deepseek",
+      "judge_runtime": {
+        "outcome": "success",
+        "judge_mode": "deepseek",
+        "provider": "opencode",
+        "endpoint_id": "https://opencode.ai/zen/go/v1",
+        "model": "deepseek-v4.1-flash",
+        "timeout_seconds": 60.0,
+        "sdk_max_retries": 2,
+        "config_sources": {
+          "api_key": "AGRI_AI_JUDGE_API_KEY",
+          "base_url": "AGRI_AI_JUDGE_BASE_URL",
+          "model": "AGRI_AI_JUDGE_MODEL",
+          "provider": "default",
+          "timeout_seconds": "default",
+          "max_retries": "default"
+        },
+        "retry_exhausted": false,
+        "token_usage": {
+          "judge_prompt_tokens": 4958,
+          "judge_completion_tokens": 5865,
+          "judge_total_tokens": 10823
+        }
+      },
+      "reasoning_trace": "KG显示早疫病需25-30°C且湿度>80%，当前温度29.2符合但湿度62%远低于硬约束；叶霉病需20-25°C、>85%也不满足。病理Agent症状有同心轮纹但中央未灰白，且置信度0.9与硬约束冲突。视觉缺图，所有counterfactual为空。故不能确诊早疫病，降级为无法定论并建议补图、复测冠层湿度、送检。",
+      "summary": "DeepSeek Judge 结构化裁决：症状有同心轮纹但中央未灰白，且棚内湿度62%远低于早疫病>80%硬约束，不能确诊早疫病，需补拍图像、复测冠层湿度并送检。",
+      "action_plan": [
+        "对异常传感器复测，并查看最近 24 小时趋势",
+        "维持当前环境管理",
+        "密切观察症状变化，记录发展过程",
+        "如症状加重，建议取样送检确认病原",
+        "未来24小时降雨不足且温度偏高，建议灌溉",
+        "建议作业时间：清晨 5:00-7:00"
+      ],
+      "runtime_seconds": 143.89211970000042,
+      "trace_id": "9e141ef5d0ca4058b15af7ebf461b37d",
+      "status": "ok",
+      "valid": true,
+      "timestamp": "2026-10-24T04:57:55.514326+00:00"
+    },
+    {
+      "seed": 43,
+      "config": "C0",
+      "case_index": 3,
+      "case_id": "amb_cucumber_angular_no_mold",
+      "group": "ambiguity",
+      "difficulty": 2,
+      "expected_key_factors": [
+        "angular_lesion",
+        "yellow_spot",
+        "leaf_dew",
+        "differential"
+      ],
+      "ground_truth": "霜霉病",
+      "decision": "无法定论（黄瓜霜霉病证据不足，需排除其他叶斑/细菌性角斑病）",
+      "confidence": 0.7338,
+      "judge_mode": "deepseek",
+      "judge_runtime": {
+        "outcome": "success",
+        "judge_mode": "deepseek",
+        "provider": "opencode",
+        "endpoint_id": "https://opencode.ai/zen/go/v1",
+        "model": "deepseek-v4.1-flash",
+        "timeout_seconds": 60.0,
+        "sdk_max_retries": 2,
+        "config_sources": {
+          "api_key": "AGRI_AI_JUDGE_API_KEY",
+          "base_url": "AGRI_AI_JUDGE_BASE_URL",
+          "model": "AGRI_AI_JUDGE_MODEL",
+          "provider": "default",
+          "timeout_seconds": "default",
+          "max_retries": "default"
+        },
+        "retry_exhausted": false,
+        "token_usage": {
+          "judge_prompt_tokens": 4136,
+          "judge_completion_tokens": 5236,
+          "judge_total_tokens": 9372
+        }
+      },
+      "reasoning_trace": "按KG硬约束，霜霉病需15-22°C且湿度>90%；现场27.2°C、67.1%明显不符，故病理Agent 0.9诊断被否决。症状多角形黄斑仅部分匹配，且无叶背霉层/无图像。传感器可信，天气高温干燥进一步削弱霜霉病。反事实均为空，替代病害未排除。综合置信度下调，需图像与送检复核。",
+      "summary": "DeepSeek Judge 结构化裁决：现有证据不支持将温室B黄瓜叶斑直接定为霜霉病，环境条件与KG硬约束明显不符，需图像和病原检测后再定。",
+      "action_plan": [
+        "采集病叶正反面高清图像，重点观察叶背霉层、病斑是否受叶脉限制及是否有菌脓/穿孔。",
+        "取样送当地植保站做镜检或病原分离，优先排除细菌性角斑病、靶斑病等其他叶斑病。",
+        "暂缓按霜霉病大面积喷药，避免盲目用药；必要时先小范围试验。",
+        "加强通风降湿，避免叶面结露；采用滴灌控水，记录温湿度日变化。",
+        "监测病斑扩展速度、病叶率及是否出现灰黑色霉层，48-72小时后复评。",
+        "若确认霜霉病且环境转为15-22°C、湿度>90%，再按KG推荐药剂防治并注意叶背喷施。"
+      ],
+      "runtime_seconds": 133.59257509999998,
+      "trace_id": "3ebf5367105d46f4a77f2a7307aa8770",
+      "status": "ok",
+      "valid": true,
+      "timestamp": "2026-10-24T04:57:55.515949+00:00"
+    },
+    {
+      "seed": 43,
+      "config": "C0",
+      "case_index": 4,
+      "case_id": "amb_sugar_spot_wilt",
+      "group": "ambiguity",
+      "difficulty": 2,
+      "expected_key_factors": [
+        "circular_spot",
+        "brown_spot",
+        "lower_leaf_start",
+        "differential"
+      ],
+      "ground_truth": "褐斑病",
+      "decision": "甜菜褐斑病（疑似，需排除根腐病）",
+      "confidence": 0.41,
+      "judge_mode": "deepseek",
+      "judge_runtime": {
+        "outcome": "success",
+        "judge_mode": "deepseek",
+        "provider": "opencode",
+        "endpoint_id": "https://opencode.ai/zen/go/v1",
+        "model": "deepseek-v4.1-flash",
+        "timeout_seconds": 60.0,
+        "sdk_max_retries": 2,
+        "config_sources": {
+          "api_key": "AGRI_AI_JUDGE_API_KEY",
+          "base_url": "AGRI_AI_JUDGE_BASE_URL",
+          "model": "AGRI_AI_JUDGE_MODEL",
+          "provider": "default",
+          "timeout_seconds": "default",
+          "max_retries": "default"
+        },
+        "retry_exhausted": false,
+        "token_usage": {
+          "judge_prompt_tokens": 4723,
+          "judge_completion_tokens": 5364,
+          "judge_total_tokens": 10087
+        }
+      },
+      "reasoning_trace": "按KG校验：甜菜褐斑病与症状描述（下部老叶圆形褐色病斑）及温度29.2°C（25-30°C）部分匹配；但湿度62.0%未达>70%硬约束，KG规则要求下调置信度。根腐病虽可致萎蔫，但症状未匹配、土壤44.8%偏干、温度29.2°C超20-28°C，证据弱。专家共识仅病理Agent明确诊断褐斑病，视觉缺图，传感器/气象提示偏干高温，不支持高湿病害高置信。故最终倾向褐斑病疑似诊断，但置信度由0.90下调至0.66，并需人工复核/送检。KG中两种病害均被提及，无集体忽略。",
+      "summary": "DeepSeek Judge 结构化裁决：症状和温度支持甜菜褐斑病，但湿度62%低于KG阈值且缺图像，根腐病不能完全排除，建议人工复核并送检。",
+      "action_plan": [
+        "采集病叶高清图像并送检/镜检，重点确认甜菜尾孢菌，排除根腐病。",
+        "拔取萎蔫株检查根部及维管束是否褐腐，记录根腐病证据。",
+        "连续监测棚内湿度和叶面结露；若湿度持续低于70%，应降低褐斑病置信度，不宜仅凭症状喷药。",
+        "适当通风降温，避免高温干旱或积水胁迫；灌溉按气象建议在清晨进行。",
+        "若镜检/图像确认褐斑病，按KG选用甲基托布津或多菌灵，7-10天一次连喷2-3次，并注意轮换药剂。",
+        "生态上优先配合枯草芽孢杆菌/木霉菌等替代方案，减少广谱杀菌剂对天敌影响。"
+      ],
+      "runtime_seconds": 149.30118509999966,
+      "trace_id": "834dd4de31534b409a5c04343b328b6e",
+      "status": "ok",
+      "valid": true,
+      "timestamp": "2026-10-24T04:57:55.517431+00:00"
+    },
+    {
+      "seed": 43,
+      "config": "C0",
+      "case_index": 5,
+      "case_id": "amb_cotton_edge_vas",
+      "group": "ambiguity",
+      "difficulty": 3,
+      "expected_key_factors": [
+        "edge_yellowing",
+        "vascular_browning",
+        "half_leaf_yellowing",
+        "differential"
+      ],
+      "ground_truth": "黄萎病",
+      "decision": "无法定论；疑似棉花黄萎病，需与棉花枯萎病鉴别",
+      "confidence": 0.69,
+      "judge_mode": "deepseek",
+      "judge_runtime": {
+        "outcome": "success",
+        "judge_mode": "deepseek",
+        "provider": "opencode",
+        "endpoint_id": "https://opencode.ai/zen/go/v1",
+        "model": "deepseek-v4.1-flash",
+        "timeout_seconds": 60.0,
+        "sdk_max_retries": 2,
+        "config_sources": {
+          "api_key": "AGRI_AI_JUDGE_API_KEY",
+          "base_url": "AGRI_AI_JUDGE_BASE_URL",
+          "model": "AGRI_AI_JUDGE_MODEL",
+          "provider": "default",
+          "timeout_seconds": "default",
+          "max_retries": "default"
+        },
+        "retry_exhausted": false,
+        "token_usage": {
+          "judge_prompt_tokens": 4636,
+          "judge_completion_tokens": 4827,
+          "judge_total_tokens": 9463
+        }
+      },
+      "reasoning_trace": "KG显示叶缘黄化、维管束褐变支持黄萎病，但黄萎病适温20-25°C、湿度>70%，当前29.2°C/62%均不满足；枯萎病湿度62%满足但温度略超28°C，且缺半边黄化/萎蔫。病理Agent置信度0.9偏高。视觉缺失，其他Agent非诊断性。综合证据冲突，降低置信度并建议送检。",
+      "summary": "DeepSeek Judge 结构化裁决：叶缘发黄更接近黄萎病，但温湿度不符合其高发条件；枯萎病环境较接近却缺少半边黄化和萎蔫，现有证据不足以确诊，建议送检。",
+      "action_plan": [
+        "采集病株叶片和维管束高清图像，重点记录叶缘黄化、叶脉斑驳、是否半边黄化及是否萎蔫。",
+        "取样送实验室进行病原分离或分子检测，明确尖孢镰刀菌与大丽轮枝菌。",
+        "复核温度传感器并加强通风降温，使棚温尽量接近25-28°C，避免高温加剧胁迫。",
+        "采用滴灌小水勤灌，避免大水漫灌；当前土壤含水量44.8偏低，但黄萎病需高湿，不宜盲目提高棚内湿度。",
+        "隔离或拔除重病株，病残体销毁，工具消毒，避免连作和病土扩散。",
+        "确诊前不盲目大面积用药；如需应急防治，选用登记药剂并先小范围试验。"
+      ],
+      "runtime_seconds": 312.7809196000003,
+      "trace_id": "66be25edeb7b4f12a236059f0a792145",
+      "status": "ok",
+      "valid": true,
+      "timestamp": "2026-10-24T04:57:55.519158+00:00"
+    },
+    {
+      "seed": 43,
+      "config": "C0",
+      "case_index": 6,
+      "case_id": "amb_tomato_curl_mold",
+      "group": "ambiguity",
+      "difficulty": 3,
+      "expected_key_factors": [
+        "leaf_curl",
+        "backside_mold",
+        "lower_leaf_start",
+        "differential"
+      ],
+      "ground_truth": "叶霉病",
+      "decision": "无法定论（叶霉病硬约束不符，早疫病证据不足）",
+      "confidence": 0.69,
+      "judge_mode": "deepseek",
+      "judge_runtime": {
+        "outcome": "success",
+        "judge_mode": "deepseek",
+        "provider": "opencode",
+        "endpoint_id": "https://opencode.ai/zen/go/v1",
+        "model": "deepseek-v4.1-flash",
+        "timeout_seconds": 60.0,
+        "sdk_max_retries": 2,
+        "config_sources": {
+          "api_key": "AGRI_AI_JUDGE_API_KEY",
+          "base_url": "AGRI_AI_JUDGE_BASE_URL",
+          "model": "AGRI_AI_JUDGE_MODEL",
+          "provider": "default",
+          "timeout_seconds": "default",
+          "max_retries": "default"
+        },
+        "retry_exhausted": false,
+        "token_usage": {
+          "judge_prompt_tokens": 4533,
+          "judge_completion_tokens": 6354,
+          "judge_total_tokens": 10887
+        }
+      },
+      "reasoning_trace": "病理Agent依据叶背灰霉层与下部叶片卷曲诊断叶霉病，KG症状部分吻合；但当前温度29.3°C超出叶霉病20-25°C，湿度61.8%远低于>85%，硬约束直接削弱并否决该诊断。早疫病温度29.3°C符合25-30°C，但湿度未达>80%，且描述缺少同心轮纹病斑，不能成立。视觉无图像，传感器仅示环境正常，其他专家未提供鉴别诊断或反事实。KG中早疫病被专家集体忽略，需下调置信度。综合证据不足以定论，建议取样送检并复核微气候，故置信度约0.30，需人工复核。",
+      "summary": "DeepSeek Judge 结构化裁决：症状略偏向叶霉病，但温度/湿度硬约束不满足且早疫病未排除，证据不足，需取样送检和人工复核。",
+      "action_plan": [
+        "立即拍摄下部叶片正反面高清图及病斑特写，记录是否有同心轮纹，补做视觉复核。",
+        "在病叶附近布点连续24-48小时监测叶面/株间温湿度，确认是否形成>85%或>80%的局部微气候。",
+        "取样送检（镜检/培养/PCR），鉴别黄枝孢霉与茄链格孢，送检前暂不大面积用药。",
+        "摘除下部重病叶并带出温室销毁，操作后消毒工具，减少初侵染源。",
+        "加强通风、控制叶面结露，采用滴灌小水勤灌；高温时段遮阳降温，避免中午灌溉。",
+        "确诊后按病原选择登记药剂，优先低风险生物制剂并轮换；化学防治前评估生态影响并小面积试验。"
+      ],
+      "runtime_seconds": 164.15552900000012,
+      "trace_id": "cd96c23440c2409abe461109018ba60a",
+      "status": "ok",
+      "valid": true,
+      "timestamp": "2026-10-24T04:57:55.520925+00:00"
+    },
+    {
+      "seed": 43,
+      "config": "C0",
+      "case_index": 7,
+      "case_id": "conf_cucumber_hot_dry",
+      "group": "conflicting",
+      "difficulty": 3,
+      "expected_key_factors": [
+        "backside_mold",
+        "angular_lesion",
+        "high_temp",
+        "low_humidity",
+        "risk_priority"
+      ],
+      "ground_truth": "霜霉病",
+      "decision": "无法定论（疑似黄瓜霜霉病，需人工复核）",
+      "confidence": 0.9,
+      "judge_mode": "deepseek",
+      "judge_runtime": {
+        "outcome": "success",
+        "judge_mode": "deepseek",
+        "provider": "opencode",
+        "endpoint_id": "https://opencode.ai/zen/go/v1",
+        "model": "deepseek-v4.1-flash",
+        "timeout_seconds": 60.0,
+        "sdk_max_retries": 2,
+        "config_sources": {
+          "api_key": "AGRI_AI_JUDGE_API_KEY",
+          "base_url": "AGRI_AI_JUDGE_BASE_URL",
+          "model": "AGRI_AI_JUDGE_MODEL",
+          "provider": "default",
+          "timeout_seconds": "default",
+          "max_retries": "default"
+        },
+        "retry_exhausted": false,
+        "token_usage": {
+          "judge_prompt_tokens": 4142,
+          "judge_completion_tokens": 6505,
+          "judge_total_tokens": 10647
+        }
+      },
+      "reasoning_trace": "按序审查：①KG一致性：病理Agent的霜霉病与KG症状（叶背灰黑霉层、多角形病斑）部分匹配，但KG要求15-22°C、湿度>90%；当前传感器27.3°C、67%RH，且现场描述35°C干燥，均不满足。②交叉验证：传感器/天气/气象均指向高温偏干，与霜霉病高湿低温条件冲突；视觉缺失。③硬约束：温度与湿度两项均违反，按规则直接否决霜霉病确诊。④证据权重：传感器8、天气6、栽培6，病理仅4（忽略硬约束）。⑤反事实：各专家未提供替代诊断，无法排除其他叶部病害；需补图像与病原检测。⑥集体忽略：KG仅含霜霉病且已被提及，未发现KG内集体忽略。综合：不站队病理高置信，降为无法定论，置信度0.35，人工复核。",
+      "summary": "DeepSeek Judge 结构化裁决：症状疑似黄瓜霜霉病，但温湿度硬约束明显不符且缺图像，无法确诊，需人工复核与采样。",
+      "action_plan": [
+        "对异常传感器复测，并查看最近 24 小时趋势",
+        "维持当前环境管理",
+        "密切观察症状变化，记录发展过程",
+        "如症状加重，建议取样送检确认病原",
+        "未来24小时降雨不足且温度偏高，建议灌溉",
+        "建议作业时间：清晨 5:00-7:00"
+      ],
+      "runtime_seconds": 153.8530655000004,
+      "trace_id": "a7b96b69ce35412b97f95259969390ff",
+      "status": "ok",
+      "valid": true,
+      "timestamp": "2026-10-24T04:57:55.521945+00:00"
+    },
+    {
+      "seed": 43,
+      "config": "C0",
+      "case_index": 8,
+      "case_id": "conf_sugar_spot_cold",
+      "group": "conflicting",
+      "difficulty": 2,
+      "expected_key_factors": [
+        "circular_spot",
+        "brown_spot",
+        "low_temp",
+        "risk_priority"
+      ],
+      "ground_truth": "褐斑病",
+      "decision": "疑似甜菜褐斑病（Cercospora beticola），但因湿度阈值未达标与低温描述矛盾，暂不能确诊",
+      "confidence": 0.89,
+      "judge_mode": "deepseek",
+      "judge_runtime": {
+        "outcome": "success",
+        "judge_mode": "deepseek",
+        "provider": "opencode",
+        "endpoint_id": "https://opencode.ai/zen/go/v1",
+        "model": "deepseek-v4.1-flash",
+        "timeout_seconds": 60.0,
+        "sdk_max_retries": 2,
+        "config_sources": {
+          "api_key": "AGRI_AI_JUDGE_API_KEY",
+          "base_url": "AGRI_AI_JUDGE_BASE_URL",
+          "model": "AGRI_AI_JUDGE_MODEL",
+          "provider": "default",
+          "timeout_seconds": "default",
+          "max_retries": "default"
+        },
+        "retry_exhausted": false,
+        "token_usage": {
+          "judge_prompt_tokens": 4464,
+          "judge_completion_tokens": 4038,
+          "judge_total_tokens": 8502
+        }
+      },
+      "reasoning_trace": "病理Agent首诊甜菜褐斑病，与KG中(甜菜)-[易感]->(甜菜褐斑病)及“圆形褐色小病斑”等症状节点完全匹配，且当前29.3℃落在25-30℃适宜区间，故保留该诊断方向。但硬约束校验发现湿度61.8%<70%，按KG规则须显著下调置信度；同时现场“低温12℃”与传感器29.3℃、外部36.9℃三重矛盾，若采信12℃则褐斑病与根腐病的温度约束均不成立。视觉Agent因无图像失效，全部专家counterfactual为空、无替代诊断，加之KG中甜菜根腐病被集体忽略（但症状为叶斑、无根腐萎蔫，实际风险低），综合下调置信度至0.52并强制人工复核。",
+      "summary": "DeepSeek Judge 结构化裁决：症状与KG中甜菜褐斑病节点高度吻合，但棚内湿度61.8%<70%硬约束未满足，且现场“低温12℃”与传感器29.3℃严重矛盾，须现场核验并取样送检后再定。",
+      "action_plan": [
+        "核实棚内温度：现场描述“低温12℃”与传感器空气温度29.3℃矛盾，请分别核对白天/夜间温度及传感器历史记录",
+        "因湿度61.8%低于甜菜褐斑病高发阈值70%，暂不按高发态势处置，改为加强通风、密切观察病斑是否扩展连片",
+        "采集典型病叶送检，确认病原是否为甜菜尾孢菌",
+        "若送检确认，发病初期优先轮换使用枯草芽孢杆菌/木霉菌，必要时用甲基托布津或多菌灵（每7-10天1次，连喷2-3次）",
+        "谨慎灌溉：土壤湿度44.8%偏低可小量滴灌，但须避免棚内湿度升至70%以上而诱发褐斑病",
+        "补拍清晰叶片图像供视觉Agent复诊，弥补无图像这一关键证据缺失"
+      ],
+      "runtime_seconds": 132.70679829999972,
+      "trace_id": "9ff26dfd8c884da387e7df213c7c256c",
+      "status": "ok",
+      "valid": true,
+      "timestamp": "2026-10-24T04:57:55.523235+00:00"
+    },
+    {
+      "seed": 43,
+      "config": "C0",
+      "case_index": 9,
+      "case_id": "conf_tomato_blight_cool_rain",
+      "group": "conflicting",
+      "difficulty": 3,
+      "expected_key_factors": [
+        "concentric_ring",
+        "low_temp",
+        "high_humidity",
+        "risk_priority"
+      ],
+      "ground_truth": "早疫病",
+      "decision": "疑似番茄早疫病（环境硬约束冲突，无法确诊）",
+      "confidence": 0.05,
+      "judge_mode": "deepseek",
+      "judge_runtime": {
+        "outcome": "success",
+        "judge_mode": "deepseek",
+        "provider": "opencode",
+        "endpoint_id": "https://opencode.ai/zen/go/v1",
+        "model": "deepseek-v4.1-flash",
+        "timeout_seconds": 60.0,
+        "sdk_max_retries": 2,
+        "config_sources": {
+          "api_key": "AGRI_AI_JUDGE_API_KEY",
+          "base_url": "AGRI_AI_JUDGE_BASE_URL",
+          "model": "AGRI_AI_JUDGE_MODEL",
+          "provider": "default",
+          "timeout_seconds": "default",
+          "max_retries": "default"
+        },
+        "retry_exhausted": false,
+        "token_usage": {
+          "judge_prompt_tokens": 4940,
+          "judge_completion_tokens": 3636,
+          "judge_total_tokens": 8576
+        }
+      },
+      "reasoning_trace": "KG症状完全匹配番茄早疫病同心轮纹病斑，温度29.3°C处于25-30°C适宜区间，但湿度61.8%远低于>80%硬约束，构成规则违反；同时天气Agent显示外部高温低湿，与现场“低温多雨”叙述冲突。硬约束违反使病理Agent高置信早疫病不能直接采信。叶霉病温度与湿度均不满足KG条件。专家间无实质共识，传感器读数正常但环境叙述矛盾。反事实均为空，无法验证替代排除。综合KG、专家与规则三方，倾向无法定论并建议采样复核，置信度下调至0.35。",
+      "summary": "DeepSeek Judge 结构化裁决：症状典型支持番茄早疫病，但当前湿度61.8%明显不满足KG硬约束>80%，且现场“低温多雨”与传感器/天气高温低湿矛盾，诊断存疑需采样复核。",
+      "action_plan": [
+        "立即采集病叶高清图像并送检病原（重点检测茄链格孢），避免仅凭症状定诊。",
+        "复核温室A温湿度传感器及近24小时历史数据，确认“低温多雨”描述与当前29.3°C/61.8%是否矛盾。",
+        "确诊前暂缓大面积喷药，仅对发病中心隔离、清除病叶并带出温室，减少潜在扩散。",
+        "若送检确认早疫病，按KG选用75%百菌清600倍液或64%杀毒矾500倍液，注意轮换用药并参考生态替代方案。",
+        "结合高温预警调整灌溉至清晨，避免叶面长时间结露，同时维持通风以降低棚内湿度波动。",
+        "24-48小时复查病斑扩展与新叶症状，若继续加重则升级人工专家复核并扩大采样。"
+      ],
+      "runtime_seconds": 185.84298430000035,
+      "trace_id": "5da395827a214c74967df7657e38b69d",
+      "status": "ok",
+      "valid": true,
+      "timestamp": "2026-10-24T04:57:55.524618+00:00"
+    },
+    {
+      "seed": 43,
+      "config": "C0",
+      "case_index": 10,
+      "case_id": "conf_cotton_wilt_dry_soil",
+      "group": "conflicting",
+      "difficulty": 3,
+      "expected_key_factors": [
+        "mottling",
+        "vascular_browning",
+        "soil_dry",
+        "risk_priority"
+      ],
+      "ground_truth": "黄萎病",
+      "decision": "无法定论",
+      "confidence": 0.8837,
+      "judge_mode": "deepseek",
+      "judge_runtime": {
+        "outcome": "success",
+        "judge_mode": "deepseek",
+        "provider": "opencode",
+        "endpoint_id": "https://opencode.ai/zen/go/v1",
+        "model": "deepseek-v4.1-flash",
+        "timeout_seconds": 60.0,
+        "sdk_max_retries": 2,
+        "config_sources": {
+          "api_key": "AGRI_AI_JUDGE_API_KEY",
+          "base_url": "AGRI_AI_JUDGE_BASE_URL",
+          "model": "AGRI_AI_JUDGE_MODEL",
+          "provider": "default",
+          "timeout_seconds": "default",
+          "max_retries": "default"
+        },
+        "retry_exhausted": false,
+        "token_usage": {
+          "judge_prompt_tokens": 4651,
+          "judge_completion_tokens": 5321,
+          "judge_total_tokens": 9972
+        }
+      },
+      "reasoning_trace": "先做KG一致性校验：黄萎病症状（叶脉间黄绿斑驳、维管束褐变）部分匹配，但硬约束要求温度20-25°C、湿度>70%，现场29.3°C/61.8%均违反，按规则否决该诊断。枯萎病湿度61.8%满足>60%，温度29.3°C略超25-28°C且症状仅维管束褐变部分匹配，证据不足。传感器读数正常，天气高温、土壤湿度44.8%偏低，提示干旱/高温胁迫需鉴别。各专家反事实为空，无法验证替代排除逻辑；无KG病害被完全集体忽略。综合专家权重与KG冲突，当前不足以确诊，建议补图、取样送检并小水灌溉后复核。",
+      "summary": "DeepSeek Judge 结构化裁决：现有证据不支持确诊棉花黄萎病：温湿度硬约束不匹配；枯萎病温度略超且症状证据不足，建议补图送检并调整水分管理。",
+      "action_plan": [
+        "暂不按黄萎病盲目用药；先隔离并标记疑似病株，补拍叶片正反面、茎秆维管束剖面图像。",
+        "采集病株与健株维管束组织送检，明确黄萎病/枯萎病病原。",
+        "复测土壤湿度传感器并查看24小时趋势；当前44.8%低于棉花适宜60-80%，结合高温预警宜清晨小水滴灌/沟灌。",
+        "避免大水漫灌和午后高温灌溉，防止湿度骤升；保持通风，记录温湿度。",
+        "送检前如需处置，可试用枯草芽孢杆菌等生物制剂灌根，并增施有机肥、钾肥增强抗性。",
+        "3-5天后复核症状扩展、维管束褐变和半边黄化情况；若成片加重立即请植保人员现场鉴定。"
+      ],
+      "runtime_seconds": 204.4770458999992,
+      "trace_id": "fbd100f7de134d53af6db84666376900",
+      "status": "ok",
+      "valid": true,
+      "timestamp": "2026-10-24T04:57:55.526788+00:00"
+    },
+    {
+      "seed": 43,
+      "config": "C0",
+      "case_index": 11,
+      "case_id": "conf_cotton_fusarium_cool_wet",
+      "group": "conflicting",
+      "difficulty": 3,
+      "expected_key_factors": [
+        "half_leaf_yellowing",
+        "wilt",
+        "low_temp",
+        "high_humidity",
+        "differential"
+      ],
+      "ground_truth": "枯萎病",
+      "decision": "无法定论：疑似棉花枯萎病/黄萎病，需采样送检与图像复核",
+      "confidence": 0.1837,
+      "judge_mode": "deepseek",
+      "judge_runtime": {
+        "outcome": "success",
+        "judge_mode": "deepseek",
+        "provider": "opencode",
+        "endpoint_id": "https://opencode.ai/zen/go/v1",
+        "model": "deepseek-v4.1-flash",
+        "timeout_seconds": 60.0,
+        "sdk_max_retries": 2,
+        "config_sources": {
+          "api_key": "AGRI_AI_JUDGE_API_KEY",
+          "base_url": "AGRI_AI_JUDGE_BASE_URL",
+          "model": "AGRI_AI_JUDGE_MODEL",
+          "provider": "default",
+          "timeout_seconds": "default",
+          "max_retries": "default"
+        },
+        "retry_exhausted": false,
+        "token_usage": {
+          "judge_prompt_tokens": 4631,
+          "judge_completion_tokens": 5242,
+          "judge_total_tokens": 9873
+        }
+      },
+      "reasoning_trace": "按KG逐项校验：病理Agent首选枯萎病，症状“半边黄化萎蔫”与KG部分吻合，湿度61.8%满足>60%，但温度29.3°C超出25-28°C硬约束，按规则该诊断应否决/存疑；黄萎病备选温湿度均不满足。传感器与天气显示高温、无降雨，与主诉“凉爽多雨”冲突；无图像，无法核对掌状斑驳等鉴别症状。专家共识不足，经济/生态仅辅助。因此不强行站队，输出无法定论，置信度降至0.28，需人审和采样送检。",
+      "summary": "DeepSeek Judge 结构化裁决：症状部分符合枯萎病，但温度硬约束不满足且现场“凉爽多雨”与实测高温无雨冲突，不能确诊，建议采样送检并补图复核。",
+      "action_plan": [
+        "对异常传感器复测，并查看最近 24 小时趋势",
+        "维持当前环境管理",
+        "密切观察症状变化，记录发展过程",
+        "如症状加重，建议取样送检确认病原",
+        "未来24小时降雨不足且温度偏高，建议灌溉",
+        "建议作业时间：清晨 5:00-7:00"
+      ],
+      "runtime_seconds": 157.47960710000007,
+      "trace_id": "b89da0163d21431d9b81f577033e670b",
+      "status": "ok",
+      "valid": true,
+      "timestamp": "2026-10-24T04:57:55.528622+00:00"
+    },
+    {
+      "seed": 43,
+      "config": "C0",
+      "case_index": 12,
+      "case_id": "conf_sugar_rootrot_dry",
+      "group": "conflicting",
+      "difficulty": 2,
+      "expected_key_factors": [
+        "root_rot",
+        "yellowing",
+        "soil_dry",
+        "risk_priority"
+      ],
+      "ground_truth": "根腐病",
+      "decision": "疑似甜菜根腐病（无法定论）",
+      "confidence": 0.05,
+      "judge_mode": "deepseek",
+      "judge_runtime": {
+        "outcome": "success",
+        "judge_mode": "deepseek",
+        "provider": "opencode",
+        "endpoint_id": "https://opencode.ai/zen/go/v1",
+        "model": "deepseek-v4.1-flash",
+        "timeout_seconds": 60.0,
+        "sdk_max_retries": 2,
+        "config_sources": {
+          "api_key": "AGRI_AI_JUDGE_API_KEY",
+          "base_url": "AGRI_AI_JUDGE_BASE_URL",
+          "model": "AGRI_AI_JUDGE_MODEL",
+          "provider": "default",
+          "timeout_seconds": "default",
+          "max_retries": "default"
+        },
+        "retry_exhausted": false,
+        "token_usage": {
+          "judge_prompt_tokens": 4315,
+          "judge_completion_tokens": 4981,
+          "judge_total_tokens": 9296
+        }
+      },
+      "reasoning_trace": "视觉缺失；病理Agent根腐病与KG症状部分匹配，但KG要求土壤过湿且20-28°C，现场空气29.3°C、湿度61.8%、土壤含水44.8%不支持，硬约束轻度冲突。其他专家多非诊断性，气象建议灌溉与根腐病防积水相反。KG中甜菜褐斑病未被任何专家提及，属集体忽略，需排除并下调置信度。",
+      "summary": "DeepSeek Judge 结构化裁决：症状支持甜菜根腐病，但现场干燥、空气温度偏高且KG湿度条件不满足，需采样确认并排除甜菜褐斑病。",
+      "action_plan": [
+        "立即挖取病株检查根部维管束和根颈，记录发病率并取样送检病原（镰刀菌、丝核菌等）。",
+        "复核叶片是否有圆形褐色病斑、灰白中心或红褐外圈，补拍叶片和根部图像，排除甜菜褐斑病。",
+        "暂缓大水灌溉，尤其避免根区积水；根据土壤含水44.8%可小水滴灌，保持通风降湿。",
+        "清除并销毁重病株，工具消毒，避免病残体和连作传播。",
+        "病原确认前不盲目灌根；若确诊根腐病，可选用登记药剂如恶霉灵或甲霜灵进行小面积试验。",
+        "24-48小时内复测温湿度、土壤水分和症状扩展，人工复核传感器读数。"
+      ],
+      "runtime_seconds": 198.84606370000074,
+      "trace_id": "c907815306814a65857cc589b2be1a24",
+      "status": "ok",
+      "valid": true,
+      "timestamp": "2026-10-24T04:57:55.530208+00:00"
+    },
+    {
+      "seed": 43,
+      "config": "C0",
+      "case_index": 13,
+      "case_id": "inc_cucumber_unspecified",
+      "group": "incomplete",
+      "difficulty": 1,
+      "expected_key_factors": [
+        "evidence_insufficient",
+        "info_request"
+      ],
+      "ground_truth": "证据不足",
+      "decision": "无法定论（未确认具体病害）",
+      "confidence": 0.89,
+      "judge_mode": "deepseek",
+      "judge_runtime": {
+        "outcome": "success",
+        "judge_mode": "deepseek",
+        "provider": "opencode",
+        "endpoint_id": "https://opencode.ai/zen/go/v1",
+        "model": "deepseek-v4.1-flash",
+        "timeout_seconds": 60.0,
+        "sdk_max_retries": 2,
+        "config_sources": {
+          "api_key": "AGRI_AI_JUDGE_API_KEY",
+          "base_url": "AGRI_AI_JUDGE_BASE_URL",
+          "model": "AGRI_AI_JUDGE_MODEL",
+          "provider": "default",
+          "timeout_seconds": "default",
+          "max_retries": "default"
+        },
+        "retry_exhausted": false,
+        "token_usage": {
+          "judge_prompt_tokens": 3722,
+          "judge_completion_tokens": 3997,
+          "judge_total_tokens": 7719
+        }
+      },
+      "reasoning_trace": "视觉缺失且症状未描述，病理Agent仅0.3且无具体病名；传感器读数正常但外部高温预警；气象与栽培建议灌溉管理。KG仅列黄瓜霜霉病，硬约束要求15-22°C、湿度>90%，当前27.3°C/67%均违反，故不能据此诊断；所有专家未提霜霉病构成集体忽略风险，但因硬约束不满足仅作复核提示。综合证据不足，最终无法定论，置信度下调，需人工补充症状/图像。",
+      "summary": "DeepSeek Judge 结构化裁决：目前缺少症状与图像证据，无法确认黄瓜具体病害；环境参数不满足KG中霜霉病硬约束，需补充症状并复核高温管理。",
+      "action_plan": [
+        "立即补充黄瓜叶片正反面高清图像与症状描述，重点记录黄化斑、霉层、多角形病斑及发展速度。",
+        "复核温室B传感器数据，尤其是温湿度与土壤水分；当前湿度67%明显低于霜霉病高湿条件。",
+        "针对外部高温黄色预警，检查通风、遮阳与灌溉，建议清晨5:00-7:00适量滴灌，避免中午高温浇水。",
+        "暂不盲目喷药，维持常规管理并记录24-48小时症状变化。",
+        "若出现叶片正面黄色褪绿斑、叶背灰黑色霉层等典型症状，按KG建议采样送检并请植保人员确认。",
+        "建议人工巡棚，必要时请植保专家现场诊断。"
+      ],
+      "runtime_seconds": 111.8534267999994,
+      "trace_id": "6dd6c59fd478440abd0c911dd5fabb91",
+      "status": "ok",
+      "valid": true,
+      "timestamp": "2026-10-24T04:57:55.532352+00:00"
+    },
+    {
+      "seed": 43,
+      "config": "C0",
+      "case_index": 14,
+      "case_id": "inc_tomato_vague_spot",
+      "group": "incomplete",
+      "difficulty": 3,
+      "expected_key_factors": [
+        "evidence_insufficient",
+        "info_request",
+        "differential"
+      ],
+      "ground_truth": "证据不足",
+      "decision": "无法定论（叶片斑点待查）",
+      "confidence": 0.8837,
+      "judge_mode": "deepseek",
+      "judge_runtime": {
+        "outcome": "success",
+        "judge_mode": "deepseek",
+        "provider": "opencode",
+        "endpoint_id": "https://opencode.ai/zen/go/v1",
+        "model": "deepseek-v4.1-flash",
+        "timeout_seconds": 60.0,
+        "sdk_max_retries": 2,
+        "config_sources": {
+          "api_key": "AGRI_AI_JUDGE_API_KEY",
+          "base_url": "AGRI_AI_JUDGE_BASE_URL",
+          "model": "AGRI_AI_JUDGE_MODEL",
+          "provider": "default",
+          "timeout_seconds": "default",
+          "max_retries": "default"
+        },
+        "retry_exhausted": false,
+        "token_usage": {
+          "judge_prompt_tokens": 4933,
+          "judge_completion_tokens": 3604,
+          "judge_total_tokens": 8537
+        }
+      },
+      "reasoning_trace": "逐一进行KG一致性校验：病理Agent首选早疫病，温度29.3°C落在25-30°C范围，但湿度61.8%明显低于KG硬约束>80%，且现场仅描述“叶片斑点”，缺少同心轮纹等典型症状，故早疫病诊断证据不足。叶霉病备选亦不满足温度20-25°C和湿度>85%硬约束。视觉Agent因无图像跳过，传感器读数正常但非疾病诊断，天气与气象Agent提示高温预警/灌溉需求，栽培、经济、生态Agent均未提供独立病害诊断。专家间无疾病共识，病理诊断与KG硬约束冲突。集体忽略检测：病理Agent已提及KG中的早疫病和叶霉病，故无集体忽略。综合三方证据，不能强行支持早疫病，置信度下调至0.3，需人审补采图像和送检。",
+      "summary": "DeepSeek Judge 结构化裁决：叶片斑点信息不足，环境湿度不符合早疫病/叶霉病高湿条件，暂无法定论，建议补采图像并送检。",
+      "action_plan": [
+        "采集病叶正反面高清图像，记录斑点形状、轮纹、霉层、病斑数量及发病部位。",
+        "复核温湿度传感器并查看24小时趋势，当前湿度61.8%偏低，需谨慎排除高湿病害。",
+        "暂不按早疫病大面积施药，先隔离标记病株并观察3-5天症状发展。",
+        "若出现同心轮纹状褐斑，再评估早疫病；若叶背出现灰紫色霉层，再评估叶霉病。",
+        "建议取样送检病原，明确茄链格孢或黄枝孢霉等病原。",
+        "结合高温预警做好遮阳通风，按土壤湿度44.8%适度滴灌，避免叶面长时间湿润。"
+      ],
+      "runtime_seconds": 128.5718625999998,
+      "trace_id": "3447f9dea1e74e00939c1f28c6f9df55",
+      "status": "ok",
+      "valid": true,
+      "timestamp": "2026-10-24T04:57:55.533784+00:00"
+    },
+    {
+      "seed": 43,
+      "config": "C0",
+      "case_index": 15,
+      "case_id": "inc_cotton_edge_yellow",
+      "group": "incomplete",
+      "difficulty": 1,
+      "expected_key_factors": [
+        "edge_yellowing",
+        "evidence_insufficient",
+        "info_request"
+      ],
+      "ground_truth": "证据不足",
+      "decision": "无法定论（非特异性叶缘黄化，需排除棉花黄萎病/枯萎病）",
+      "confidence": 0.64,
+      "judge_mode": "deepseek",
+      "judge_runtime": {
+        "outcome": "success",
+        "judge_mode": "deepseek",
+        "provider": "opencode",
+        "endpoint_id": "https://opencode.ai/zen/go/v1",
+        "model": "deepseek-v4.1-flash",
+        "timeout_seconds": 60.0,
+        "sdk_max_retries": 2,
+        "config_sources": {
+          "api_key": "AGRI_AI_JUDGE_API_KEY",
+          "base_url": "AGRI_AI_JUDGE_BASE_URL",
+          "model": "AGRI_AI_JUDGE_MODEL",
+          "provider": "default",
+          "timeout_seconds": "default",
+          "max_retries": "default"
+        },
+        "retry_exhausted": false,
+        "token_usage": {
+          "judge_prompt_tokens": 4061,
+          "judge_completion_tokens": 5664,
+          "judge_total_tokens": 9725
+        }
+      },
+      "reasoning_trace": "视觉缺图，病理仅称证据不足；传感器/气象/栽培均未发现严重异常。KG列出棉花黄萎病与枯萎病：前者需20-25°C且湿度>70%，当前29.3°C、61.8%均不满足；后者需25-28°C且湿度>60%，仅湿度满足、温度略高，且仅叶缘轻微黄化，非典型萎蔫/半边黄。所有专家及反事实均未提二者，属集体忽略，故下调置信度。结合土壤水分44.8%低于棉花适宜60-80%和外部高温，先按非特异性/环境胁迫处理并人工复核，不确诊。",
+      "summary": "DeepSeek Judge 结构化裁决：目前仅叶缘轻微黄化且传感器无异常，无法确诊棉花黄萎病/枯萎病，暂按环境/水分胁迫观察并人工复核。",
+      "action_plan": [
+        "补采叶片正反面、叶脉和茎基部清晰图像，人工检查是否出现叶脉间斑驳、维管束褐变或半边萎蔫。",
+        "连续3-5天记录叶缘黄化范围；若扩展、出现萎蔫或维管束褐变，取样送检棉花黄萎病/枯萎病。",
+        "结合土壤含水量44.8%低于棉花适宜60-80%及高温无雨，清晨5:00-7:00适量滴灌，避免大水漫灌和高温时段灌溉。",
+        "暂不按黄萎病喷施广谱杀菌剂；保持通风，避免棚内高湿，待复核后再决定是否用枯草芽孢杆菌/多抗霉素等。",
+        "复测土壤湿度传感器并查看24小时趋势，排除传感器偏差；同时关注外部高温预警对蒸腾和水分的影响。",
+        "维持常规栽培管理，避免不必要农药和人工投入；如确诊土传病害，再评估经济阈值和生态友好药剂。"
+      ],
+      "runtime_seconds": 270.50212589999956,
+      "trace_id": "92eaaffc15bb48d49606f6693b756869",
+      "status": "ok",
+      "valid": true,
+      "timestamp": "2026-10-24T04:57:55.535287+00:00"
+    },
+    {
+      "seed": 43,
+      "config": "C0",
+      "case_index": 16,
+      "case_id": "inc_sugar_beet_weak",
+      "group": "incomplete",
+      "difficulty": 2,
+      "expected_key_factors": [
+        "evidence_insufficient",
+        "info_request",
+        "root_check"
+      ],
+      "ground_truth": "证据不足",
+      "decision": "无法定论（疑似甜菜根腐病，需根部检查/取样；需排查甜菜褐斑病）",
+      "confidence": 0.7037,
+      "judge_mode": "deepseek",
+      "judge_runtime": {
+        "outcome": "success",
+        "judge_mode": "deepseek",
+        "provider": "opencode",
+        "endpoint_id": "https://opencode.ai/zen/go/v1",
+        "model": "deepseek-v4.1-flash",
+        "timeout_seconds": 60.0,
+        "sdk_max_retries": 2,
+        "config_sources": {
+          "api_key": "AGRI_AI_JUDGE_API_KEY",
+          "base_url": "AGRI_AI_JUDGE_BASE_URL",
+          "model": "AGRI_AI_JUDGE_MODEL",
+          "provider": "default",
+          "timeout_seconds": "default",
+          "max_retries": "default"
+        },
+        "retry_exhausted": false,
+        "token_usage": {
+          "judge_prompt_tokens": 4293,
+          "judge_completion_tokens": 5598,
+          "judge_total_tokens": 9891
+        }
+      },
+      "reasoning_trace": "视觉缺失，病理Agent仅凭长势弱诊断甜菜根腐病且matched_symptoms为空。KG硬约束要求根腐病温度20-28℃，当前29.3℃超限；湿度61.8%、土壤湿度44.8%不支持土壤过湿，故根腐病不能确诊。甜菜褐斑病需湿度>70%，当前61.8%不满足但温度符合，且所有专家未提及，属集体忽略，需叶部排查。传感器正常、天气高温支持水分管理，经济生态不改变诊断。综合下调置信度，输出无法定论并建议根部检查/取样。",
+      "summary": "DeepSeek Judge 结构化裁决：现有数据不足以确诊，病理Agent的甜菜根腐病诊断与KG温度/湿度硬约束冲突且无根部症状证据，建议挖根检查并取样送检，同时排查甜菜褐斑病。",
+      "action_plan": [
+        "对异常传感器复测，并查看最近 24 小时趋势",
+        "维持当前环境管理",
+        "密切观察症状变化，记录发展过程",
+        "如症状加重，建议取样送检确认病原",
+        "未来24小时降雨不足且温度偏高，建议灌溉",
+        "建议作业时间：清晨 5:00-7:00"
+      ],
+      "runtime_seconds": 266.19004959999984,
+      "trace_id": "3de0857ee6e04e2cb3382fcad2c3fdb9",
+      "status": "ok",
+      "valid": true,
+      "timestamp": "2026-10-24T04:57:55.536741+00:00"
+    },
+    {
+      "seed": 43,
+      "config": "C0",
+      "case_index": 17,
+      "case_id": "inc_tomato_yellow_no_cue",
+      "group": "incomplete",
+      "difficulty": 3,
+      "expected_key_factors": [
+        "yellowing",
+        "evidence_insufficient",
+        "info_request"
+      ],
+      "ground_truth": "证据不足",
+      "decision": "无法定论（倾向非侵染性生理性黄化）",
+      "confidence": 0.9,
+      "judge_mode": "deepseek",
+      "judge_runtime": {
+        "outcome": "success",
+        "judge_mode": "deepseek",
+        "provider": "opencode",
+        "endpoint_id": "https://opencode.ai/zen/go/v1",
+        "model": "deepseek-v4.1-flash",
+        "timeout_seconds": 60.0,
+        "sdk_max_retries": 2,
+        "config_sources": {
+          "api_key": "AGRI_AI_JUDGE_API_KEY",
+          "base_url": "AGRI_AI_JUDGE_BASE_URL",
+          "model": "AGRI_AI_JUDGE_MODEL",
+          "provider": "default",
+          "timeout_seconds": "default",
+          "max_retries": "default"
+        },
+        "retry_exhausted": false,
+        "token_usage": {
+          "judge_prompt_tokens": 4915,
+          "judge_completion_tokens": 3838,
+          "judge_total_tokens": 8753
+        }
+      },
+      "reasoning_trace": "视觉缺失，传感器正常但土湿44.8%偏低、温度29.3°C偏高。病理Agent首选叶霉病，但现场叶背无霉层，且KG硬约束要求湿度>85%、温度20-25°C，当前均不满足；早疫病要求同心轮纹和湿度>80%，也不符。其余专家多给管理/灌溉/经济生态建议，未提供侵染病证据。综合倾向生理性黄化待排，置信度下调，需补图像与检测。",
+      "summary": "DeepSeek Judge 结构化裁决：现有证据不支持叶霉病或早疫病，番茄黄化更可能与高温、土壤偏干或营养生理因素有关，需补采图像和检测后定论。",
+      "action_plan": [
+        "补采叶片正面、背面及整株高清图像，重点确认有无霉层、轮纹、叶脉间黄化或边缘焦枯。",
+        "记录黄化分布：新叶/老叶、上部/下部、整片/脉间，并检查根系和茎基部，排查水分与营养障碍。",
+        "复核温室温湿度与土壤水分趋势；当前湿度61.8%偏低、温度29.3°C偏高，先排查高温热害和水分胁迫。",
+        "暂不按叶霉病或早疫病喷药，避免在诊断未成立时使用多菌灵、百菌清等杀菌剂。",
+        "采用滴灌小水补湿，避开中午高温时段，加强通风降温，防止土壤湿度剧烈波动。",
+        "若症状继续加重，取样送检病原，并检测土壤EC/pH及缺素情况，必要时请栽培与病理专家复核。"
+      ],
+      "runtime_seconds": 139.25752629999988,
+      "trace_id": "a4b7306e960e45b6be9167fcff855bb2",
+      "status": "ok",
+      "valid": true,
+      "timestamp": "2026-10-24T04:57:55.538452+00:00"
+    },
+    {
+      "seed": 43,
+      "config": "C0",
+      "case_index": 18,
+      "case_id": "inc_cucumber_mold_unclear_shape",
+      "group": "incomplete",
+      "difficulty": 3,
+      "expected_key_factors": [
+        "backside_mold",
+        "angular_lesion",
+        "evidence_insufficient",
+        "info_request"
+      ],
+      "ground_truth": "证据不足",
+      "decision": "黄瓜霜霉病（疑似，未确诊）",
+      "confidence": 0.05,
+      "judge_mode": "deepseek",
+      "judge_runtime": {
+        "outcome": "success",
+        "judge_mode": "deepseek",
+        "provider": "opencode",
+        "endpoint_id": "https://opencode.ai/zen/go/v1",
+        "model": "deepseek-v4.1-flash",
+        "timeout_seconds": 60.0,
+        "sdk_max_retries": 2,
+        "config_sources": {
+          "api_key": "AGRI_AI_JUDGE_API_KEY",
+          "base_url": "AGRI_AI_JUDGE_BASE_URL",
+          "model": "AGRI_AI_JUDGE_MODEL",
+          "provider": "default",
+          "timeout_seconds": "default",
+          "max_retries": "default"
+        },
+        "retry_exhausted": false,
+        "token_usage": {
+          "judge_prompt_tokens": 4135,
+          "judge_completion_tokens": 4404,
+          "judge_total_tokens": 8539
+        }
+      },
+      "reasoning_trace": "视觉缺失，仅有叶背霉层；病理Agent诊断霜霉病，但KG硬约束要求15-22°C且湿度>90%，现场27.3°C/67%RH均违反，外部高温预警亦不支持。其余Agent多提供环境、管理、经济信息，无独立病原证据。依据KG、专家、规则三方，不能确诊霜霉病，仅保留疑似，置信度下调，建议补图/送检并复核传感器。",
+      "summary": "DeepSeek Judge 结构化裁决：仅有叶背霉层且病斑不清，KG硬约束要求的低温高湿条件不满足，暂不能确诊霜霉病，建议补拍图像并送检。",
+      "action_plan": [
+        "立即补拍叶片正面、背面高清图及病斑微距图，必要时取样送检病原。",
+        "复核棚内温湿度传感器并查看24小时趋势；当前27.3°C、67%RH与霜霉病15-22°C、>90%RH不符。",
+        "检查病斑是否受叶脉限制呈多角形、叶片正面是否有黄色褪绿斑，并统计病叶率。",
+        "暂缓全棚喷药；标记并隔离病叶，若确认霜霉病再按KG选用霜脲·锰锌或烯酰吗啉，注意叶背喷施。",
+        "采用膜下滴灌或清晨灌溉，避免叶面结露，兼顾高温时段遮阳通风。",
+        "3-5天复评；若症状扩展或出现典型多角形病斑，升级处置并采样确认。"
+      ],
+      "runtime_seconds": 235.07932510000046,
+      "trace_id": "49c4b37770344607bccd6d31fb0fc73c",
+      "status": "ok",
+      "valid": true,
+      "timestamp": "2026-10-24T04:57:55.540196+00:00"
+    },
+    {
+      "seed": 43,
+      "config": "C0",
+      "case_index": 19,
+      "case_id": "ms_cucumber_downy_irrigate",
+      "group": "multi_step",
+      "difficulty": 2,
+      "expected_key_factors": [
+        "backside_mold",
+        "angular_lesion",
+        "leaf_dew",
+        "delay_irrigation"
+      ],
+      "ground_truth": "霜霉病",
+      "decision": "无法定论（高度疑似黄瓜霜霉病，但温湿度硬约束不符，需复核）",
+      "confidence": 0.74,
+      "judge_mode": "deepseek",
+      "judge_runtime": {
+        "outcome": "success",
+        "judge_mode": "deepseek",
+        "provider": "opencode",
+        "endpoint_id": "https://opencode.ai/zen/go/v1",
+        "model": "deepseek-v4.1-flash",
+        "timeout_seconds": 60.0,
+        "sdk_max_retries": 2,
+        "config_sources": {
+          "api_key": "AGRI_AI_JUDGE_API_KEY",
+          "base_url": "AGRI_AI_JUDGE_BASE_URL",
+          "model": "AGRI_AI_JUDGE_MODEL",
+          "provider": "default",
+          "timeout_seconds": "default",
+          "max_retries": "default"
+        },
+        "retry_exhausted": false,
+        "token_usage": {
+          "judge_prompt_tokens": 4134,
+          "judge_completion_tokens": 4821,
+          "judge_total_tokens": 8955
+        }
+      },
+      "reasoning_trace": "按KG核对：叶背灰黑霉层、多角形病斑与霜霉病症状三元组匹配，但硬约束要求温度15-22°C、湿度>90%，现场27.3°C、67%均违反，故病理Agent的0.9置信度必须大幅下调。传感器与气象支持土壤偏干、高温需补水，但与霜霉病需降湿防结露存在张力。视觉缺图，无法客观验证。专家共识仅在结瓜期需水和监测，疾病诊断证据不足。综合KG、规则与专家加权，最终无法确诊，置信度0.35，需人工复核和采样。",
+      "summary": "DeepSeek Judge 结构化裁决：现场症状高度提示黄瓜霜霉病，但KG硬约束要求15-22°C且湿度>90%，当前27.3°C/67%不满足且无图像，故不能确诊；结瓜期可清晨膜下滴灌小水，灌后通风降湿并尽快采样复核。",
+      "action_plan": [
+        "今日可灌溉但避免喷淋或大水漫灌，采用膜下滴灌，清晨5:00-7:00小水补至土壤湿度约60-70%。",
+        "灌溉后及时通风排湿，避免叶面结露和夜间高湿，兼顾外部高温预警下的降温管理。",
+        "立即采集叶背病斑高清图像并送检，重点复核黄瓜霜霉病，同时排除其他叶斑/霉污类病害。",
+        "清除下部重病叶并带出温室，操作后对工具和手部消毒，减少病原扩散。",
+        "若采样确认霜霉病，按KG选用72%霜脲·锰锌600倍液或69%烯酰吗啉800倍液，重点喷叶背，5-7天一次并注意安全间隔。",
+        "持续监测温湿度、土壤水分和病斑扩展，若症状加重或出现生长点感染，立即升级人工复核。"
+      ],
+      "runtime_seconds": 150.35815300000013,
+      "trace_id": "8fe7e677573a4cc788ff5b049ab6ed54",
+      "status": "ok",
+      "valid": true,
+      "timestamp": "2026-10-24T04:57:55.542492+00:00"
+    },
+    {
+      "seed": 43,
+      "config": "C0",
+      "case_index": 20,
+      "case_id": "ms_cotton_wilt_irrigate",
+      "group": "multi_step",
+      "difficulty": 3,
+      "expected_key_factors": [
+        "mottling",
+        "vascular_browning",
+        "soil_dry",
+        "irrigation_decision",
+        "risk_priority"
+      ],
+      "ground_truth": "黄萎病",
+      "decision": "无法定论（疑似棉花黄萎病，需排除棉花枯萎病）",
+      "confidence": 0.8837,
+      "judge_mode": "deepseek",
+      "judge_runtime": {
+        "outcome": "success",
+        "judge_mode": "deepseek",
+        "provider": "opencode",
+        "endpoint_id": "https://opencode.ai/zen/go/v1",
+        "model": "deepseek-v4.1-flash",
+        "timeout_seconds": 60.0,
+        "sdk_max_retries": 2,
+        "config_sources": {
+          "api_key": "AGRI_AI_JUDGE_API_KEY",
+          "base_url": "AGRI_AI_JUDGE_BASE_URL",
+          "model": "AGRI_AI_JUDGE_MODEL",
+          "provider": "default",
+          "timeout_seconds": "default",
+          "max_retries": "default"
+        },
+        "retry_exhausted": false,
+        "token_usage": {
+          "judge_prompt_tokens": 4651,
+          "judge_completion_tokens": 4352,
+          "judge_total_tokens": 9003
+        }
+      },
+      "reasoning_trace": "病理Agent首选棉花黄萎病，KG症状（叶脉间黄绿斑驳、维管束褐变）有直接支持；但KG硬约束要求温度20-25°C、湿度>70%，当前29.3°C、61.8%明显不满足，按规则应否决该诊断的高置信结论。枯萎病温度25-28°C也略超上限，但湿度>60%满足，且症状不能完全排除。传感器整体正常，但土壤湿度44.8低于栽培适宜60-80，且L2对soil_moisture有重建误差，需复测。气象与栽培均支持花铃期补水，但黄萎病KG提示大水漫灌后发病重，故灌溉决策应改为小水/滴灌。综合专家与KG对立，降低置信度并建议采样复核，不强行定论。",
+      "summary": "DeepSeek Judge 结构化裁决：症状与KG中棉花黄萎病部分吻合，但当前高温低湿违反其硬约束；今日可小水/滴灌，不宜大水漫灌，并需取样复核病原。",
+      "action_plan": [
+        "今日可灌溉，但采用滴灌或小水沟灌，避开中午高温，建议清晨5:00-7:00进行，避免大水漫灌和根际积水。",
+        "立即采集典型病株下部叶片及维管束样本送检，重点鉴别棉花黄萎病与棉花枯萎病，并补充叶片症状图像。",
+        "复测土壤湿度传感器并手测多点土壤水分，结合L2对soil_moisture的重建误差判断是否真缺水。",
+        "灌溉后加强通风降湿，避免叶面长期结露和根际高湿，持续记录黄化、斑驳和维管束褐变发展。",
+        "在病原确认前不盲目使用高毒化学农药；如确需预防，可评估枯草芽孢杆菌或多抗霉素等KG推荐方案。",
+        "若出现半边萎蔫、成片枯死或症状快速加重，升级为高风险并联系植保专家现场诊断。"
+      ],
+      "runtime_seconds": 202.09942330000013,
+      "trace_id": "da44515e3f6f4ae3b5ded16859d96125",
+      "status": "ok",
+      "valid": true,
+      "timestamp": "2026-10-24T04:57:55.544774+00:00"
+    },
+    {
+      "seed": 43,
+      "config": "C0",
+      "case_index": 21,
+      "case_id": "ms_sugar_spot_irrigate_cold",
+      "group": "multi_step",
+      "difficulty": 3,
+      "expected_key_factors": [
+        "circular_spot",
+        "brown_spot",
+        "low_temp",
+        "irrigation_decision",
+        "risk_priority"
+      ],
+      "ground_truth": "褐斑病",
+      "decision": "疑似甜菜褐斑病（需复核，不能确诊）",
+      "confidence": 0.89,
+      "judge_mode": "deepseek",
+      "judge_runtime": {
+        "outcome": "success",
+        "judge_mode": "deepseek",
+        "provider": "opencode",
+        "endpoint_id": "https://opencode.ai/zen/go/v1",
+        "model": "deepseek-v4.1-flash",
+        "timeout_seconds": 60.0,
+        "sdk_max_retries": 2,
+        "config_sources": {
+          "api_key": "AGRI_AI_JUDGE_API_KEY",
+          "base_url": "AGRI_AI_JUDGE_BASE_URL",
+          "model": "AGRI_AI_JUDGE_MODEL",
+          "provider": "default",
+          "timeout_seconds": "default",
+          "max_retries": "default"
+        },
+        "retry_exhausted": false,
+        "token_usage": {
+          "judge_prompt_tokens": 4459,
+          "judge_completion_tokens": 6301,
+          "judge_total_tokens": 10760
+        }
+      },
+      "reasoning_trace": "KG显示甜菜褐斑病需25-30°C且湿度>70%，当前温度29.3°C满足，但湿度61.8%未达阈值，构成硬约束违反；症状‘褐斑增多’又支持该病，故只能判疑似并下调置信度。视觉无图像，病理诊断证据打折；传感器/天气/气象提示棚内读数正常、外部高温无雨、土壤湿度44.8%偏干，支持清晨滴灌补水，但应避免喷灌增湿。反事实均为空，无法核对替代诊断，属证据缺口。KG中甜菜根腐病无人提及，根腐需土壤过湿，当前偏干且温度略高，可能性低但需检查根部排除。综合KG、专家和规则，不能确诊，建议复核湿度/图像并送检。",
+      "summary": "DeepSeek Judge 结构化裁决：甜菜褐斑病症状与温度部分支持，但湿度未达KG硬约束且缺图像，建议复核湿度/症状并送检，同时采用滴灌补水而非喷灌。",
+      "action_plan": [
+        "立即复测棚内温湿度与土壤湿度，连续记录24小时，核对‘低温多湿’描述与实测29.3°C/61.8%的矛盾。",
+        "采集病叶高清图像并取样送检甜菜尾孢菌，同时检查根部是否变褐腐烂，排除甜菜根腐病。",
+        "若需灌溉，采用滴灌或根部灌溉，清晨5:00-7:00进行，每次约10-15 m³/亩，避免喷灌、叶面淋水和积水。",
+        "加强通风与遮阳降温，避免棚温持续偏高，灌后及时降湿，减少叶面结露时间。",
+        "确诊褐斑病初期可选用甲基托布津或多菌灵，但按生态建议轮换枯草芽孢杆菌/木霉菌，并注意安全间隔。",
+        "持续监测病斑扩展和植株萎蔫情况，若病斑密集连片或根部变褐，立即请农技人员现场诊断并升级处置。"
+      ],
+      "runtime_seconds": 219.3562823000002,
+      "trace_id": "73bc6e599909426495580e8327dc7540",
+      "status": "ok",
+      "valid": true,
+      "timestamp": "2026-10-24T04:57:55.546732+00:00"
+    },
+    {
+      "seed": 43,
+      "config": "C0",
+      "case_index": 22,
+      "case_id": "ms_tomato_mold_ventilate",
+      "group": "multi_step",
+      "difficulty": 2,
+      "expected_key_factors": [
+        "backside_mold",
+        "leaf_curl",
+        "poor_ventilation",
+        "action_plan"
+      ],
+      "ground_truth": "叶霉病",
+      "decision": "无法定论（高度疑似番茄叶霉病，但环境硬约束不满足；需排除番茄早疫病）",
+      "confidence": 0.8837,
+      "judge_mode": "deepseek",
+      "judge_runtime": {
+        "outcome": "success",
+        "judge_mode": "deepseek",
+        "provider": "opencode",
+        "endpoint_id": "https://opencode.ai/zen/go/v1",
+        "model": "deepseek-v4.1-flash",
+        "timeout_seconds": 60.0,
+        "sdk_max_retries": 2,
+        "config_sources": {
+          "api_key": "AGRI_AI_JUDGE_API_KEY",
+          "base_url": "AGRI_AI_JUDGE_BASE_URL",
+          "model": "AGRI_AI_JUDGE_MODEL",
+          "provider": "default",
+          "timeout_seconds": "default",
+          "max_retries": "default"
+        },
+        "retry_exhausted": false,
+        "token_usage": {
+          "judge_prompt_tokens": 4527,
+          "judge_completion_tokens": 5676,
+          "judge_total_tokens": 10203
+        }
+      },
+      "reasoning_trace": "视觉缺失，病理Agent虽症状与KG叶霉病匹配，但当前29.3℃、61.8%RH违反叶霉病20-25℃及>85%RH硬约束，按规则否决；早疫病温度满足但湿度不满足，且所有专家未提及，构成集体忽略。传感器正常、天气高温、灌溉建议与通风降湿需协调。综合KG、专家与规则，证据不足，不作单病确诊，置信度下调，需人工复核并补充叶面微气候、图像和送检证据。",
+      "summary": "DeepSeek Judge 结构化裁决：症状高度疑似番茄叶霉病，但当前温湿度违反KG硬约束且早疫病被集体忽略，只能判为无法定论并建议送检复核。",
+      "action_plan": [
+        "采集病叶正反面高清图像及叶背霉层样本送检，明确病原后再决定用药。",
+        "在冠层和叶面布置温湿度记录，连续监测24-48小时，重点核实叶面湿度是否>85%、温度是否处于20-25℃。",
+        "立即改善通风、合理整枝并摘除下部病老叶，降低局部微环境湿度，避免叶面结露。",
+        "暂缓仅凭症状喷施多菌灵或甲基托布津；若镜检/送检确认叶霉病，再按KG方案轮换用药并注意安全间隔期。",
+        "采用滴灌，避免傍晚灌溉和叶面喷水；结合外部高温预警，可在清晨适量灌溉，避免中午高温作业。",
+        "同步监测番茄早疫病典型症状（同心轮纹斑、茎部深褐病斑），因KG存在但所有专家均未提及。"
+      ],
+      "runtime_seconds": 166.54206590000013,
+      "trace_id": "a7a1c07e6fcd475abf79f55ee30a1938",
+      "status": "ok",
+      "valid": true,
+      "timestamp": "2026-10-24T04:57:55.548574+00:00"
+    },
+    {
+      "seed": 43,
+      "config": "C0",
+      "case_index": 23,
+      "case_id": "ms_tomato_blight_stem",
+      "group": "multi_step",
+      "difficulty": 3,
+      "expected_key_factors": [
+        "concentric_ring",
+        "stem_lesion",
+        "fruit_stage",
+        "action_plan"
+      ],
+      "ground_truth": "早疫病",
+      "decision": "番茄早疫病（高度疑似，环境证据冲突，需复核）",
+      "confidence": 0.05,
+      "judge_mode": "deepseek",
+      "judge_runtime": {
+        "outcome": "success",
+        "judge_mode": "deepseek",
+        "provider": "opencode",
+        "endpoint_id": "https://opencode.ai/zen/go/v1",
+        "model": "deepseek-v4.1-flash",
+        "timeout_seconds": 60.0,
+        "sdk_max_retries": 2,
+        "config_sources": {
+          "api_key": "AGRI_AI_JUDGE_API_KEY",
+          "base_url": "AGRI_AI_JUDGE_BASE_URL",
+          "model": "AGRI_AI_JUDGE_MODEL",
+          "provider": "default",
+          "timeout_seconds": "default",
+          "max_retries": "default"
+        },
+        "retry_exhausted": false,
+        "token_usage": {
+          "judge_prompt_tokens": 4942,
+          "judge_completion_tokens": 6052,
+          "judge_total_tokens": 10994
+        }
+      },
+      "reasoning_trace": "KG中番茄早疫病症状与现场同心轮纹、茎部病斑高度吻合，温度29.3℃在25-30℃内；但湿度61.8%显著低于>80%硬约束，按规则需降低置信度并转人工复核。叶霉病温湿度均不符且仅为低分替代。视觉缺失、无专家反事实，防治顺序应先清除病残体并调控湿度/通风，再选保护性杀菌剂或生物制剂，7天轮换，注意安全间隔。",
+      "summary": "DeepSeek Judge 结构化裁决：症状高度疑似番茄早疫病，但当前湿度61.8%低于KG硬约束>80%，建议立即取样复核并按早疫病进行病残体清除和有序用药。",
+      "action_plan": [
+        "立即取样送检病叶、病茎，请植保人员复核是否为茄链格孢，并解释湿度61.8%与KG>80%不符的原因。",
+        "先清除病叶、病茎和病果，装袋带出棚外销毁，操作后洗手并消毒工具。",
+        "防治顺序：农业清除与通风降湿、避免叶面结露→生物保护剂（枯草芽孢杆菌或木霉菌）→发病初期化学保护剂（75%百菌清600倍或64%杀毒矾500倍，按标签）。",
+        "化学防治每7天一次、连喷3-4次，轮换不同机制药剂，采收前严格遵守安全间隔期；生态上可轮换波尔多液或枯草芽孢杆菌。",
+        "灌溉安排在清晨5:00-7:00，采用滴灌，避免大水漫灌和傍晚喷药，降低叶面持续湿润。",
+        "连续7天记录病斑扩展、温湿度和用药反应；若茎部病斑快速扩大或果实出现病斑，立即升级防控并复诊。"
+      ],
+      "runtime_seconds": 229.83793609999975,
+      "trace_id": "8bc929f884f14c91ad290e1e93c0736b",
+      "status": "ok",
+      "valid": true,
+      "timestamp": "2026-10-24T04:57:55.550372+00:00"
+    },
+    {
+      "seed": 43,
+      "config": "C0",
+      "case_index": 24,
+      "case_id": "ms_cotton_fusarium_quarantine",
+      "group": "multi_step",
+      "difficulty": 3,
+      "expected_key_factors": [
+        "half_leaf_yellowing",
+        "wilt",
+        "quarantine",
+        "irrigation_decision"
+      ],
+      "ground_truth": "枯萎病",
+      "decision": "棉花枯萎病（尖孢镰刀菌，温室A已确诊；相邻健康地块可正常灌溉但需水路隔离）",
+      "confidence": 0.9,
+      "judge_mode": "deepseek",
+      "judge_runtime": {
+        "outcome": "success",
+        "judge_mode": "deepseek",
+        "provider": "opencode",
+        "endpoint_id": "https://opencode.ai/zen/go/v1",
+        "model": "deepseek-v4.1-flash",
+        "timeout_seconds": 60.0,
+        "sdk_max_retries": 2,
+        "config_sources": {
+          "api_key": "AGRI_AI_JUDGE_API_KEY",
+          "base_url": "AGRI_AI_JUDGE_BASE_URL",
+          "model": "AGRI_AI_JUDGE_MODEL",
+          "provider": "default",
+          "timeout_seconds": "default",
+          "max_retries": "default"
+        },
+        "retry_exhausted": false,
+        "token_usage": {
+          "judge_prompt_tokens": 4631,
+          "judge_completion_tokens": 3907,
+          "judge_total_tokens": 8538
+        }
+      },
+      "reasoning_trace": "KG症状三元组（半边叶片发黄、自下而上枯萎、维管束变褐）与现场确诊一致，湿度61.8%满足>60%硬约束，温度29.3℃仅高于适宜上限28℃约1.3℃，属轻微越界，故判为部分匹配而非否决；竞争诊断黄萎病同时违反温度20-25℃与湿度>70%两条硬约束，予以排除。病理Agent证据最充分（9分），栽培与气象Agent支持灌溉需求，但未考虑病菌随水传播风险，需补正。全部专家反事实字段为空，缺乏替代诊断排除论证，且无图像佐证，故将0.85下调至0.74并建议人工复核。",
+      "summary": "DeepSeek Judge 结构化裁决：温室A棉花枯萎病诊断与KG症状/湿度条件基本吻合，仅温度略超适宜上限；相邻健康地块可以浇水，但必须与病田水路物理隔离、禁止串灌漫灌，改用滴灌并清晨作业。",
+      "action_plan": [
+        "相邻健康地块可以正常灌溉，但必须使用独立滴灌带/独立水路，严禁病田回水或漫灌串流进入健康地块。",
+        "灌溉安排在清晨5:00-7:00，参考蒸散13.9mm，单次20-30 m³/亩，避免大水漫灌造成土壤过湿与病菌扩散。",
+        "温室A病田暂停大水灌溉，仅对发病中心用恶霉灵或咪鲜胺灌根，拔除病株带出棚外销毁，并对病穴土壤消毒。",
+        "农机具、水管、鞋具在病田与健康田之间消毒隔离，作业顺序坚持“先健康田、后病田”。",
+        "当前土壤湿度44.8%低于棉花适宜60-80%田间持水量，需复测并查看24小时趋势；同时核查传感器棚号标注异常（记录为gh-a tomato，与棉花不符）。",
+        "高温预警（36°C）期间加强通风降温，避免高温高湿叠加；7天后巡查健康地块，一旦出现半边黄化立即取样送检。"
+      ],
+      "runtime_seconds": 142.21965640000053,
+      "trace_id": "edf529cfcefb421abe53d6fc8e7819c0",
+      "status": "ok",
+      "valid": true,
+      "timestamp": "2026-10-24T04:57:55.552255+00:00"
+    },
+    {
+      "seed": 43,
+      "config": "C2",
+      "case_index": 1,
+      "case_id": "amb_tomato_mold_blind_leaf",
+      "group": "ambiguity",
+      "difficulty": 2,
+      "expected_key_factors": [
+        "backside_mold",
+        "yellow_spot",
+        "high_humidity",
+        "differential"
+      ],
+      "ground_truth": "叶霉病",
+      "decision": "疑似番茄叶霉病（Fulvia fulva），需排除番茄早疫病，暂无法定论",
+      "confidence": 0.3337,
+      "judge_mode": "deepseek",
+      "judge_runtime": {
+        "outcome": "success",
+        "judge_mode": "deepseek",
+        "provider": "opencode",
+        "endpoint_id": "https://opencode.ai/zen/go/v1",
+        "model": "deepseek-v4.1-flash",
+        "timeout_seconds": 60.0,
+        "sdk_max_retries": 2,
+        "config_sources": {
+          "api_key": "AGRI_AI_JUDGE_API_KEY",
+          "base_url": "AGRI_AI_JUDGE_BASE_URL",
+          "model": "AGRI_AI_JUDGE_MODEL",
+          "provider": "default",
+          "timeout_seconds": "default",
+          "max_retries": "default"
+        },
+        "retry_exhausted": false,
+        "token_usage": {
+          "judge_prompt_tokens": 5415,
+          "judge_completion_tokens": 4992,
+          "judge_total_tokens": 10407
+        }
+      },
+      "reasoning_trace": "KG校验：叶霉病两条典型症状与现场描述完全匹配(+)，但其诱发条件温度20-25℃、湿度>85%被实测29.2℃/62%双双击穿；早疫病温度25-30℃匹配、湿度>80%同样不满足。按硬约束规则，叶霉病应被直接否决，然早疫病亦不达标，加之症状缺乏同心轮纹，故不站队单一方，改为\"疑似叶霉病＋需复核\"。病理Agent置信度0.85下调，主因是其environment_issues为空、未自检环境冲突。气象Agent灌溉建议在高温低湿下合理，但棚内灌溉会抬升夜间湿度，构成叶霉病诱发风险，已并入通风降湿建议。KG中褐斑病、黑斑病全体专家及反事实均未提及，记为集体忽略并下调置信度。",
+      "summary": "DeepSeek Judge 结构化裁决：症状学（叶正面淡黄斑＋叶背灰紫霉层）与KG中番茄叶霉病完全吻合，但实测29.2℃/62%RH同时违反叶霉病温度(20-25℃)与湿度(>85%)硬约束，早疫病温度匹配而湿度同样不足，须补夜间湿度与图像后定论。",
+      "action_plan": [
+        "立即取样送检并补拍高清近景（叶正面病斑）与叶背微距照片，交视觉Agent复核霉层颜色与轮纹特征",
+        "用独立温湿度记录仪核查夜间20:00-08:00棚内湿度与叶面结露时长，白天62%不代表夜间不达85%",
+        "确诊前暂缓全棚化学防治；若病情扩展快，可先用以百菌清为代表的保护性药剂应急兼治，避免单一多菌灵",
+        "加强通风降湿、合理密植，及时摘除下部病叶老叶并带出棚外销毁，阻断由下向上蔓延",
+        "灌溉改为清晨滴灌（5:00-7:00），严禁傍晚大水漫灌，避免夜间棚内湿度叠加抬升",
+        "3-5天后复评：出现同心轮纹状病斑→倾向早疫病；叶背霉层扩大且自下而上蔓延→确认叶霉病；同时排除褐斑病/黑斑病"
+      ],
+      "runtime_seconds": 142.67799019999984,
+      "trace_id": "e0fcddcb705744a58813655d6e4adefa",
+      "status": "ok",
+      "valid": true,
+      "timestamp": "2026-10-24T05:30:35.713280+00:00"
+    },
+    {
+      "seed": 43,
+      "config": "C2",
+      "case_index": 2,
+      "case_id": "amb_tomato_ring_before_gray",
+      "group": "ambiguity",
+      "difficulty": 2,
+      "expected_key_factors": [
+        "concentric_ring",
+        "brown_spot",
+        "gray_white_center",
+        "differential"
+      ],
+      "ground_truth": "早疫病",
+      "decision": "无法定论（疑似番茄早疫病，但湿度硬约束不满足）",
+      "confidence": 0.88,
+      "judge_mode": "deepseek",
+      "judge_runtime": {
+        "outcome": "success",
+        "judge_mode": "deepseek",
+        "provider": "opencode",
+        "endpoint_id": "https://opencode.ai/zen/go/v1",
+        "model": "deepseek-v4.1-flash",
+        "timeout_seconds": 60.0,
+        "sdk_max_retries": 2,
+        "config_sources": {
+          "api_key": "AGRI_AI_JUDGE_API_KEY",
+          "base_url": "AGRI_AI_JUDGE_BASE_URL",
+          "model": "AGRI_AI_JUDGE_MODEL",
+          "provider": "default",
+          "timeout_seconds": "default",
+          "max_retries": "default"
+        },
+        "retry_exhausted": false,
+        "token_usage": {
+          "judge_prompt_tokens": 5373,
+          "judge_completion_tokens": 4311,
+          "judge_total_tokens": 9684
+        }
+      },
+      "reasoning_trace": "按序审查：先核对KG，病理Agent的同心轮纹与早疫病症状部分匹配，温度29.2℃处于25-30℃；但KG硬约束要求湿度>80%，实测62%，按规则直接否决早疫病确诊。叶霉病反事实亦违反20-25℃和>85%湿度，排除合理。视觉缺失，传感器与天气只提供环境背景。经济、生态、栽培建议不构成诊断主证。KG还列出褐斑病、斑萎病、绵疫病，所有专家及反事实均未提及，按集体忽略下调置信度。故最终无法定论，需图像/送检/温湿度复核，避免盲目按早疫病施药。",
+      "summary": "DeepSeek Judge 结构化裁决：症状呈同心轮纹，早疫病需高度怀疑，但棚内湿度62%显著低于KG硬约束>80%，不能确诊；缺少图像且褐斑病等被集体忽略，建议采样复核。",
+      "action_plan": [
+        "采集病叶正反面高清图像，重点记录同心轮纹、病斑中央是否灰白及茎/果是否发病。",
+        "取样送检病原，优先排查茄链格孢，同时覆盖褐斑病、斑萎病、绵疫病等KG提及病害。",
+        "连续监测棚内温湿度与叶面湿度，当前湿度62%低于早疫病KG要求>80%，需复核传感器并观察夜间结露。",
+        "暂不按早疫病大面积施药，先隔离病叶、清除病残体，避免盲目用药。",
+        "加强通风降湿、采用滴灌稳定土壤湿度；土壤湿度44.8%偏低，可清晨小水补灌但避免叶面沾湿。",
+        "若症状扩展至茎/果或出现典型中央灰白轮纹，再按早疫病早期防治，并轮换百菌清/杀毒矾与生态替代方案。"
+      ],
+      "runtime_seconds": 108.41425769999933,
+      "trace_id": "729a026e382d4e7b8b6b6d18c824d798",
+      "status": "ok",
+      "valid": true,
+      "timestamp": "2026-10-24T05:30:35.714358+00:00"
+    },
+    {
+      "seed": 43,
+      "config": "C2",
+      "case_index": 3,
+      "case_id": "amb_cucumber_angular_no_mold",
+      "group": "ambiguity",
+      "difficulty": 2,
+      "expected_key_factors": [
+        "angular_lesion",
+        "yellow_spot",
+        "leaf_dew",
+        "differential"
+      ],
+      "ground_truth": "霜霉病",
+      "decision": "无法定论（疑似黄瓜霜霉病早期）",
+      "confidence": 0.1537,
+      "judge_mode": "deepseek",
+      "judge_runtime": {
+        "outcome": "success",
+        "judge_mode": "deepseek",
+        "provider": "opencode",
+        "endpoint_id": "https://opencode.ai/zen/go/v1",
+        "model": "deepseek-v4.1-flash",
+        "timeout_seconds": 60.0,
+        "sdk_max_retries": 2,
+        "config_sources": {
+          "api_key": "AGRI_AI_JUDGE_API_KEY",
+          "base_url": "AGRI_AI_JUDGE_BASE_URL",
+          "model": "AGRI_AI_JUDGE_MODEL",
+          "provider": "default",
+          "timeout_seconds": "default",
+          "max_retries": "default"
+        },
+        "retry_exhausted": false,
+        "token_usage": {
+          "judge_prompt_tokens": 6012,
+          "judge_completion_tokens": 5929,
+          "judge_total_tokens": 11941
+        }
+      },
+      "reasoning_trace": "按KG校验，病理Agent的黄瓜霜霉病与KG症状部分匹配（多角形黄褐斑），但叶背无霉层；现场温度27.2°C、湿度67.1%分别违反KG硬约束15-22°C和>90%，规则应否决或显著降权。视觉Agent缺失图像，关键证据缺位；传感器正常，天气高温低湿与霜霉病适温高湿相反。专家共识仅为观察和管理，无直接冲突；病理反事实提生理障碍、气象反事实提高湿叠加风险均合理。KG还提示黄瓜易感丝瓜霜霉病和冬瓜细菌性角斑病，所有专家均未提及，列为集体忽略并下调置信度。综上不能确诊，需采样复核。",
+      "summary": "【第二轮辩论后裁决】DeepSeek Judge 结构化裁决：症状呈多角形黄褐斑提示霜霉病早期，但现场温湿度违反KG硬约束且缺少图像，不能确诊；需采样并排除细菌性角斑病。",
+      "action_plan": [
+        "对异常传感器复测，并查看最近 24 小时趋势",
+        "维持当前环境管理",
+        "密切观察症状变化，记录发展过程",
+        "如症状加重，建议取样送检确认病原",
+        "未来24小时降雨不足且温度偏高，建议灌溉",
+        "建议作业时间：清晨 5:00-7:00"
+      ],
+      "runtime_seconds": 350.52707869999995,
+      "trace_id": "793e14b528f54a0b99c72dc9ce9bb3e4",
+      "status": "ok",
+      "valid": true,
+      "timestamp": "2026-10-24T05:30:35.718699+00:00"
+    },
+    {
+      "seed": 43,
+      "config": "C2",
+      "case_index": 4,
+      "case_id": "amb_sugar_spot_wilt",
+      "group": "ambiguity",
+      "difficulty": 2,
+      "expected_key_factors": [
+        "circular_spot",
+        "brown_spot",
+        "lower_leaf_start",
+        "differential"
+      ],
+      "ground_truth": "褐斑病",
+      "decision": "甜菜褐斑病（Cercospora beticola，甜菜尾孢菌）——中等置信，需图像与湿度复核",
+      "confidence": 0.05,
+      "judge_mode": "deepseek",
+      "judge_runtime": {
+        "outcome": "success",
+        "judge_mode": "deepseek",
+        "provider": "opencode",
+        "endpoint_id": "https://opencode.ai/zen/go/v1",
+        "model": "deepseek-v4.1-flash",
+        "timeout_seconds": 60.0,
+        "sdk_max_retries": 2,
+        "config_sources": {
+          "api_key": "AGRI_AI_JUDGE_API_KEY",
+          "base_url": "AGRI_AI_JUDGE_BASE_URL",
+          "model": "AGRI_AI_JUDGE_MODEL",
+          "provider": "default",
+          "timeout_seconds": "default",
+          "max_retries": "default"
+        },
+        "retry_exhausted": false,
+        "token_usage": {
+          "judge_prompt_tokens": 5090,
+          "judge_completion_tokens": 4974,
+          "judge_total_tokens": 10064
+        }
+      },
+      "reasoning_trace": "其一，与KG一致性：病理Agent诊断与KG三元组“圆形褐色小病斑/中央灰白外圈红褐/自下部老叶向上蔓延”三条完全对应，温度29.2°C在25-30°C适温内，为最强证据。其二，硬约束检查：褐斑病要求湿度>70%，实测62.0%未达标（差8个百分点），按规则不得直接采信，需降权而非全额采纳；根腐病要求20-28°C，实测29.2°C略超，且土壤含水44.8%远低于“土壤过湿”诱发条件，症状也无根部变褐记录，支持病理Agent的反事实排除（但其排除理由未引用萎蔫与墒情，论证偏弱）。其三，证据缺口：视觉Agent缺图，传感器层L2对soil_ph/light/soil_moisture有重建误差，且棚号元数据作物标注为tomato，环境数据可信度需打折——这同时削弱了湿度否决的绝对性。其四，集体忽略：KG存在甜菜猝倒病、甜菜白粉病，八位专家含反事实均未提及，按规则下调约0.2。综合：0.90基线−0.20忽略−0.10湿度约束−0.05无图像+0.07适温与症状吻合≈0.62，故不强行定论，标记人工复核。",
+      "summary": "DeepSeek Judge 结构化裁决：症状与KG中甜菜褐斑病三条典型症状完全吻合、温度29.2°C落在25-30°C适温区间，但棚内湿度62%未达>70%硬约束、缺图像证据且KG中猝倒病/白粉病被集体忽略，故定为中等置信的褐斑病并建议人工复核。",
+      "action_plan": [
+        "对异常传感器复测，并查看最近 24 小时趋势",
+        "维持当前环境管理",
+        "密切观察症状变化，记录发展过程",
+        "如症状加重，建议取样送检确认病原",
+        "未来24小时降雨不足且温度偏高，建议灌溉",
+        "建议作业时间：清晨 5:00-7:00"
+      ],
+      "runtime_seconds": 133.4135480999994,
+      "trace_id": "70ea3ff4e38e4e1dac30df9a48463f35",
+      "status": "ok",
+      "valid": true,
+      "timestamp": "2026-10-24T05:30:35.719512+00:00"
+    },
+    {
+      "seed": 43,
+      "config": "C2",
+      "case_index": 5,
+      "case_id": "amb_cotton_edge_vas",
+      "group": "ambiguity",
+      "difficulty": 3,
+      "expected_key_factors": [
+        "edge_yellowing",
+        "vascular_browning",
+        "half_leaf_yellowing",
+        "differential"
+      ],
+      "ground_truth": "黄萎病",
+      "decision": "无法定论（疑似棉花枯萎病/黄萎病，需病原检测）",
+      "confidence": 0.05,
+      "judge_mode": "deepseek",
+      "judge_runtime": {
+        "outcome": "success",
+        "judge_mode": "deepseek",
+        "provider": "opencode",
+        "endpoint_id": "https://opencode.ai/zen/go/v1",
+        "model": "deepseek-v4.1-flash",
+        "timeout_seconds": 60.0,
+        "sdk_max_retries": 2,
+        "config_sources": {
+          "api_key": "AGRI_AI_JUDGE_API_KEY",
+          "base_url": "AGRI_AI_JUDGE_BASE_URL",
+          "model": "AGRI_AI_JUDGE_MODEL",
+          "provider": "default",
+          "timeout_seconds": "default",
+          "max_retries": "default"
+        },
+        "retry_exhausted": false,
+        "token_usage": {
+          "judge_prompt_tokens": 5004,
+          "judge_completion_tokens": 5731,
+          "judge_total_tokens": 10735
+        }
+      },
+      "reasoning_trace": "KG中枯萎病有维管束褐变、湿度>60%支持，但现场无半边黄化/萎蔫且温度29.2°C超28°C上限；黄萎病有叶缘发黄、维管束褐变支持，但温度超20-25°C且湿度62%<70%，硬约束均冲突。病理Agent首选枯萎病并排除黄萎病，排除理由不充分；视觉缺失导致关键症状不可核验。故不强行站队，判无法定论。KG还提示棉根腐病菌、松苗立枯病未被任何专家提及，属集体忽略，置信度下调约0.2。",
+      "summary": "DeepSeek Judge 结构化裁决：现场症状与KG对枯萎病、黄萎病各有部分支持，但两病均存在温湿度硬约束冲突且缺少图像与病原检测，暂无法定论，建议采样送检并补拍图像。",
+      "action_plan": [
+        "立即采集病叶、叶柄及维管束样本送检，重点检测尖孢镰刀菌和大丽轮枝菌，必要时做PCR或病原分离。",
+        "补拍高清叶片正反面、叶缘、维管束剖面及田间分布图像，确认有无半边黄化、掌状斑驳、萎蔫等关键症状。",
+        "复核并记录24小时温湿度与灌溉记录；当前温度29.2°C偏高、湿度62%偏低、土壤湿度44.8%偏低，避免高温大水漫灌。",
+        "确诊前不要大面积施药；标记或隔离病株，拔除重病株并销毁，防止病原扩散。",
+        "若需应急防治，须依据检测结果选择：枯萎病可考虑恶霉灵或咪鲜胺灌根，黄萎病可考虑多抗霉素或枯草芽孢杆菌灌根，并遵守当地登记标签。",
+        "继续监测高温预警和传感器趋势，清晨滴灌或沟灌，降低叶面湿度风险，同时排查KG提示的棉根腐病菌、松苗立枯病等集体忽略方向。"
+      ],
+      "runtime_seconds": 158.7939839999999,
+      "trace_id": "73bf1a32b464444ca7c2670d0261a2ba",
+      "status": "ok",
+      "valid": true,
+      "timestamp": "2026-10-24T05:30:35.720397+00:00"
+    },
+    {
+      "seed": 43,
+      "config": "C2",
+      "case_index": 6,
+      "case_id": "amb_tomato_curl_mold",
+      "group": "ambiguity",
+      "difficulty": 3,
+      "expected_key_factors": [
+        "leaf_curl",
+        "backside_mold",
+        "lower_leaf_start",
+        "differential"
+      ],
+      "ground_truth": "叶霉病",
+      "decision": "疑似番茄叶霉病（环境条件不符，暂不能确诊，需排除早疫病/褐斑病）",
+      "confidence": 0.3149,
+      "judge_mode": "deepseek",
+      "judge_runtime": {
+        "outcome": "success",
+        "judge_mode": "deepseek",
+        "provider": "opencode",
+        "endpoint_id": "https://opencode.ai/zen/go/v1",
+        "model": "deepseek-v4.1-flash",
+        "timeout_seconds": 60.0,
+        "sdk_max_retries": 2,
+        "config_sources": {
+          "api_key": "AGRI_AI_JUDGE_API_KEY",
+          "base_url": "AGRI_AI_JUDGE_BASE_URL",
+          "model": "AGRI_AI_JUDGE_MODEL",
+          "provider": "default",
+          "timeout_seconds": "default",
+          "max_retries": "default"
+        },
+        "retry_exhausted": false,
+        "token_usage": {
+          "judge_prompt_tokens": 6514,
+          "judge_completion_tokens": 4246,
+          "judge_total_tokens": 10760
+        }
+      },
+      "reasoning_trace": "KG校验：叶霉病三项症状节点与本例（叶背灰霉层、下部叶卷曲干枯）高度吻合，但两条诱发条件硬约束被违反——温度29.2°C超出20-25°C、湿度62%远低于>85%，按规则该诊断应否决/大幅降权；早疫病温度窗口25-30°C虽吻合，但湿度<80%且症状缺同心轮纹，亦不成立。专家间病理Agent为唯一诊断方，无对立意见，但其反事实仅列'生理性障碍'，未正式排除早疫病，属鉴别不足。视觉Agent缺席致无图像佐证，传感器两套读数轻微不一致。KG尚有番茄褐斑病、黑腐病未被任何专家（含反事实）提及，构成集体忽略，置信度再下调约0.2。综合：症状支持但环境反证强，取0.42并转人工复核。",
+      "summary": "【第二轮辩论后裁决】DeepSeek Judge 结构化裁决：症状（叶背灰霉层、下部叶卷曲干枯）指向番茄叶霉病，但当前29.2°C、湿度62%严重偏离其20-25°C、>85%的诱发条件，且无图像证据、早疫病未做正式排除，故只能给出中等偏低置信度的疑似结论。",
+      "action_plan": [
+        "立即采集下部病叶正反面高清近景图像，并取样送检/镜检病原，重点区分叶霉病（黄枝孢霉）、早疫病（茄链格孢）与褐斑病。",
+        "在冠层下部（近下部叶）加装温湿度记录仪，复核叶面结露与局部湿度：当前62%RH低于叶霉病阈值，需确认真实微环境。",
+        "加强通风排湿、合理疏叶，摘除下部病老叶并带出棚外销毁，避免病残体滞留。",
+        "灌溉按气象建议于清晨5:00-7:00滴灌，避免大水漫灌与叶面淋湿叠加湿度风险；高温预警（>35°C）期间遮阳降温。",
+        "确诊前暂缓大面积化学施药；如需应急，优先枯草芽孢杆菌/木霉菌等低毒方案，并与多菌灵、甲基托布津轮换以延缓抗性。",
+        "未来3-5天逐日记录病斑扩展与霉层变化，若出现同心轮纹病斑应立即按早疫病方案（百菌清/杀毒矾）处置。"
+      ],
+      "runtime_seconds": 443.68612679999933,
+      "trace_id": "fc6888d27a8c4ca0bd014e6e5ee02a20",
+      "status": "ok",
+      "valid": true,
+      "timestamp": "2026-10-24T05:30:35.721326+00:00"
+    },
+    {
+      "seed": 43,
+      "config": "C2",
+      "case_index": 7,
+      "case_id": "conf_cucumber_hot_dry",
+      "group": "conflicting",
+      "difficulty": 3,
+      "expected_key_factors": [
+        "backside_mold",
+        "angular_lesion",
+        "high_temp",
+        "low_humidity",
+        "risk_priority"
+      ],
+      "ground_truth": "霜霉病",
+      "decision": "病理判断首选：黄瓜霜霉病",
+      "confidence": 0.71,
+      "judge_mode": "rules",
+      "judge_runtime": {
+        "outcome": "fallback",
+        "judge_mode": "rules",
+        "provider": "opencode",
+        "endpoint_id": "https://opencode.ai/zen/go/v1",
+        "model": "deepseek-v4.1-flash",
+        "timeout_seconds": 60.0,
+        "sdk_max_retries": 2,
+        "config_sources": {
+          "api_key": "AGRI_AI_JUDGE_API_KEY",
+          "base_url": "AGRI_AI_JUDGE_BASE_URL",
+          "model": "AGRI_AI_JUDGE_MODEL",
+          "provider": "default",
+          "timeout_seconds": "default",
+          "max_retries": "default"
+        },
+        "retry_exhausted": true,
+        "fallback_reason_code": "connection_error",
+        "fallback_detail": "APIConnectionError: Connection error."
+      },
+      "reasoning_trace": "KG参照疾病：黄瓜霜霉病、黄瓜病害、苦瓜细菌性角斑病、黄瓜细菌性角斑病；未触发KG硬约束否决；风险等级=medium，置信度=0.71；集体漏检预警：KG中存在专家均未考虑的病害--黄瓜病害、苦瓜细菌性角斑病、黄瓜细菌性角斑病（漏检比例 75%）；第二轮辩论后裁决：第二轮病理意见与首轮一致",
+      "summary": "【第二轮辩论后裁决】Orchestrator 已完成 gh-b/cucumber 的diagnose 工作流：病理判断首选：黄瓜霜霉病。风险等级：medium。",
+      "action_plan": [
+        "对异常传感器复测，并查看最近 24 小时趋势",
+        "维持当前环境管理",
+        "密切观察症状变化，记录发展过程",
+        "如症状加重，建议取样送检确认病原",
+        "未来24小时降雨不足且温度偏高，建议灌溉",
+        "建议作业时间：清晨 5:00-7:00"
+      ],
+      "runtime_seconds": 22.63011600000027,
+      "trace_id": "bdea19acfa3d4c059739a08b8878ad34",
+      "status": "ok",
+      "valid": true,
+      "timestamp": "2026-10-24T05:30:35.722171+00:00"
+    },
+    {
+      "seed": 43,
+      "config": "C2",
+      "case_index": 8,
+      "case_id": "conf_sugar_spot_cold",
+      "group": "conflicting",
+      "difficulty": 2,
+      "expected_key_factors": [
+        "circular_spot",
+        "brown_spot",
+        "low_temp",
+        "risk_priority"
+      ],
+      "ground_truth": "褐斑病",
+      "decision": "病理判断首选：甜菜褐斑病",
+      "confidence": 0.69,
+      "judge_mode": "rules",
+      "judge_runtime": {
+        "outcome": "fallback",
+        "judge_mode": "rules",
+        "provider": "opencode",
+        "endpoint_id": "https://opencode.ai/zen/go/v1",
+        "model": "deepseek-v4.1-flash",
+        "timeout_seconds": 60.0,
+        "sdk_max_retries": 2,
+        "config_sources": {
+          "api_key": "AGRI_AI_JUDGE_API_KEY",
+          "base_url": "AGRI_AI_JUDGE_BASE_URL",
+          "model": "AGRI_AI_JUDGE_MODEL",
+          "provider": "default",
+          "timeout_seconds": "default",
+          "max_retries": "default"
+        },
+        "retry_exhausted": true,
+        "fallback_reason_code": "connection_error",
+        "fallback_detail": "APIConnectionError: Connection error."
+      },
+      "reasoning_trace": "KG参照疾病：甜菜褐斑病、甜菜根腐病、甜菜白粉病、甜菜猝倒病；未触发KG硬约束否决；风险等级=medium，置信度=0.69；集体漏检预警：KG中存在专家均未考虑的病害--甜菜根腐病、甜菜白粉病、甜菜猝倒病（漏检比例 75%）；第二轮辩论后裁决：第二轮病理意见与首轮一致",
+      "summary": "【第二轮辩论后裁决】Orchestrator 已完成 gh-a/sugar_beet 的diagnose 工作流：病理判断首选：甜菜褐斑病。风险等级：medium。",
+      "action_plan": [
+        "对异常传感器复测，并查看最近 24 小时趋势",
+        "维持当前环境管理",
+        "密切观察症状变化，记录发展过程",
+        "如症状加重，建议取样送检确认病原",
+        "未来24小时降雨不足且温度偏高，建议灌溉",
+        "建议作业时间：清晨 5:00-7:00"
+      ],
+      "runtime_seconds": 22.37466929999937,
+      "trace_id": "1b01359d89e640cc8611489ad6e9868f",
+      "status": "ok",
+      "valid": true,
+      "timestamp": "2026-10-24T05:30:35.722953+00:00"
+    },
+    {
+      "seed": 43,
+      "config": "C2",
+      "case_index": 9,
+      "case_id": "conf_tomato_blight_cool_rain",
+      "group": "conflicting",
+      "difficulty": 3,
+      "expected_key_factors": [
+        "concentric_ring",
+        "low_temp",
+        "high_humidity",
+        "risk_priority"
+      ],
+      "ground_truth": "早疫病",
+      "decision": "病理判断首选：番茄早疫病",
+      "confidence": 0.75,
+      "judge_mode": "rules",
+      "judge_runtime": {
+        "outcome": "fallback",
+        "judge_mode": "rules",
+        "provider": "opencode",
+        "endpoint_id": "https://opencode.ai/zen/go/v1",
+        "model": "deepseek-v4.1-flash",
+        "timeout_seconds": 60.0,
+        "sdk_max_retries": 2,
+        "config_sources": {
+          "api_key": "AGRI_AI_JUDGE_API_KEY",
+          "base_url": "AGRI_AI_JUDGE_BASE_URL",
+          "model": "AGRI_AI_JUDGE_MODEL",
+          "provider": "default",
+          "timeout_seconds": "default",
+          "max_retries": "default"
+        },
+        "retry_exhausted": true,
+        "fallback_reason_code": "connection_error",
+        "fallback_detail": "APIConnectionError: Connection error."
+      },
+      "reasoning_trace": "KG参照疾病：番茄早疫病、番茄叶霉病、番茄褐斑病、番茄斑萎病；未触发KG硬约束否决；风险等级=medium，置信度=0.75；集体漏检预警：KG中存在专家均未考虑的病害--番茄褐斑病、番茄斑萎病（漏检比例 50%）；第二轮辩论后裁决：第二轮病理意见与首轮一致",
+      "summary": "【第二轮辩论后裁决】Orchestrator 已完成 gh-a/tomato 的diagnose 工作流：病理判断首选：番茄早疫病。风险等级：medium。",
+      "action_plan": [
+        "对异常传感器复测，并查看最近 24 小时趋势",
+        "维持当前环境管理",
+        "密切观察症状变化，记录发展过程",
+        "如症状加重，建议取样送检确认病原",
+        "未来24小时降雨不足且温度偏高，建议灌溉",
+        "建议作业时间：清晨 5:00-7:00"
+      ],
+      "runtime_seconds": 21.400002000000313,
+      "trace_id": "557078f8fd9143c3af66e66bbe1054d3",
+      "status": "ok",
+      "valid": true,
+      "timestamp": "2026-10-24T05:30:35.723825+00:00"
+    },
+    {
+      "seed": 43,
+      "config": "C2",
+      "case_index": 10,
+      "case_id": "conf_cotton_wilt_dry_soil",
+      "group": "conflicting",
+      "difficulty": 3,
+      "expected_key_factors": [
+        "mottling",
+        "vascular_browning",
+        "soil_dry",
+        "risk_priority"
+      ],
+      "ground_truth": "黄萎病",
+      "decision": "病理判断首选：棉花黄萎病",
+      "confidence": 0.71,
+      "judge_mode": "rules",
+      "judge_runtime": {
+        "outcome": "fallback",
+        "judge_mode": "rules",
+        "provider": "opencode",
+        "endpoint_id": "https://opencode.ai/zen/go/v1",
+        "model": "deepseek-v4.1-flash",
+        "timeout_seconds": 60.0,
+        "sdk_max_retries": 2,
+        "config_sources": {
+          "api_key": "AGRI_AI_JUDGE_API_KEY",
+          "base_url": "AGRI_AI_JUDGE_BASE_URL",
+          "model": "AGRI_AI_JUDGE_MODEL",
+          "provider": "default",
+          "timeout_seconds": "default",
+          "max_retries": "default"
+        },
+        "retry_exhausted": true,
+        "fallback_reason_code": "connection_error",
+        "fallback_detail": "APIConnectionError: Connection error."
+      },
+      "reasoning_trace": "KG参照疾病：棉花黄萎病、棉花枯萎病、棉花红腐病、棉花叶烧病、甘薯根腐病；未触发KG硬约束否决；风险等级=medium，置信度=0.71；集体漏检预警：KG中存在专家均未考虑的病害--棉花红腐病、棉花叶烧病、甘薯根腐病（漏检比例 60%）；第二轮辩论后裁决：第二轮病理意见与首轮一致",
+      "summary": "【第二轮辩论后裁决】Orchestrator 已完成 gh-a/cotton 的diagnose 工作流：病理判断首选：棉花黄萎病。风险等级：medium。",
+      "action_plan": [
+        "对异常传感器复测，并查看最近 24 小时趋势",
+        "维持当前环境管理",
+        "密切观察症状变化，记录发展过程",
+        "如症状加重，建议取样送检确认病原",
+        "未来24小时降雨不足且温度偏高，建议灌溉",
+        "建议作业时间：清晨 5:00-7:00"
+      ],
+      "runtime_seconds": 23.005335199999536,
+      "trace_id": "4e226ce439054c3ab704b62713a164ef",
+      "status": "ok",
+      "valid": true,
+      "timestamp": "2026-10-24T05:30:35.724624+00:00"
+    },
+    {
+      "seed": 43,
+      "config": "C2",
+      "case_index": 11,
+      "case_id": "conf_cotton_fusarium_cool_wet",
+      "group": "conflicting",
+      "difficulty": 3,
+      "expected_key_factors": [
+        "half_leaf_yellowing",
+        "wilt",
+        "low_temp",
+        "high_humidity",
+        "differential"
+      ],
+      "ground_truth": "枯萎病",
+      "decision": "病理判断首选：棉花枯萎病",
+      "confidence": 0.75,
+      "judge_mode": "rules",
+      "judge_runtime": {
+        "outcome": "fallback",
+        "judge_mode": "rules",
+        "provider": "opencode",
+        "endpoint_id": "https://opencode.ai/zen/go/v1",
+        "model": "deepseek-v4.1-flash",
+        "timeout_seconds": 60.0,
+        "sdk_max_retries": 2,
+        "config_sources": {
+          "api_key": "AGRI_AI_JUDGE_API_KEY",
+          "base_url": "AGRI_AI_JUDGE_BASE_URL",
+          "model": "AGRI_AI_JUDGE_MODEL",
+          "provider": "default",
+          "timeout_seconds": "default",
+          "max_retries": "default"
+        },
+        "retry_exhausted": true,
+        "fallback_reason_code": "connection_error",
+        "fallback_detail": "APIConnectionError: Connection error."
+      },
+      "reasoning_trace": "KG参照疾病：棉花枯萎病、棉花黄萎病、植物真菌病害、棉花立枯病；未触发KG硬约束否决；风险等级=medium，置信度=0.75；集体漏检预警：KG中存在专家均未考虑的病害--植物真菌病害、棉花立枯病（漏检比例 50%）；第二轮辩论后裁决：第二轮病理意见与首轮一致",
+      "summary": "【第二轮辩论后裁决】Orchestrator 已完成 gh-a/cotton 的diagnose 工作流：病理判断首选：棉花枯萎病。风险等级：medium。",
+      "action_plan": [
+        "对异常传感器复测，并查看最近 24 小时趋势",
+        "维持当前环境管理",
+        "密切观察症状变化，记录发展过程",
+        "如症状加重，建议取样送检确认病原",
+        "未来24小时降雨不足且温度偏高，建议灌溉",
+        "建议作业时间：清晨 5:00-7:00"
+      ],
+      "runtime_seconds": 21.4081812000004,
+      "trace_id": "b219f2f12e8d4c6493fc30644369988f",
+      "status": "ok",
+      "valid": true,
+      "timestamp": "2026-10-24T05:30:35.725411+00:00"
+    },
+    {
+      "seed": 43,
+      "config": "C2",
+      "case_index": 12,
+      "case_id": "conf_sugar_rootrot_dry",
+      "group": "conflicting",
+      "difficulty": 2,
+      "expected_key_factors": [
+        "root_rot",
+        "yellowing",
+        "soil_dry",
+        "risk_priority"
+      ],
+      "ground_truth": "根腐病",
+      "decision": "病理判断首选：甜菜根腐病",
+      "confidence": 0.7,
+      "judge_mode": "rules",
+      "judge_runtime": {
+        "outcome": "fallback",
+        "judge_mode": "rules",
+        "provider": "opencode",
+        "endpoint_id": "https://opencode.ai/zen/go/v1",
+        "model": "deepseek-v4.1-flash",
+        "timeout_seconds": 60.0,
+        "sdk_max_retries": 2,
+        "config_sources": {
+          "api_key": "AGRI_AI_JUDGE_API_KEY",
+          "base_url": "AGRI_AI_JUDGE_BASE_URL",
+          "model": "AGRI_AI_JUDGE_MODEL",
+          "provider": "default",
+          "timeout_seconds": "default",
+          "max_retries": "default"
+        },
+        "retry_exhausted": true,
+        "fallback_reason_code": "connection_error",
+        "fallback_detail": "APIConnectionError: Connection error."
+      },
+      "reasoning_trace": "KG参照疾病：甜菜根腐病、甜菜褐斑病、甜菜立枯病、甜菜白粉病；未触发KG硬约束否决；风险等级=medium，置信度=0.7；集体漏检预警：KG中存在专家均未考虑的病害--甜菜褐斑病、甜菜立枯病、甜菜白粉病（漏检比例 75%）；第二轮辩论后裁决：第二轮病理意见与首轮一致",
+      "summary": "【第二轮辩论后裁决】Orchestrator 已完成 gh-a/sugar_beet 的diagnose 工作流：病理判断首选：甜菜根腐病。风险等级：medium。",
+      "action_plan": [
+        "对异常传感器复测，并查看最近 24 小时趋势",
+        "维持当前环境管理",
+        "密切观察症状变化，记录发展过程",
+        "如症状加重，建议取样送检确认病原",
+        "未来24小时降雨不足且温度偏高，建议灌溉",
+        "建议作业时间：清晨 5:00-7:00"
+      ],
+      "runtime_seconds": 22.445331900000383,
+      "trace_id": "c5ad54219bcd435c975d0ab2cc5b236e",
+      "status": "ok",
+      "valid": true,
+      "timestamp": "2026-10-24T05:30:35.726189+00:00"
+    },
+    {
+      "seed": 43,
+      "config": "C2",
+      "case_index": 13,
+      "case_id": "inc_cucumber_unspecified",
+      "group": "incomplete",
+      "difficulty": 1,
+      "expected_key_factors": [
+        "evidence_insufficient",
+        "info_request"
+      ],
+      "ground_truth": "证据不足",
+      "decision": "已生成栽培管理建议",
+      "confidence": 0.58,
+      "judge_mode": "rules",
+      "judge_runtime": {
+        "outcome": "fallback",
+        "judge_mode": "rules",
+        "provider": "opencode",
+        "endpoint_id": "https://opencode.ai/zen/go/v1",
+        "model": "deepseek-v4.1-flash",
+        "timeout_seconds": 60.0,
+        "sdk_max_retries": 2,
+        "config_sources": {
+          "api_key": "AGRI_AI_JUDGE_API_KEY",
+          "base_url": "AGRI_AI_JUDGE_BASE_URL",
+          "model": "AGRI_AI_JUDGE_MODEL",
+          "provider": "default",
+          "timeout_seconds": "default",
+          "max_retries": "default"
+        },
+        "retry_exhausted": true,
+        "fallback_reason_code": "connection_error",
+        "fallback_detail": "APIConnectionError: Connection error."
+      },
+      "reasoning_trace": "KG参照疾病：黄瓜霜霉病、黄瓜病害、黄瓜白粉病、黄瓜疫病；未触发KG硬约束否决；风险等级=medium，置信度=0.58；集体漏检预警：KG中存在专家均未考虑的病害--黄瓜霜霉病、黄瓜病害、黄瓜白粉病、黄瓜疫病（漏检比例 100%）",
+      "summary": "Orchestrator 已完成 gh-b/cucumber 的diagnose 工作流：已生成栽培管理建议。风险等级：medium。",
+      "action_plan": [
+        "对异常传感器复测，并查看最近 24 小时趋势",
+        "维持当前环境管理",
+        "密切观察症状变化，记录发展过程",
+        "如症状加重，建议取样送检确认病原",
+        "未来24小时降雨不足且温度偏高，建议灌溉",
+        "建议作业时间：清晨 5:00-7:00"
+      ],
+      "runtime_seconds": 11.647825000000012,
+      "trace_id": "803314efa54b46668d5cb6fcbaf86390",
+      "status": "ok",
+      "valid": true,
+      "timestamp": "2026-10-24T05:30:35.726809+00:00"
+    },
+    {
+      "seed": 43,
+      "config": "C2",
+      "case_index": 14,
+      "case_id": "inc_tomato_vague_spot",
+      "group": "incomplete",
+      "difficulty": 3,
+      "expected_key_factors": [
+        "evidence_insufficient",
+        "info_request",
+        "differential"
+      ],
+      "ground_truth": "证据不足",
+      "decision": "病理判断首选：番茄早疫病",
+      "confidence": 0.61,
+      "judge_mode": "rules",
+      "judge_runtime": {
+        "outcome": "fallback",
+        "judge_mode": "rules",
+        "provider": "opencode",
+        "endpoint_id": "https://opencode.ai/zen/go/v1",
+        "model": "deepseek-v4.1-flash",
+        "timeout_seconds": 60.0,
+        "sdk_max_retries": 2,
+        "config_sources": {
+          "api_key": "AGRI_AI_JUDGE_API_KEY",
+          "base_url": "AGRI_AI_JUDGE_BASE_URL",
+          "model": "AGRI_AI_JUDGE_MODEL",
+          "provider": "default",
+          "timeout_seconds": "default",
+          "max_retries": "default"
+        },
+        "retry_exhausted": true,
+        "fallback_reason_code": "connection_error",
+        "fallback_detail": "APIConnectionError: Connection error."
+      },
+      "reasoning_trace": "KG参照疾病：番茄叶霉病、番茄早疫病、番茄褐斑病、番茄脐腐病、番茄黑斑病；未触发KG硬约束否决；风险等级=medium，置信度=0.61；集体漏检预警：KG中存在专家均未考虑的病害--番茄褐斑病、番茄脐腐病、番茄黑斑病（漏检比例 60%）；第二轮辩论后裁决：第二轮病理意见与首轮一致",
+      "summary": "【第二轮辩论后裁决】Orchestrator 已完成 gh-a/tomato 的diagnose 工作流：病理判断首选：番茄早疫病。风险等级：medium。",
+      "action_plan": [
+        "对异常传感器复测，并查看最近 24 小时趋势",
+        "维持当前环境管理",
+        "密切观察症状变化，记录发展过程",
+        "如症状加重，建议取样送检确认病原",
+        "未来24小时降雨不足且温度偏高，建议灌溉",
+        "建议作业时间：清晨 5:00-7:00"
+      ],
+      "runtime_seconds": 23.597786399999677,
+      "trace_id": "59f58d6fd5d446279c47f17c055c2b05",
+      "status": "ok",
+      "valid": true,
+      "timestamp": "2026-10-24T05:30:35.727611+00:00"
+    },
+    {
+      "seed": 43,
+      "config": "C2",
+      "case_index": 15,
+      "case_id": "inc_cotton_edge_yellow",
+      "group": "incomplete",
+      "difficulty": 1,
+      "expected_key_factors": [
+        "edge_yellowing",
+        "evidence_insufficient",
+        "info_request"
+      ],
+      "ground_truth": "证据不足",
+      "decision": "已生成栽培管理建议",
+      "confidence": 0.58,
+      "judge_mode": "rules",
+      "judge_runtime": {
+        "outcome": "fallback",
+        "judge_mode": "rules",
+        "provider": "opencode",
+        "endpoint_id": "https://opencode.ai/zen/go/v1",
+        "model": "deepseek-v4.1-flash",
+        "timeout_seconds": 60.0,
+        "sdk_max_retries": 2,
+        "config_sources": {
+          "api_key": "AGRI_AI_JUDGE_API_KEY",
+          "base_url": "AGRI_AI_JUDGE_BASE_URL",
+          "model": "AGRI_AI_JUDGE_MODEL",
+          "provider": "default",
+          "timeout_seconds": "default",
+          "max_retries": "default"
+        },
+        "retry_exhausted": true,
+        "fallback_reason_code": "connection_error",
+        "fallback_detail": "APIConnectionError: Connection error."
+      },
+      "reasoning_trace": "KG参照疾病：棉花黄萎病、棉花枯萎病、棉花炭疽病、棉花立枯病；未触发KG硬约束否决；风险等级=medium，置信度=0.58；集体漏检预警：KG中存在专家均未考虑的病害--棉花黄萎病、棉花枯萎病、棉花炭疽病、棉花立枯病（漏检比例 100%）",
+      "summary": "Orchestrator 已完成 gh-a/cotton 的consult 工作流：已生成栽培管理建议。风险等级：medium。",
+      "action_plan": [
+        "对异常传感器复测，并查看最近 24 小时趋势",
+        "维持当前环境管理",
+        "密切观察症状变化，记录发展过程",
+        "如症状加重，建议取样送检确认病原",
+        "未来24小时降雨不足且温度偏高，建议灌溉",
+        "建议作业时间：清晨 5:00-7:00"
+      ],
+      "runtime_seconds": 13.239492799999425,
+      "trace_id": "a673e6347ccc496a8fe3bac5d0fa4871",
+      "status": "ok",
+      "valid": true,
+      "timestamp": "2026-10-24T05:30:35.728236+00:00"
+    },
+    {
+      "seed": 43,
+      "config": "C2",
+      "case_index": 16,
+      "case_id": "inc_sugar_beet_weak",
+      "group": "incomplete",
+      "difficulty": 2,
+      "expected_key_factors": [
+        "evidence_insufficient",
+        "info_request",
+        "root_check"
+      ],
+      "ground_truth": "证据不足",
+      "decision": "病理判断首选：甜菜根腐病",
+      "confidence": 0.59,
+      "judge_mode": "rules",
+      "judge_runtime": {
+        "outcome": "fallback",
+        "judge_mode": "rules",
+        "provider": "opencode",
+        "endpoint_id": "https://opencode.ai/zen/go/v1",
+        "model": "deepseek-v4.1-flash",
+        "timeout_seconds": 60.0,
+        "sdk_max_retries": 2,
+        "config_sources": {
+          "api_key": "AGRI_AI_JUDGE_API_KEY",
+          "base_url": "AGRI_AI_JUDGE_BASE_URL",
+          "model": "AGRI_AI_JUDGE_MODEL",
+          "provider": "default",
+          "timeout_seconds": "default",
+          "max_retries": "default"
+        },
+        "retry_exhausted": true,
+        "fallback_reason_code": "connection_error",
+        "fallback_detail": "APIConnectionError: Connection error."
+      },
+      "reasoning_trace": "KG参照疾病：甜菜根腐病、甜菜褐斑病、甜菜丛根病、甜菜白粉病；未触发KG硬约束否决；风险等级=medium，置信度=0.59；集体漏检预警：KG中存在专家均未考虑的病害--甜菜褐斑病、甜菜丛根病、甜菜白粉病（漏检比例 75%）",
+      "summary": "Orchestrator 已完成 gh-a/sugar_beet 的consult 工作流：病理判断首选：甜菜根腐病。风险等级：medium。",
+      "action_plan": [
+        "对异常传感器复测，并查看最近 24 小时趋势",
+        "维持当前环境管理",
+        "密切观察症状变化，记录发展过程",
+        "如症状加重，建议取样送检确认病原",
+        "未来24小时降雨不足且温度偏高，建议灌溉",
+        "建议作业时间：清晨 5:00-7:00"
+      ],
+      "runtime_seconds": 11.540288799998962,
+      "trace_id": "27d959ed3acb4795a9146cd731692264",
+      "status": "ok",
+      "valid": true,
+      "timestamp": "2026-10-24T05:30:35.728869+00:00"
+    },
+    {
+      "seed": 43,
+      "config": "C2",
+      "case_index": 17,
+      "case_id": "inc_tomato_yellow_no_cue",
+      "group": "incomplete",
+      "difficulty": 3,
+      "expected_key_factors": [
+        "yellowing",
+        "evidence_insufficient",
+        "info_request"
+      ],
+      "ground_truth": "证据不足",
+      "decision": "病理判断首选：番茄叶霉病",
+      "confidence": 0.61,
+      "judge_mode": "rules",
+      "judge_runtime": {
+        "outcome": "fallback",
+        "judge_mode": "rules",
+        "provider": "opencode",
+        "endpoint_id": "https://opencode.ai/zen/go/v1",
+        "model": "deepseek-v4.1-flash",
+        "timeout_seconds": 60.0,
+        "sdk_max_retries": 2,
+        "config_sources": {
+          "api_key": "AGRI_AI_JUDGE_API_KEY",
+          "base_url": "AGRI_AI_JUDGE_BASE_URL",
+          "model": "AGRI_AI_JUDGE_MODEL",
+          "provider": "default",
+          "timeout_seconds": "default",
+          "max_retries": "default"
+        },
+        "retry_exhausted": true,
+        "fallback_reason_code": "connection_error",
+        "fallback_detail": "APIConnectionError: Connection error."
+      },
+      "reasoning_trace": "KG参照疾病：番茄叶霉病、番茄早疫病、番茄褐斑病、番茄绵疫病、番茄黑斑病；未触发KG硬约束否决；风险等级=medium，置信度=0.61；集体漏检预警：KG中存在专家均未考虑的病害--番茄褐斑病、番茄绵疫病、番茄黑斑病（漏检比例 60%）；第二轮辩论后裁决：第二轮病理意见与首轮一致",
+      "summary": "【第二轮辩论后裁决】Orchestrator 已完成 gh-a/tomato 的diagnose 工作流：病理判断首选：番茄叶霉病。风险等级：medium。",
+      "action_plan": [
+        "对异常传感器复测，并查看最近 24 小时趋势",
+        "维持当前环境管理",
+        "密切观察症状变化，记录发展过程",
+        "如症状加重，建议取样送检确认病原",
+        "未来24小时降雨不足且温度偏高，建议灌溉",
+        "建议作业时间：清晨 5:00-7:00"
+      ],
+      "runtime_seconds": 22.921966500000053,
+      "trace_id": "483cffeb390b46c2b72c732e4f3b2415",
+      "status": "ok",
+      "valid": true,
+      "timestamp": "2026-10-24T05:30:35.729763+00:00"
+    },
+    {
+      "seed": 43,
+      "config": "C2",
+      "case_index": 18,
+      "case_id": "inc_cucumber_mold_unclear_shape",
+      "group": "incomplete",
+      "difficulty": 3,
+      "expected_key_factors": [
+        "backside_mold",
+        "angular_lesion",
+        "evidence_insufficient",
+        "info_request"
+      ],
+      "ground_truth": "证据不足",
+      "decision": "病理判断首选：黄瓜霜霉病",
+      "confidence": 0.7,
+      "judge_mode": "rules",
+      "judge_runtime": {
+        "outcome": "fallback",
+        "judge_mode": "rules",
+        "provider": "opencode",
+        "endpoint_id": "https://opencode.ai/zen/go/v1",
+        "model": "deepseek-v4.1-flash",
+        "timeout_seconds": 60.0,
+        "sdk_max_retries": 2,
+        "config_sources": {
+          "api_key": "AGRI_AI_JUDGE_API_KEY",
+          "base_url": "AGRI_AI_JUDGE_BASE_URL",
+          "model": "AGRI_AI_JUDGE_MODEL",
+          "provider": "default",
+          "timeout_seconds": "default",
+          "max_retries": "default"
+        },
+        "retry_exhausted": true,
+        "fallback_reason_code": "connection_error",
+        "fallback_detail": "APIConnectionError: Connection error."
+      },
+      "reasoning_trace": "KG参照疾病：黄瓜霜霉病、黄瓜病害、黄瓜疫病、黄瓜靶斑病；未触发KG硬约束否决；风险等级=medium，置信度=0.7；集体漏检预警：KG中存在专家均未考虑的病害--黄瓜病害、黄瓜疫病、黄瓜靶斑病（漏检比例 75%）；第二轮辩论后裁决：第二轮病理意见与首轮一致",
+      "summary": "【第二轮辩论后裁决】Orchestrator 已完成 gh-b/cucumber 的diagnose 工作流：病理判断首选：黄瓜霜霉病。风险等级：medium。",
+      "action_plan": [
+        "对异常传感器复测，并查看最近 24 小时趋势",
+        "维持当前环境管理",
+        "密切观察症状变化，记录发展过程",
+        "如症状加重，建议取样送检确认病原",
+        "未来24小时降雨不足且温度偏高，建议灌溉",
+        "建议作业时间：清晨 5:00-7:00"
+      ],
+      "runtime_seconds": 22.128257599999415,
+      "trace_id": "fc6d34656d0844b1a953f6aa3a5945d0",
+      "status": "ok",
+      "valid": true,
+      "timestamp": "2026-10-24T05:30:35.730607+00:00"
+    },
+    {
+      "seed": 43,
+      "config": "C2",
+      "case_index": 19,
+      "case_id": "ms_cucumber_downy_irrigate",
+      "group": "multi_step",
+      "difficulty": 2,
+      "expected_key_factors": [
+        "backside_mold",
+        "angular_lesion",
+        "leaf_dew",
+        "delay_irrigation"
+      ],
+      "ground_truth": "霜霉病",
+      "decision": "气象条件支持灌溉",
+      "confidence": 0.66,
+      "judge_mode": "rules",
+      "judge_runtime": {
+        "outcome": "fallback",
+        "judge_mode": "rules",
+        "provider": "opencode",
+        "endpoint_id": "https://opencode.ai/zen/go/v1",
+        "model": "deepseek-v4.1-flash",
+        "timeout_seconds": 60.0,
+        "sdk_max_retries": 2,
+        "config_sources": {
+          "api_key": "AGRI_AI_JUDGE_API_KEY",
+          "base_url": "AGRI_AI_JUDGE_BASE_URL",
+          "model": "AGRI_AI_JUDGE_MODEL",
+          "provider": "default",
+          "timeout_seconds": "default",
+          "max_retries": "default"
+        },
+        "retry_exhausted": true,
+        "fallback_reason_code": "connection_error",
+        "fallback_detail": "APIConnectionError: Connection error."
+      },
+      "reasoning_trace": "KG参照疾病：黄瓜霜霉病、黄瓜病害、苦瓜细菌性角斑病、黄瓜细菌性角斑病；未触发KG硬约束否决；风险等级=high，置信度=0.66；Critic反驳：反驳轮次裁定：病理已诊断黄瓜霜霉病；暂缓灌溉，先控湿防病；集体漏检预警：KG中存在专家均未考虑的病害--黄瓜病害、苦瓜细菌性角斑病、黄瓜细菌性角斑病（漏检比例 75%）；第二轮辩论后裁决：第二轮病理意见与首轮一致",
+      "summary": "【第二轮辩论后裁决】Orchestrator 已完成 gh-b/cucumber 的irrigate 工作流：气象条件支持灌溉。风险等级：high。",
+      "action_plan": [
+        "对异常传感器复测，并查看最近 24 小时趋势",
+        "维持当前环境管理",
+        "密切观察症状变化，记录发展过程",
+        "如症状加重，建议取样送检确认病原",
+        "未来24小时降雨不足且温度偏高，建议灌溉",
+        "建议作业时间：清晨 5:00-7:00"
+      ],
+      "runtime_seconds": 21.50127809999867,
+      "trace_id": "3493b8f0c975437b8b8877be9ec48eca",
+      "status": "ok",
+      "valid": true,
+      "timestamp": "2026-10-24T05:30:35.731499+00:00"
+    },
+    {
+      "seed": 43,
+      "config": "C2",
+      "case_index": 20,
+      "case_id": "ms_cotton_wilt_irrigate",
+      "group": "multi_step",
+      "difficulty": 3,
+      "expected_key_factors": [
+        "mottling",
+        "vascular_browning",
+        "soil_dry",
+        "irrigation_decision",
+        "risk_priority"
+      ],
+      "ground_truth": "黄萎病",
+      "decision": "气象条件支持灌溉",
+      "confidence": 0.65,
+      "judge_mode": "rules",
+      "judge_runtime": {
+        "outcome": "fallback",
+        "judge_mode": "rules",
+        "provider": "opencode",
+        "endpoint_id": "https://opencode.ai/zen/go/v1",
+        "model": "deepseek-v4.1-flash",
+        "timeout_seconds": 60.0,
+        "sdk_max_retries": 2,
+        "config_sources": {
+          "api_key": "AGRI_AI_JUDGE_API_KEY",
+          "base_url": "AGRI_AI_JUDGE_BASE_URL",
+          "model": "AGRI_AI_JUDGE_MODEL",
+          "provider": "default",
+          "timeout_seconds": "default",
+          "max_retries": "default"
+        },
+        "retry_exhausted": true,
+        "fallback_reason_code": "connection_error",
+        "fallback_detail": "APIConnectionError: Connection error."
+      },
+      "reasoning_trace": "KG参照疾病：棉花黄萎病、棉花枯萎病、棉花红腐病、棉花叶烧病、甘薯根腐病；未触发KG硬约束否决；风险等级=high，置信度=0.65；Critic反驳：反驳轮次裁定：病理已诊断棉花黄萎病；暂缓灌溉，先控湿防病；集体漏检预警：KG中存在专家均未考虑的病害--棉花红腐病、棉花叶烧病、甘薯根腐病（漏检比例 60%）；第二轮辩论后裁决：第二轮病理意见与首轮一致",
+      "summary": "【第二轮辩论后裁决】Orchestrator 已完成 gh-a/cotton 的irrigate 工作流：气象条件支持灌溉。风险等级：high。",
+      "action_plan": [
+        "对异常传感器复测，并查看最近 24 小时趋势",
+        "维持当前环境管理",
+        "密切观察症状变化，记录发展过程",
+        "如症状加重，建议取样送检确认病原",
+        "未来24小时降雨不足且温度偏高，建议灌溉",
+        "建议作业时间：清晨 5:00-7:00"
+      ],
+      "runtime_seconds": 23.336276899999575,
+      "trace_id": "c33e4aa012194817a2501e28c15b7c32",
+      "status": "ok",
+      "valid": true,
+      "timestamp": "2026-10-24T05:30:35.732489+00:00"
+    },
+    {
+      "seed": 43,
+      "config": "C2",
+      "case_index": 21,
+      "case_id": "ms_sugar_spot_irrigate_cold",
+      "group": "multi_step",
+      "difficulty": 3,
+      "expected_key_factors": [
+        "circular_spot",
+        "brown_spot",
+        "low_temp",
+        "irrigation_decision",
+        "risk_priority"
+      ],
+      "ground_truth": "褐斑病",
+      "decision": "气象条件支持灌溉",
+      "confidence": 0.56,
+      "judge_mode": "rules",
+      "judge_runtime": {
+        "outcome": "fallback",
+        "judge_mode": "rules",
+        "provider": "opencode",
+        "endpoint_id": "https://opencode.ai/zen/go/v1",
+        "model": "deepseek-v4.1-flash",
+        "timeout_seconds": 60.0,
+        "sdk_max_retries": 2,
+        "config_sources": {
+          "api_key": "AGRI_AI_JUDGE_API_KEY",
+          "base_url": "AGRI_AI_JUDGE_BASE_URL",
+          "model": "AGRI_AI_JUDGE_MODEL",
+          "provider": "default",
+          "timeout_seconds": "default",
+          "max_retries": "default"
+        },
+        "retry_exhausted": true,
+        "fallback_reason_code": "connection_error",
+        "fallback_detail": "APIConnectionError: Connection error."
+      },
+      "reasoning_trace": "KG参照疾病：甜菜褐斑病、甜菜根腐病、甜菜白粉病、甜菜猝倒病；未触发KG硬约束否决；风险等级=high，置信度=0.56；Critic反驳：反驳轮次裁定：病理已诊断甜菜褐斑病；暂缓灌溉，先控湿防病；集体漏检预警：KG中存在专家均未考虑的病害--甜菜根腐病、甜菜白粉病、甜菜猝倒病（漏检比例 75%）",
+      "summary": "Orchestrator 已完成 gh-a/sugar_beet 的irrigate 工作流：气象条件支持灌溉。风险等级：high。",
+      "action_plan": [
+        "对异常传感器复测，并查看最近 24 小时趋势",
+        "维持当前环境管理",
+        "密切观察症状变化，记录发展过程",
+        "如症状加重，建议取样送检确认病原",
+        "未来24小时降雨不足且温度偏高，建议灌溉",
+        "建议作业时间：清晨 5:00-7:00"
+      ],
+      "runtime_seconds": 12.26339519999965,
+      "trace_id": "3986e7839197402c80e25f791ca4d688",
+      "status": "ok",
+      "valid": true,
+      "timestamp": "2026-10-24T05:30:35.733261+00:00"
+    },
+    {
+      "seed": 43,
+      "config": "C2",
+      "case_index": 22,
+      "case_id": "ms_tomato_mold_ventilate",
+      "group": "multi_step",
+      "difficulty": 2,
+      "expected_key_factors": [
+        "backside_mold",
+        "leaf_curl",
+        "poor_ventilation",
+        "action_plan"
+      ],
+      "ground_truth": "叶霉病",
+      "decision": "病理判断首选：番茄叶霉病",
+      "confidence": 0.69,
+      "judge_mode": "rules",
+      "judge_runtime": {
+        "outcome": "fallback",
+        "judge_mode": "rules",
+        "provider": "opencode",
+        "endpoint_id": "https://opencode.ai/zen/go/v1",
+        "model": "deepseek-v4.1-flash",
+        "timeout_seconds": 60.0,
+        "sdk_max_retries": 2,
+        "config_sources": {
+          "api_key": "AGRI_AI_JUDGE_API_KEY",
+          "base_url": "AGRI_AI_JUDGE_BASE_URL",
+          "model": "AGRI_AI_JUDGE_MODEL",
+          "provider": "default",
+          "timeout_seconds": "default",
+          "max_retries": "default"
+        },
+        "retry_exhausted": true,
+        "fallback_reason_code": "connection_error",
+        "fallback_detail": "APIConnectionError: Connection error."
+      },
+      "reasoning_trace": "KG参照疾病：番茄叶霉病、番茄早疫病、番茄褐斑病、番茄黑斑病；未触发KG硬约束否决；风险等级=medium，置信度=0.69；集体漏检预警：KG中存在专家均未考虑的病害--番茄早疫病、番茄褐斑病、番茄黑斑病（漏检比例 75%）；第二轮辩论后裁决：第二轮病理意见与首轮一致",
+      "summary": "【第二轮辩论后裁决】Orchestrator 已完成 gh-a/tomato 的diagnose 工作流：病理判断首选：番茄叶霉病。风险等级：medium。",
+      "action_plan": [
+        "对异常传感器复测，并查看最近 24 小时趋势",
+        "维持当前环境管理",
+        "密切观察症状变化，记录发展过程",
+        "如症状加重，建议取样送检确认病原",
+        "未来24小时降雨不足且温度偏高，建议灌溉",
+        "建议作业时间：清晨 5:00-7:00"
+      ],
+      "runtime_seconds": 22.973694899999828,
+      "trace_id": "4b1593e733a24b5bbe1151687f4770cd",
+      "status": "ok",
+      "valid": true,
+      "timestamp": "2026-10-24T05:30:35.734019+00:00"
+    },
+    {
+      "seed": 43,
+      "config": "C2",
+      "case_index": 23,
+      "case_id": "ms_tomato_blight_stem",
+      "group": "multi_step",
+      "difficulty": 3,
+      "expected_key_factors": [
+        "concentric_ring",
+        "stem_lesion",
+        "fruit_stage",
+        "action_plan"
+      ],
+      "ground_truth": "早疫病",
+      "decision": "病理判断首选：番茄早疫病",
+      "confidence": 0.75,
+      "judge_mode": "rules",
+      "judge_runtime": {
+        "outcome": "fallback",
+        "judge_mode": "rules",
+        "provider": "opencode",
+        "endpoint_id": "https://opencode.ai/zen/go/v1",
+        "model": "deepseek-v4.1-flash",
+        "timeout_seconds": 60.0,
+        "sdk_max_retries": 2,
+        "config_sources": {
+          "api_key": "AGRI_AI_JUDGE_API_KEY",
+          "base_url": "AGRI_AI_JUDGE_BASE_URL",
+          "model": "AGRI_AI_JUDGE_MODEL",
+          "provider": "default",
+          "timeout_seconds": "default",
+          "max_retries": "default"
+        },
+        "retry_exhausted": true,
+        "fallback_reason_code": "connection_error",
+        "fallback_detail": "APIConnectionError: Connection error."
+      },
+      "reasoning_trace": "KG参照疾病：番茄早疫病、番茄叶霉病、番茄褐斑病、番茄斑萎病；未触发KG硬约束否决；风险等级=medium，置信度=0.75；集体漏检预警：KG中存在专家均未考虑的病害--番茄褐斑病、番茄斑萎病（漏检比例 50%）；第二轮辩论后裁决：第二轮病理意见与首轮一致",
+      "summary": "【第二轮辩论后裁决】Orchestrator 已完成 gh-a/tomato 的diagnose 工作流：病理判断首选：番茄早疫病。风险等级：medium。",
+      "action_plan": [
+        "对异常传感器复测，并查看最近 24 小时趋势",
+        "维持当前环境管理",
+        "密切观察症状变化，记录发展过程",
+        "如症状加重，建议取样送检确认病原",
+        "未来24小时降雨不足且温度偏高，建议灌溉",
+        "建议作业时间：清晨 5:00-7:00"
+      ],
+      "runtime_seconds": 23.35897010000008,
+      "trace_id": "fdd4251b7c684444b43007f1efa99422",
+      "status": "ok",
+      "valid": true,
+      "timestamp": "2026-10-24T05:30:35.734877+00:00"
+    },
+    {
+      "seed": 43,
+      "config": "C2",
+      "case_index": 24,
+      "case_id": "ms_cotton_fusarium_quarantine",
+      "group": "multi_step",
+      "difficulty": 3,
+      "expected_key_factors": [
+        "half_leaf_yellowing",
+        "wilt",
+        "quarantine",
+        "irrigation_decision"
+      ],
+      "ground_truth": "枯萎病",
+      "decision": "气象条件支持灌溉",
+      "confidence": 0.7,
+      "judge_mode": "rules",
+      "judge_runtime": {
+        "outcome": "fallback",
+        "judge_mode": "rules",
+        "provider": "opencode",
+        "endpoint_id": "https://opencode.ai/zen/go/v1",
+        "model": "deepseek-v4.1-flash",
+        "timeout_seconds": 60.0,
+        "sdk_max_retries": 2,
+        "config_sources": {
+          "api_key": "AGRI_AI_JUDGE_API_KEY",
+          "base_url": "AGRI_AI_JUDGE_BASE_URL",
+          "model": "AGRI_AI_JUDGE_MODEL",
+          "provider": "default",
+          "timeout_seconds": "default",
+          "max_retries": "default"
+        },
+        "retry_exhausted": true,
+        "fallback_reason_code": "connection_error",
+        "fallback_detail": "APIConnectionError: Connection error."
+      },
+      "reasoning_trace": "KG参照疾病：棉花枯萎病、棉花黄萎病、植物真菌病害、棉花立枯病；未触发KG硬约束否决；风险等级=high，置信度=0.7；Critic反驳：反驳轮次裁定：病理已诊断棉花枯萎病；暂缓灌溉，先控湿防病；集体漏检预警：KG中存在专家均未考虑的病害--植物真菌病害、棉花立枯病（漏检比例 50%）；第二轮辩论后裁决：第二轮病理意见与首轮一致",
+      "summary": "【第二轮辩论后裁决】Orchestrator 已完成 gh-a/cotton 的irrigate 工作流：气象条件支持灌溉。风险等级：high。",
+      "action_plan": [
+        "对异常传感器复测，并查看最近 24 小时趋势",
+        "维持当前环境管理",
+        "密切观察症状变化，记录发展过程",
+        "如症状加重，建议取样送检确认病原",
+        "未来24小时降雨不足且温度偏高，建议灌溉",
+        "建议作业时间：清晨 5:00-7:00"
+      ],
+      "runtime_seconds": 23.559236900000542,
+      "trace_id": "58cb8adc3ee34ce4a9a8c753b441352f",
+      "status": "ok",
+      "valid": true,
+      "timestamp": "2026-10-24T05:30:35.735711+00:00"
+    }
+  ]
+}
