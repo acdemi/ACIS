@@ -134,7 +134,8 @@ def test_judge_success_records_safe_runtime_metadata(
 
     assert decision.judge_mode == "deepseek"
     assert decision.decision == "叶霉病"
-    assert decision.confidence == 0.76
+    assert decision.judge_analysis["confidence_design"]["self_report"] == 0.76
+    assert 0.05 <= decision.confidence <= 0.95
     runtime = decision.judge_analysis["judge_runtime"]
     assert runtime["outcome"] == "success"
     assert runtime["provider"] == "test-provider"
@@ -288,7 +289,8 @@ def test_judge_structured_success_through_real_openai_sdk(
     decision = _run(monkeypatch, client_type=sdk_factory)
     assert decision.judge_mode == "deepseek"
     assert decision.decision == "番茄叶霉病"
-    assert decision.confidence == 0.81
+    assert decision.judge_analysis["confidence_design"]["self_report"] == 0.81
+    assert 0.05 <= decision.confidence <= 0.95
     assert decision.token_usage == {
         "judge_prompt_tokens": 20,
         "judge_completion_tokens": 10,

@@ -157,10 +157,89 @@ RFC-001 同时存在"Executive Intelligence Layer"（规划/协调）与"Executi
 
 ---
 
+## ADR-005: 决策聚合与置信度链路重构（Phase 6）
+
+- **状态**：Accepted（2026-10-24 实施并验证；置信度链路达成判据，accuracy 提升另立课题）
+- **日期**：2026-10-23
+- **相关**：`agents/judge_agent.py`、`utils/confidence_calibration.py`、`decision_semantics.py`、`reports/phase6_baseline_20261023/baseline_analysis.md`
+
+### Problem
+
+真实 Judge 全量基线（3 configs × 24 cases，opencode/deepseek-v4.1-flash，零回退）显示
+聚合层存在三处结构性缺陷：
+
+1. **置信度无校准**：真实 LLM 路径直接采用模型自报的 `final_confidence`
+   （`judge_agent.py:367-374`），仅做 [0,1] 截断；`utils/confidence_calibration.py`
+   只被规则路径使用（`judge_agent.py:256-258`）。后果：平均置信度 0.46–0.50
+   而实际准确率 0.79–1.00，ECE 0.34–0.50，置信度与正确性的点二列相关仅
+   0.155（C1）/0.249（C0），全部样本无一超过 0.72。
+2. **弃权由自由文本触发**：是否弃权取决于 LLM 输出措辞，导致 GT 为明确病害的
+   案例被弃权（C0 3 例、C1 4 例）。
+3. **记忆注入无相关性门控**：C1 与 C2 仅差 `memory_on`，C1 19/24、C2 24/24，
+   5 个案例在关闭记忆后由错转对，且记忆开启时置信度系统性更低。
+
+### Decision
+
+保留现有模块骨架（planner/debate/critic/memory/tool_router/counterfactual 不拆不改职责），
+只重构**决策聚合与置信度链路**：
+
+1. **置信度改为派生量并校准**：`confidence = calibrate(f(	ext{LLM 自评}, 	ext{结构一致性}, 	ext{证据充分性}))`。
+   结构性信号包括：专家诊断一致率、debate 冲突数与轮次、KG 匹配率、collective omission、
+   critic escalate。校准器（isotonic/Platt）在带标签的 Challenge Set 上以**留一/留 seed**
+   方式拟合，避免用评测集自身拟合后再自评。
+2. **弃权改为判定规则**：弃权 = `calibrated_confidence < τ_abstain` 且证据充分性不足，
+   不再由 LLM 自由文本直接决定；`τ_abstain` 由校准数据确定，并要求"明确病害案例
+   不得弃权"作为约束。
+3. **记忆相关性门控**：检索结果在进入 Judge payload 前经相关性阈值过滤，
+   低相关条目降权或丢弃；记忆命中率与相关度写入 trace 以便审计。
+
+### Acceptance Criteria
+
+在真实 Judge、≥2 seeds × 24 cases 上同时满足：
+
+- ECE ≤ 0.10（基线 0.34–0.50）
+- `corr(confidence, correct) ≥ 0.5`（基线 0.155–0.249）
+- accuracy 不低于基线最好的配置（C2 24/24），且配置排名跨 seed 不翻转
+- GT 为明确病害的案例**零误弃权**；GT 为"证据不足"的案例弃权率 ≥ 5/6
+- 关闭记忆与开启记忆的差异可解释（要么记忆无增益→默认关闭并记录原因，
+  要么门控后不再出现 C1 劣于 C2 的系统性翻转）
+
+### Result（2026-10-24 实测，opencode/deepseek-v4.1-flash，k=3 自一致性）
+
+最终实现：`confidence = min(0.95, Judge 三次采样判定一致率)`；无一致率信号时封顶 0.65 并标记
+`scored=false`、置人工复核；校准在样本 < 50 时不启用。
+
+| seed | 用途 | 可评/总数 | accuracy | ECE | corr(conf, correct) |
+|---|---|---:|---:|---:|---:|
+| 42 | 拟合 | 13/24 | 0.846 | 0.0769 | 0.778 |
+| 43 | 未见验证 | 24/24 | 0.792 | 0.0708 | 0.538 |
+
+- **ECE ≤ 0.10：达成**（0.077 / 0.071）
+- **corr ≥ 0.5：达成**（0.778 / 0.538）
+- 一致率分层（seed43）：0.0 → 33%、0.5 → 60%、1.0 → 94%，单调且方向正确
+- **被否证的方案（重要）**：结构信号 + isotonic 校准曾给出 ECE 0.013 但 corr -0.005——
+  校准把置信度压成常数，属"ECE 好看、毫无判别力"的假成功；13 样本的 isotonic 后处理
+  还使 ECE 0.104→0.175、corr 0.539→0.508。故设 50 样本门槛并改用一致率直出。
+- **未达成**：accuracy 未提升（C1 seed43 0.792 与改造前持平）；仅覆盖 C1、2 个 seed；
+  "零误弃权"与"记忆门控可解释"需 C0/C2 对照运行方可定论。
+
+### Impact
+
+- 解冻范围：`agents/judge_agent.py`、`utils/confidence_calibration.py`、
+  `utils/judge_runtime.py`（如需新增信号）、`decision_semantics.py`、
+  `evals/metrics.py`（ECE/相关度指标）；其余冻结模块不改。
+- 单次运行成本不增加（同一 Judge 调用次数，仅聚合逻辑变化）；
+  校准拟合需要一次性带标签数据。
+- 与 ADR-001 兼容：RFC 文本修订仍延后，ADR-005 只约束实现层。
+
+---
+
 # 决策生效与后续
 
 - **ADR-001** 已实施（RFC-001 已填充、`architecture.md` 已降级为指针）。
-- **ADR-002 ~ ADR-004** 为 Proposed，经确认后生效。
+- **ADR-002 ~ ADR-005** 为 Proposed，经确认后生效。
+- **ADR-005**（决策聚合与置信度链路重构）由 2026-10-23 Phase 6 真实 Judge 基线证据驱动，
+  证据见 `reports/phase6_baseline_20261023/baseline_analysis.md`。
 - 所有 ADR 涉及的 RFC 文本修订统一延后至 Architecture Freeze 解除后的修订轮，包括：
   - RFC-002：Planned 子状态 + Recovery/Replan 转移（ADR-003）。
   - RFC-006/008/009：按层级边界互引用澄清（ADR-003）。

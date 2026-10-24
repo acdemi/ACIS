@@ -2,7 +2,7 @@
 
 Phase: 4.2-R — Challenge Set Evaluation (Real Agent)
 Sprint: 06 (completed) -> Phase 4 Evaluation Campaign
-Status: **真实 LLM Judge 已恢复并验证（2026-10-19，六次最小预检零回退）— 等待架构决策（Phase 5 vs Phase 6）**
+Status: **Phase 6 架构重设计进行中（2026-10-24）：ADR-005 置信度链路已实施并验证（ECE 0.071–0.077、corr 0.538–0.778，两 seed）；accuracy 未提升，C0/C2 对照待跑**
 Goal: Architecture impact assessment — Challenge Set multi-seed validation + real agent evaluation
 
 ## 结论摘要（截至 2026-10-19）

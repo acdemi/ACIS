@@ -34,6 +34,13 @@
 - **真实 Judge 凭证（2026-10-18 → 2026-10-19 已解决）**: 曾因 `DEEPSEEK_API_KEY` 401 BLOCKED；
   用户经正常 `.env` 渠道更新凭证后，2026-10-19 按规程完成 1 次受控验证 + 六次最小预检，
   6/6 `judge_mode=deepseek` 零回退。遗留观察：API 响应 `model=deepseek-flash`（请求 `deepseek-chat`）。
+- **Phase 6 accuracy 未提升（2026-10-24）**: ADR-005 修好了置信度链路（ECE/corr 达标），
+  但 C1 seed43 accuracy 0.792 与改造前持平。置信度可信 ≠ 决策更准；决策质量需独立课题。
+  Priority: High。
+- **Phase 6 验证覆盖不足（2026-10-24）**: 仅 C1、2 个 seed；agreement=0.0 分层 n=3；
+  "GT 为明确病害零误弃权"与"记忆门控可解释"需 C0/C2 对照运行方可定论。Priority: Medium。
+- **校准样本门槛（2026-10-24）**: DecisionCalibrator 在样本 < 50 时不启用；当前数据 13–24 条，
+  故生产路径实际为"一致率直出"。待累计 ≥50 条可评样本后启用 isotonic。Priority: Low。
 - **factor coverage 契约边界（2026-10-17）**: 现行契约只对最终用户可见决策解释评分，
   不计隐藏专家证据（内部 trace 的 symptom factor 不计入）；全 trace 覆盖率为未来独立指标。
   Priority: Low（设计决定，待架构师确认）。
