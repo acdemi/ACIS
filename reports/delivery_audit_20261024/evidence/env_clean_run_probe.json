@@ -1,0 +1,148 @@
+{
+  "cwd": "E:\\knowledge_database\\ACIS\\logs\\delivery_audit_20261024\\env\\clean",
+  "sys_path_head": [
+    "E:\\knowledge_database\\ACIS\\logs\\delivery_audit_20261024\\env",
+    "E:\\knowledge_database\\ACIS\\logs\\delivery_audit_20261024\\env\\clean",
+    "C:\\Users\\lkl\\AppData\\Roaming\\uv\\python\\cpython-3.13-windows-x86_64-none\\python313.zip"
+  ],
+  "has_env_file": false,
+  "has_data_dir_before": false,
+  "env": {
+    "DEEPSEEK_API_KEY": null,
+    "AGRI_AI_JUDGE_API_KEY": null,
+    "AGRI_AI_PERSIST": null,
+    "AGRI_AI_RAG_BACKEND": null,
+    "AGRI_AI_KG_BACKEND": null,
+    "HF_HUB_OFFLINE": null
+  },
+  "imports": {
+    "orchestrator": "ok",
+    "workflow": "ok",
+    "langgraph": "ok",
+    "openai": "ok",
+    "qdrant_client": "ok",
+    "neo4j": "ok",
+    "torch": "ok",
+    "transformers": "ok",
+    "sklearn": "ok"
+  },
+  "runs": {
+    "rules_only": {
+      "ok": true,
+      "elapsed_s": 3.78,
+      "summary": {
+        "decision": "病理判断首选：番茄叶霉病",
+        "confidence": 0.72,
+        "judge_mode": "rules",
+        "need_human_review": false,
+        "risk_level": "medium",
+        "judge_runtime": {
+          "outcome": "rules",
+          "judge_mode": "rules",
+          "provider": "deepseek",
+          "endpoint_id": "https://api.deepseek.com",
+          "model": "deepseek-chat",
+          "timeout_seconds": 60.0,
+          "sdk_max_retries": 2,
+          "config_sources": {
+            "api_key": "default",
+            "base_url": "default",
+            "model": "default",
+            "provider": "default",
+            "timeout_seconds": "default",
+            "max_retries": "default"
+          },
+          "retry_exhausted": false,
+          "fallback_reason_code": "disabled_by_configuration",
+          "fallback_detail": "JudgeAgent(use_llm=False)"
+        },
+        "missing_evidence": [
+          "缺少有效图像证据，视觉 Agent 未参与确认"
+        ],
+        "warnings": [
+          "缺少叶片图像，病害判断依赖症状与环境数据",
+          "日最高气温将超过35°C，注意防暑降温",
+          "日最高气温将超过35°C，注意防暑降温"
+        ],
+        "decision_id": 1,
+        "action_plan_len": 6
+      },
+      "trace_id": "03af4684c656486a9d9ab7cd074f5c48",
+      "trace_stages": [
+        "request",
+        "perception",
+        "memory",
+        "experts",
+        "debate",
+        "critic",
+        "judge",
+        "planner",
+        "tool_router",
+        "metrics"
+      ],
+      "trace_event_count": 19
+    },
+    "langgraph": {
+      "ok": true,
+      "compiled_graph": true,
+      "elapsed_s": 2.05,
+      "summary": {
+        "decision": "病理判断首选：番茄叶霉病",
+        "confidence": 0.74,
+        "judge_mode": "rules",
+        "need_human_review": false,
+        "risk_level": "medium",
+        "judge_runtime": {
+          "outcome": "rules",
+          "judge_mode": "rules",
+          "provider": "deepseek",
+          "endpoint_id": "https://api.deepseek.com",
+          "model": "deepseek-chat",
+          "timeout_seconds": 60.0,
+          "sdk_max_retries": 2,
+          "config_sources": {
+            "api_key": "default",
+            "base_url": "default",
+            "model": "default",
+            "provider": "default",
+            "timeout_seconds": "default",
+            "max_retries": "default"
+          },
+          "retry_exhausted": false,
+          "fallback_reason_code": "disabled_by_configuration",
+          "fallback_detail": "JudgeAgent(use_llm=False)"
+        },
+        "missing_evidence": [
+          "缺少有效图像证据，视觉 Agent 未参与确认"
+        ],
+        "warnings": [
+          "缺少叶片图像，病害判断依赖症状与环境数据",
+          "日最高气温将超过35°C，注意防暑降温",
+          "日最高气温将超过35°C，注意防暑降温",
+          "日最高气温将超过35°C，注意防暑降温"
+        ],
+        "decision_id": 2,
+        "action_plan_len": 6
+      },
+      "trace_id": "988f90fcf663431f8e30c48ee608af5e",
+      "trace_stages": [
+        "request",
+        "perception",
+        "memory",
+        "experts",
+        "debate",
+        "critic",
+        "judge",
+        "planner",
+        "tool_router",
+        "metrics"
+      ]
+    }
+  },
+  "has_data_dir_after": true,
+  "data_dir_contents": [
+    "agri.db"
+  ],
+  "has_results_dir": false,
+  "has_logs_dir": false
+}

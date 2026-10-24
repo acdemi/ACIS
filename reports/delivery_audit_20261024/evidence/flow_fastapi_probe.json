@@ -1,0 +1,72 @@
+{
+  "request_body_schema": "{\"query\": str, \"image_path\": str|None, \"use_llm_judge\": bool=False, \"use_llm_critic\": bool=False}",
+  "health": {
+    "status_code": 200,
+    "body": {
+      "status": "ok"
+    },
+    "elapsed_seconds": 0.0967
+  },
+  "diagnose": {
+    "status_code": 200,
+    "elapsed_seconds": 7.552,
+    "request_body": {
+      "query": "温室A番茄叶片出现黄斑，叶背有灰色霉层，如何处理？"
+    },
+    "top_level_keys": [
+      "action_plan",
+      "confidence",
+      "debate",
+      "decision",
+      "decision_id",
+      "judge_analysis",
+      "judge_mode",
+      "need_human_review",
+      "reasoning_trace",
+      "risk_level",
+      "summary",
+      "token_usage",
+      "traces"
+    ],
+    "decision": "病理判断首选：番茄叶霉病",
+    "judge_mode": "rules",
+    "confidence": 0.74,
+    "risk_level": "medium",
+    "action_plan_count": 6,
+    "agent_trace_count": 15,
+    "judge_analysis_keys": [
+      "calibration",
+      "collective_omission",
+      "consistency",
+      "critic",
+      "judge_runtime",
+      "kg",
+      "kg_evolution",
+      "sensor_readings"
+    ],
+    "judge_runtime": {
+      "outcome": "rules",
+      "judge_mode": "rules",
+      "provider": "openai-compatible",
+      "endpoint_id": "http://127.0.0.1:9",
+      "model": "deepseek-chat",
+      "timeout_seconds": 2.0,
+      "sdk_max_retries": 0,
+      "config_sources": {
+        "api_key": "AGRI_AI_JUDGE_API_KEY",
+        "base_url": "AGRI_AI_JUDGE_BASE_URL",
+        "model": "default",
+        "provider": "default",
+        "timeout_seconds": "AGRI_AI_JUDGE_TIMEOUT_SECONDS",
+        "max_retries": "AGRI_AI_JUDGE_MAX_RETRIES"
+      },
+      "retry_exhausted": false,
+      "fallback_reason_code": "disabled_by_configuration",
+      "fallback_detail": "JudgeAgent(use_llm=False)"
+    },
+    "debate_missing_evidence": [
+      "缺少有效图像证据，视觉 Agent 未参与确认"
+    ],
+    "decision_id": 43
+  }
+}

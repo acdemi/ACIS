@@ -1,0 +1,176 @@
+{
+  "cli_rules_only_json": {
+    "file": "cli_rules_only_json.out.txt",
+    "decision": "病理判断首选：番茄叶霉病",
+    "judge_mode": "rules",
+    "confidence": 0.72,
+    "risk_level": "medium",
+    "need_human_review": false,
+    "decision_id": 36,
+    "summary": "Orchestrator 已完成 gh-a/tomato 的diagnose 工作流：病理判断首选：番茄叶霉病。风险等级：medium。",
+    "action_plan_count": 6,
+    "agent_count": 12,
+    "agents": [
+      "[感知层] 视觉Agent",
+      "[感知层] 传感器Agent",
+      "[感知层] 天气Agent",
+      "[记忆层] RAG",
+      "[记忆层] 知识图谱",
+      "[记忆层] 历史案例库",
+      "[记忆层] 经验回放Agent",
+      "[专家层] 病理Agent",
+      "[专家层] 气象Agent",
+      "[专家层] 栽培Agent",
+      "[专家层] 经济Agent",
+      "[专家层] 生态Agent"
+    ],
+    "judge_analysis_keys": [
+      "calibration",
+      "collective_omission",
+      "consistency",
+      "critic",
+      "judge_runtime",
+      "kg",
+      "kg_evolution",
+      "sensor_readings"
+    ],
+    "judge_runtime": {
+      "outcome": "rules",
+      "judge_mode": "rules",
+      "provider": "deepseek",
+      "endpoint_id": "https://api.deepseek.com",
+      "model": "deepseek-chat",
+      "timeout_seconds": 60.0,
+      "sdk_max_retries": 2,
+      "config_sources": {
+        "api_key": "DEEPSEEK_API_KEY",
+        "base_url": "DEEPSEEK_BASE_URL",
+        "model": "default",
+        "provider": "default",
+        "timeout_seconds": "default",
+        "max_retries": "default"
+      },
+      "retry_exhausted": false,
+      "fallback_reason_code": "disabled_by_configuration",
+      "fallback_detail": "JudgeAgent(use_llm=False)"
+    },
+    "kg_backend": "neo4j",
+    "rag_backend": "fallback",
+    "debate": {
+      "consensus": [
+        "病理诊断与记忆层（RAG/历史案例）结论一致，诊断可信度升高"
+      ],
+      "conflicts": [],
+      "missing_evidence": [
+        "缺少有效图像证据，视觉 Agent 未参与确认"
+      ],
+      "risk_level": "medium",
+      "critic_triggered": null
+    },
+    "has_trace_in_json": false,
+    "json_top_level_keys": [
+      "action_plan",
+      "confidence",
+      "debate",
+      "decision",
+      "decision_id",
+      "judge_analysis",
+      "judge_mode",
+      "need_human_review",
+      "reasoning_trace",
+      "risk_level",
+      "summary",
+      "token_usage",
+      "traces"
+    ]
+  },
+  "cli_langgraph_json": {
+    "file": "cli_langgraph_json.out.txt",
+    "decision": "病理判断首选：番茄叶霉病",
+    "judge_mode": "rules",
+    "confidence": 0.74,
+    "risk_level": "medium",
+    "need_human_review": false,
+    "decision_id": 37,
+    "summary": "【第二轮辩论后裁决】Orchestrator 已完成 gh-a/tomato 的diagnose 工作流：病理判断首选：番茄叶霉病。风险等级：medium。",
+    "action_plan_count": 6,
+    "agent_count": 15,
+    "agents": [
+      "[感知层] 视觉Agent",
+      "[感知层] 传感器Agent",
+      "[感知层] 天气Agent",
+      "[记忆层] RAG",
+      "[记忆层] 知识图谱",
+      "[记忆层] 历史案例库",
+      "[记忆层] 经验回放Agent",
+      "[专家层] 病理Agent",
+      "[专家层] 气象Agent",
+      "[专家层] 栽培Agent",
+      "[专家层] 经济Agent",
+      "[专家层] 生态Agent",
+      "[专家层] 病理Agent",
+      "[专家层] 气象Agent",
+      "[专家层] 栽培Agent"
+    ],
+    "judge_analysis_keys": [
+      "calibration",
+      "collective_omission",
+      "consistency",
+      "critic",
+      "judge_runtime",
+      "kg",
+      "kg_evolution",
+      "sensor_readings"
+    ],
+    "judge_runtime": {
+      "outcome": "rules",
+      "judge_mode": "rules",
+      "provider": "deepseek",
+      "endpoint_id": "https://api.deepseek.com",
+      "model": "deepseek-chat",
+      "timeout_seconds": 60.0,
+      "sdk_max_retries": 2,
+      "config_sources": {
+        "api_key": "DEEPSEEK_API_KEY",
+        "base_url": "DEEPSEEK_BASE_URL",
+        "model": "default",
+        "provider": "default",
+        "timeout_seconds": "default",
+        "max_retries": "default"
+      },
+      "retry_exhausted": false,
+      "fallback_reason_code": "disabled_by_configuration",
+      "fallback_detail": "JudgeAgent(use_llm=False)"
+    },
+    "kg_backend": "neo4j",
+    "rag_backend": "fallback",
+    "debate": {
+      "consensus": [
+        "【多轮辩论·第2轮】已携带前1轮辩论上下文",
+        "病理诊断与记忆层（RAG/历史案例）结论一致，诊断可信度升高"
+      ],
+      "conflicts": [],
+      "missing_evidence": [
+        "缺少有效图像证据，视觉 Agent 未参与确认"
+      ],
+      "risk_level": "medium",
+      "critic_triggered": null
+    },
+    "has_trace_in_json": false,
+    "json_top_level_keys": [
+      "action_plan",
+      "confidence",
+      "debate",
+      "decision",
+      "decision_id",
+      "judge_analysis",
+      "judge_mode",
+      "need_human_review",
+      "reasoning_trace",
+      "risk_level",
+      "summary",
+      "token_usage",
+      "traces"
+    ]
+  }
+}

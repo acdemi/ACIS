@@ -1,0 +1,62 @@
+{
+  "mapping": "confidence := min(0.95, self_consistency.agreement) from trace",
+  "runs": {
+    "sc_c1_42": {
+      "n_scored": 13,
+      "report": {
+        "n_scored": 13,
+        "accuracy": "11/13",
+        "ece": 0.0769,
+        "corr": 0.778
+      },
+      "ece_on_min095_agreement": 0.076923,
+      "corr_on_min095_agreement": 0.7785,
+      "ece_on_raw_agreement": 0.038462,
+      "ece_on_stored_confidence": 0.074123,
+      "matches_reported_ece": true,
+      "matches_reported_corr": true,
+      "ece_bins_sensitivity": {
+        "3": 0.076923,
+        "5": 0.076923,
+        "10": 0.076923,
+        "20": 0.076923
+      }
+    },
+    "sc43_c1_43": {
+      "n_scored": 24,
+      "report": {
+        "n_scored": 24,
+        "accuracy": "19/24",
+        "ece": 0.0708,
+        "corr": 0.538
+      },
+      "ece_on_min095_agreement": 0.070833,
+      "corr_on_min095_agreement": 0.5379,
+      "ece_on_raw_agreement": 0.104167,
+      "ece_on_stored_confidence": 0.175,
+      "matches_reported_ece": true,
+      "matches_reported_corr": true,
+      "ece_bins_sensitivity": {
+        "3": 0.070833,
+        "5": 0.070833,
+        "10": 0.070833,
+        "20": 0.070833
+      }
+    }
+  },
+  "baseline_c1_ece_probe": {
+    "reported": 0.339,
+    "all24": 0.375833,
+    "bins": {
+      "3": 0.375833,
+      "4": 0.375833,
+      "5": 0.375833,
+      "10": 0.375833,
+      "20": 0.375833
+    },
+    "exclude_false_abstention": 0.416,
+    "exclude_correct_cases": 0.416,
+    "only_correct_cases": 0.537895,
+    "single_case_drop_hits": []
+  }
+}
