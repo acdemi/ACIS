@@ -17,7 +17,14 @@ class VisionAgent:
             return AgentOutput(layer="感知层", agent=self.name, claim="视觉模型调用失败", confidence=0.0, evidence={"error": str(exc)}, warnings=["视觉通道不可用，需要依赖其他 Agent 交叉判断"])
         if "error" in result:
             return AgentOutput(layer="感知层", agent=self.name, claim="视觉识别未给出有效结论", confidence=0.1, evidence=result, warnings=[result["error"]])
-        top = result.get("top_prediction", {})
-        disease = top.get("chinese_name") or top.get("label") or "未知类别"
-        confidence = float(top.get("confidence", 0.0))
+        # ``agents.vision.diagnose_image`` returns {"diagnosis": {...}}; keep a
+        # fallback for older callers that returned a ``top_prediction`` block.
+        diagnosis = result.get("diagnosis") or {}
+        if diagnosis:
+            disease = diagnosis.get("primary") or "未知类别"
+            confidence = float(diagnosis.get("confidence", 0.0))
+        else:
+            top = result.get("top_prediction") or {}
+            disease = top.get("chinese_name") or top.get("label") or "未知类别"
+            confidence = float(top.get("confidence", 0.0))
         return AgentOutput(layer="感知层", agent=self.name, claim=f"图像最可能识别为：{disease}", confidence=confidence, evidence=result, recommendations=["将视觉结果与传感器湿度、知识库症状匹配结果交叉验证"])

@@ -20,7 +20,7 @@ $py = 'E:\knowledge_database\ACIS\.venv\Scripts\python.exe'
 检查三件事：
 
 1. `.\.venv\Scripts\python.exe -V` → `Python 3.13.3`（仓库自带 venv，不要用系统 python）。
-2. `& $py orchestrator.py --rules-only "温室A番茄叶片出现黄斑，叶背有灰色霉层，如何处理？"` → 能出 `病理判断首选：番茄叶霉病`（冷启动约 8–9s）。
+2. `& $py orchestrator.py --rules-only --seed 7 --trace-out logs/trace_demo.json "温室A番茄叶片出现黄斑，叶背有灰色霉层，如何处理？"` → 能出 `病理判断首选：番茄叶霉病`，并生成 `logs/trace_demo.json`（冷启动约 8–9s）。
 3. 开第二个终端预跑一遍演示命令，避免首次 import/模型预热占用演示时间。
 
 **可选（有 Key 才用）**：`$env:DEEPSEEK_API_KEY='sk-...'`，并在 TUI 中按 `[j]` 开 LLM Judge；**无 Key 时不要承诺 LLM 演示**，直接讲规则版（本脚本默认）。
@@ -61,10 +61,11 @@ $py = 'E:\knowledge_database\ACIS\.venv\Scripts\python.exe'
 
 **方式 B（更有说服力，开第二个终端）**：
 ```powershell
-& $py -c "import json; from orchestrator import AgentOrchestrator; o=AgentOrchestrator(use_llm_judge=False); d=o.run('温室A番茄叶片出现黄斑，叶背有灰色霉层，如何处理？'); t=o.last_trace; print('trace_id=',t.trace_id); print('stages=',t.stages_present); print('judge_runtime=',json.dumps(t.judge[0].payload['judge_analysis']['judge_runtime'],ensure_ascii=False))"
+& $py orchestrator.py --rules-only --seed 7 --trace-out logs/trace_demo.json "温室A番茄叶片出现黄斑，叶背有灰色霉层，如何处理？"
+& $py -c "import json; d=json.load(open('logs/trace_demo.json',encoding='utf-8')); print('trace_id=',d['trace_id']); print('stages=',[k for k in ('request','perception','memory','experts','debate','critic','judge','planner','tool_router','metrics') if k in d]); print('judge_runtime=',d['judge'][0]['judge_analysis']['judge_runtime'])"
 ```
 讲：
-> "一条命令给出统一 Trace 的 trace_id、10 个阶段（request…metrics）和 Judge 运行元数据；同一条决策在 SQLite 里有 decision_id。这就是'可追溯'的落点。"
+> "`--trace-out` 一条命令把本次运行导出成 JSON：trace_id、10 个阶段（request…metrics）和 Judge 运行元数据都在里面；同一条决策在 SQLite 里有 decision_id。这就是'可追溯'的落点。`--seed 7` 让模拟天气/传感器中的随机部分可复现。"
 
 ### 3:20–4:10 · 异常处理（故障注入，证明"故障可解释"）
 在第二个终端执行（复制即可）：

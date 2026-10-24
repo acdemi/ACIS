@@ -11,12 +11,16 @@ if str(ROOT) not in sys.path:
 from _env import load_env
 load_env()  # 注入 .env（DEEPSEEK_API_KEY / NEO4J_PASSWORD），须在 import orchestrator 前
 
+import logging
 from dataclasses import asdict
 
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 
 from orchestrator import AgentOrchestrator
+from utils.judge_runtime import resolve_judge_config
+
+logger = logging.getLogger(__name__)
 
 app = FastAPI(title="Agri AI Gateway", version="0.2.0")
 
@@ -29,8 +33,9 @@ class DiagnoseRequest(BaseModel):
 
 
 @app.get("/health")
-def health() -> dict[str, str]:
-    return {"status": "ok"}
+def health() -> dict[str, object]:
+    """Liveness plus whether the optional LLM Judge is configured."""
+    return {"status": "ok", "judge_configured": resolve_judge_config().configured}
 
 
 @app.post("/diagnose")
@@ -38,8 +43,20 @@ def diagnose(request: DiagnoseRequest) -> dict:
     orchestrator = AgentOrchestrator(
         use_llm_judge=request.use_llm_judge, use_llm_critic=request.use_llm_critic
     )
-    decision = orchestrator.run(request.query, request.image_path)
-    return asdict(decision)
+    try:
+        decision = orchestrator.run(request.query, request.image_path)
+    except Exception as exc:  # boundary: never leak a bare 500/stack trace
+        logger.exception("diagnose failed: %s: %s", type(exc).__name__, exc)
+        raise HTTPException(
+            status_code=500,
+            detail=f"diagnosis failed: {type(exc).__name__}",
+        ) from exc
+    payload = asdict(decision)
+    trace = orchestrator.last_trace
+    if trace is not None:
+        payload["trace_id"] = trace.trace_id
+        payload["trace_stages"] = trace.stages_present
+    return payload
 
 
 @app.get("/decisions")
