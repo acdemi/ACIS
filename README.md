@@ -6,21 +6,92 @@ LangGraph 不可用或执行失败时自动回退规则编排。
 
 主图流程：`context → perception → memory → experts → debate → critic → judge`（含多轮辩论条件循环 `rebuttal`）。
 
-## 当前状态（2026-09-20）
+## 项目解决的问题
+
+温室/大棚种植者在病害早期缺少"可解释、可追溯"的诊断与处置建议：只看单一模型输出，
+很难知道结论依据了哪些传感器/天气/知识库证据，也不清楚何时应当弃权或转人工。
+ACIS 把一次问诊拆成可审计的多阶段流程，输出**诊断 + 置信度 + 风险 + 行动建议 + 证据链**，
+并在外部模型不可用时自动回退到确定性规则链路。
+
+## 系统能力与适用范围
+
+**能做（MVP 范围）**
+- 自然语言病害咨询：番茄（叶霉病/早疫病）为主，知识库另含黄瓜霜霉病、甜菜褐斑病/根腐病、棉花黄萎病/枯萎病；
+- 输出首选诊断、置信度、风险等级、是否需人工复核、6 条行动建议、辩论共识/冲突、KG 校验、推理摘要；
+- 三个入口：CLI、TUI（6 个演示场景）、FastAPI（诊断/历史/反馈/结果回灌）；
+- 离线运行：无 API key、无 Neo4j/Qdrant 也能跑；可选接入 Qdrant/Neo4j 与真实 LLM Judge；
+- 统一 Trace（10 阶段）、SQLite 决策审计、故障分类与自动回退。
+
+**不能做 / 不在范围**
+- 不做真实田间诊断、不替代农技专家；传感器/天气为**模拟数据**；
+- 图片识别默认 mock（可选真实模型但未验证质量）；
+- 不自动执行施药/灌溉（Tool Router 只生成请求，不执行工具）；
+- 未验证生产并发、SLA、跨作物泛化。
+
+## 架构与关键数据流
+
+```mermaid
+flowchart TD
+  CLI["CLI: orchestrator.py"] --> ORCH["AgentOrchestrator.run"]
+  TUI["TUI: ui/tui.py"] --> ORCH
+  API["FastAPI: gateway/app.py"] --> ORCH
+  ORCH --> LG{"LangGraph 可用?"}
+  LG -- "是" --> WF["workflow.py 主图：context→perception→memory→experts→debate→critic→judge"]
+  LG -- "否 / 异常" --> RULES["run_rules 规则编排"]
+  WF --> PER["感知层：视觉(可选/跳过) + 传感器(模拟) + 天气(模拟)"]
+  RULES --> PER
+  PER --> MEM["记忆层：RAG(Qdrant/内存) + KG(Neo4j/DISEASE_DB) + 案例/经验(SQLite)"]
+  MEM --> EXP["专家层：病理(规则+知识库) + 气象/栽培/经济/生态"]
+  EXP --> DEB["Debate：冲突/共识"]
+  DEB --> CRI["Critic：规则/可选 LLM 反驳降权"]
+  CRI --> JUD["Judge：规则/可选 LLM + 置信度策略"]
+  JUD --> OUT["DecisionOutput：裁决/置信度/风险/建议/证据"]
+  OUT --> DB[("SQLite decisions 审计")]
+  OUT --> TR["Unified Trace（10 阶段）"]
+  JUD -. "Planner 可选（默认关）" .-> PLAN["Planner"] --> ROUTER["ToolRouter 只生成请求"]
+```
+
+关键数据流：`用户输入 → 上下文解析 → 感知/记忆/专家证据 → Debate/Critic → Judge → 决策落库 + Trace`。
+`need_human_review` 在低置信、冲突、Critic escalate、KG 硬约束冲突时置真；人工反馈通过
+`/decisions/{id}/feedback`、`/outcome` 回灌，影响后续案例/经验回放。
+
+## 技术栈
+
+Python 3.13 / LangGraph（主图，失败回退规则）/ OpenAI-compatible SDK（可选 Judge/Critic）/
+FastAPI + Uvicorn / SQLite（标准库）/ rich（TUI）/ Qdrant（可选）/ Neo4j（可选）/ pytest。
+
+## 演示案例
+
+- 主案例：`温室A番茄叶片出现黄斑，叶背有灰色霉层，如何处理？` → 叶霉病、置信度 0.72–0.74、medium、6 条建议；
+- 冲突案例：`温室A番茄叶背灰色霉层，今天需要浇水吗？要兼顾病害风险` → Debate/Critic 降权；
+- 演示脚本与异常处理见 [docs/DEMO_RUNBOOK.md](docs/DEMO_RUNBOOK.md)（3–5 分钟）。
+
+## 验收与材料
+
+- 端到端验收记录：[reports/acceptance_20261024.md](reports/acceptance_20261024.md)
+- 最终交付判定：[reports/delivery_verdict_20261024.md](reports/delivery_verdict_20261024.md)
+- 实验与指标审计：[reports/experiment_audit_20261024.md](reports/experiment_audit_20261024.md)
+- 技术展示材料（架构/流程/请求示例/结果表/故障记录）：[docs/PORTFOLIO.md](docs/PORTFOLIO.md)
+- 简历项目描述：[docs/RESUME_ACIS.md](docs/RESUME_ACIS.md)
+
+## 最小可交付版本（2026-10-24）
+
+当前仓库按"可运行、可演示、可验证"的最小交付版本维护。产品代码沿用 ACIS 2.1E 分层链路，
+不再以补齐 Phase / 通用智能体架构为目标。
 
 | 项目 | 状态 |
 |---|---|
-| 版本 | ACIS 2.1E — Evidence Platform；Sprint 01 ~ 06 已完成；当前处于 **Phase 4.2-R（Challenge Set 真实 Agent 评测）**，等待架构决策（Phase 5 扩展评测 / Phase 6 架构重设计） |
-| 模块冻结 | Planner / Judge / Debate / Critic / Tool Router / Memory / DecisionOutput / Unified Trace / Perception Agents 冻结 2.1（详见 `context/ARCHITECTURE_STATE.md`） |
-| 单元测试 | `pytest`：**267 passed**（2026-09-20 实测） |
-| 回归 | `evals/smoke_eval.py`（3 套 × 3 场景）、`evals/fixture_eval.py`（12 场景）全绿 |
-| 基准 | `benchmarks/` 9 个数据集 / **64 案例**（52 已标注能力，一致性检查 52/52）；enriched 18 例 accuracy 1.00 |
-| 能力度量 | 7 种认知能力均可由 Trace 自动打分（0-1），见 `results/summary.md` 的 “Capability Performance” |
-| 消融 | 7 组合消融已产出（`results/ablation/`），含能力分数消融（cap_smoke） |
-| 实验管理 | `experiments/` 实验管理器：YAML 定义 / 多 seed 运行 / manifest 可复现归档 / 统计分析与论文图（见 `results/experiments/`） |
-| 评测战役 | Challenge Set v1（24 案例）+ Phase 4.1 pilot（72 calls）+ Phase 4.2 验证（216 calls）+ 真实 Agent（216 calls）+ 稳定性/压力测试/预检（`reports/`） |
-| 关键发现 | C1（完整 ACIS）在 Challenge Set 上未显著优于 C0（裸基线），R3 排名跨 seed 翻转；R2 中 191/216 次 judge 回退 rules；R4 预检 FAIL |
-| 已知债务 | 12 个难度案例按设计未标注（待审查）；judge 端点/连接性、harness 与真实 Agent 不一致、C1≤C0 结论未决（详见 `context/KNOWN_DEBT.md`） |
+| 主场景 | **温室番茄病害诊断与处置建议**（文本输入；4 作物 / 7 病害知识库；黄瓜保留兼容） |
+| 运行基线 | Python 3.13（`.venv`）；CLI / TUI / FastAPI 三入口；无 Neo4j / Qdrant / API key 也可离线运行 |
+| 单元测试 | 24 个测试文件 / **343 用例**；普通环境应全绿；沙箱/受限环境中 `tmp_path` ACL 与子进程管道会导致已知错误（见"测试与评估"） |
+| 回归 | `evals/smoke_eval.py`（3 套 × 3 场景，LLM Judge 套件在无 key 时回退规则）、`evals/fixture_eval.py`（12 场景） |
+| 固定评测 | `scripts/run_delivery_eval.py` → `reports/delivery_eval/summary.{json,md}`（12 例离线确定性评测，已提交） |
+| 可观测性 | 统一 Trace 10 阶段；CLI `--trace-out` 可导出；SQLite 决策审计；API 返回 `trace_id` |
+| 已知限制 | 图片识别为 mock/可选模型（字段已修复，离线不下载模型）；LLM Judge/Critic 为可选增强；Docker 未在本环境验证；Phase 4/6 指标仅供研究记录 |
+
+> 下文 Sprint/Phase 章节是历史记录，保留用于追溯；交付验收以本节与
+> `reports/acceptance_20261024.md`、`reports/delivery_eval/`、`docs/DEMO_RUNBOOK.md` 为准。
+> 历史实验的指标口径混用，引用前请先读 `reports/experiment_audit_20261024.md`。
 
 ## 版本演进
 
@@ -38,7 +109,10 @@ LangGraph 不可用或执行失败时自动回退规则编排。
 
 ### Phase 4 — Challenge Set 评测战役（2026-08-09 ~ 2026-08-31）
 
-针对"架构是否带来真实能力增量"的问题，建立 Challenge Set v1（24 案例，5 类挑战）并做多轮评测：
+针对"架构是否带来真实能力增量"的问题，建立 Challenge Set v1（24 案例，5 类挑战）并做多轮评测。
+> 口径提示：本节为历史记录；Phase 4.1/4.2 与 R3 报告中的 "accuracy" 在部分报告中指 factor coverage
+> （见 `scripts/generate_stability_report.py:66-75`），**不是诊断准确率**；引用前先读
+> `reports/experiment_audit_20261024.md`。
 
 - **Phase 4.1 pilot（2026-08-09）**：3 configs × 24 cases = 72 calls；accuracy C0 0.5611 / C1 0.5451 / C2 0.5062；仅 ECE C1 略优（0.4571）。
 - **Phase 4.2 验证（2026-08-10）**：3 seeds（42/43/44）× 3 configs × 24 cases = 216 calls；C1/C2 相对 C0 弃权率下降（41/33/31）、平均置信度上升（0.39/0.50/0.52），但 accuracy 未显著改善；1 条 malformed output。
@@ -89,39 +163,52 @@ LangGraph 不可用或执行失败时自动回退规则编排。
 - `utils/`：置信度校准、集体遗漏分析
 - `.venv`：项目 Python 3.13 虚拟环境（运行时 + 开发依赖已装）
 
-## 环境准备
+## 环境准备（干净环境）
 
 ```powershell
-# 推荐使用仓库自带 venv
-.\.venv\Scripts\Activate.ps1
-# 或直接指定解释器
+# 1) 创建虚拟环境（仓库不提交 .venv）
+python -m venv .venv
+.\.venv\Scripts\Activate.ps1          # Linux/macOS: source .venv/bin/activate
+
+# 2) 安装依赖。精确复现用锁文件；日常开发用 requirements.txt
+pip install -r requirements-lock.txt
+
+# 3) 可选配置：复制模板后按需填写；不填也能离线跑规则链路
+Copy-Item .env.example .env
+
+# 4) 运行前设置（Windows PowerShell）
 $env:PYTHONIOENCODING='utf-8'
 $env:PYTHONPATH='.'
-$py = 'E:\knowledge_database\ACIS\.venv\Scripts\python.exe'
-
-# 首次安装依赖（含开发工具）
-pip install -r requirements.txt pytest ruff mypy
+$env:NO_PROXY='localhost,127.0.0.1'   # 系统代理会劫持 localhost 时必设
 ```
+
+- 核心文本链路不需要 API key、Neo4j、Qdrant；真实 LLM Judge/Critic 需要 `.env` 中的
+  `AGRI_AI_JUDGE_API_KEY`（或 `DEEPSEEK_API_KEY`），配置说明见 `.env.example`。
+- 依赖锁定文件 `requirements-lock.txt` 由当前验证环境 `pip freeze` 生成；若只装核心依赖，
+  可改用 `requirements.txt`（含可选 ML 依赖）。`ruff` / `mypy` 为开发工具，非运行必需。
 
 ## 运行
 
 ```powershell
 $env:PYTHONIOENCODING='utf-8'
 $env:PYTHONPATH='.'
+
+# 无参数：内置 2 个演示问题
 python orchestrator.py
-```
 
-自定义问题：
-
-```powershell
+# 真实业务输入（默认 LangGraph 主图 + 规则 Judge；失败自动回退规则编排）
 python orchestrator.py "温室A番茄叶片黄斑，叶背有灰色霉层，如何处理？"
+
+# 仅规则编排；导出统一 Trace；固定随机种子（演示/评测可复现）
+python orchestrator.py --rules-only --trace-out logs/trace_demo.json --seed 7 "温室A番茄叶片黄斑，叶背有灰色霉层，如何处理？"
+
+# JSON 输出（含 trace_id / trace_stages）
+python orchestrator.py --json "温室A番茄叶片黄斑，叶背有灰色霉层，如何处理？"
 ```
 
-仅使用规则编排 fallback：
-
-```powershell
-python orchestrator.py --rules-only
-```
+`--trace-out` 输出的 JSON 包含 `trace_id`、10 个阶段 payload 与有序 `events`，可直接用于
+演示中的"证据追溯"；`--json` 输出在原有 decision 字段上增量增加 `trace_id` / `trace_stages`
+（兼容旧字段）。
 
 ## Docker 快速部署（一键启动）
 
@@ -156,9 +243,9 @@ $env:PYTHONPATH='.'
 python -m ui.tui
 ```
 
-- 内置 5 个演示场景（番茄 / 甜菜 / 棉花 × 诊断 / 灌溉 / 预警），覆盖 RAG 命中、KG 一致性校验、Critic 多轮反驳降权。
+- 内置 **6 个演示场景**（番茄 / 甜菜 / 棉花 × 诊断 / 灌溉 / 预警），覆盖 RAG 命中、KG 一致性校验、Critic 多轮反驳降权。
 - `[j]` 切换 DeepSeek Judge（KG 锚定结构化裁决），`[c]` 切换 Critic LLM 反驳；`[6]` 自定义输入。无 Key 或网络失败时自动回退规则模式。
-- 首次启动预热传感器异常检测模型约 10s，之后每次决策 <1s。
+- 首次启动预热传感器异常检测模型约 10s；预热后单次规则决策约 1.4–2.7s（视是否触发第二轮辩论）。
 - 未启动 Neo4j / Qdrant 时自动回退内存知识库，TUI 自动设置 `NEO4J_PASSWORD=agriai2026` 与 `HF_HUB_OFFLINE=1`（避免 Chronos 联网下载超时）。
 
 当前支持作物：番茄 / 甜菜 / 棉花（病害与农事指南已内置；黄瓜保留兼容）。
@@ -177,28 +264,36 @@ python orchestrator.py --llm-critic "温室A番茄今天需要浇水吗？如果
 python orchestrator.py --llm-judge --llm-critic "温室A甜菜叶片圆形褐色病斑，如何处理？"
 ```
 
-可选环境变量：
+可选环境变量（完整模板见 `.env.example`）：
 
-- `DEEPSEEK_BASE_URL`：默认 `https://api.deepseek.com`
-- `DEEPSEEK_MODEL` / `AGRI_AI_JUDGE_MODEL`：默认 `deepseek-chat`
-- `AGRI_AI_CRITIC_MODEL`：Critic 反驳所用模型，默认同上
-- `AGRI_AI_MULTI_ROUND_DEBATE`：多轮辩论开关（默认 1）
-- `AGRI_AI_EXTRA_EXPERTS`：经济/生态 Agent 开关（默认 1）
-- `AGRI_AI_CALIBRATION` / `AGRI_AI_CALIB_ALPHA`：置信度校准开关与参数
-- `AGRI_AI_KG_DRAFTS_PROPOSE` / `AGRI_AI_KG_DRAFTS_LOAD` / `AGRI_AI_KG_DRAFTS_PATH`：KG 草稿三元组提议/加载
-- `AGRI_AI_PERSIST`：SQLite 持久化开关（默认 1）
+- `AGRI_AI_JUDGE_API_KEY` / `AGRI_AI_JUDGE_BASE_URL` / `AGRI_AI_JUDGE_MODEL` / `AGRI_AI_JUDGE_PROVIDER`：
+  Judge 配置，优先于 `DEEPSEEK_*`；`AGRI_AI_JUDGE_TIMEOUT_SECONDS`（默认 60，最大 300）、
+  `AGRI_AI_JUDGE_MAX_RETRIES`（默认 2，最大 5）、`AGRI_AI_JUDGE_SELF_CONSISTENCY_K`（默认 3，1 关闭）
+- `DEEPSEEK_API_KEY` / `DEEPSEEK_BASE_URL` / `DEEPSEEK_MODEL`：兼容别名；`AGRI_AI_CRITIC_MODEL`：Critic 模型
+- `AGRI_AI_MULTI_ROUND_DEBATE`：多轮辩论开关（默认 1）；`AGRI_AI_EXTRA_EXPERTS`：经济/生态 Agent 开关（默认 1）
+- `AGRI_AI_MEMORY_GATE` / `AGRI_AI_MEMORY_GATE_MIN_CONF`：记忆相关性门控（默认开 / 0.45）
+- `AGRI_AI_PERSIST`：SQLite 持久化开关（默认 1）；`AGRI_AI_DB_PATH`：审计库路径（默认 `data/agri.db`）
+- `ACIS_ENABLE_PLANNER`：启用 Planner（默认 0；Planner 在 Judge 之后运行，Tool Router 不执行工具）
+- `AGRI_AI_RAG_BACKEND` / `QDRANT_URL` / `QDRANT_COLLECTION` / `AGRI_AI_RAG_TOP_K`：RAG 后端
+- `AGRI_AI_KG_BACKEND` / `NEO4J_URI` / `NEO4J_USER` / `NEO4J_PASSWORD`：KG 后端
+- 若使用 opencode 网关：代码**不直接读取** `OPENCODE_*`，需把 `OPENCODE_BASE_URL`/`OPENCODE_API_KEY`
+  分别映射到 `AGRI_AI_JUDGE_BASE_URL`/`AGRI_AI_JUDGE_API_KEY`（验收中的真实调用即按此方式配置）
+- `HF_HUB_OFFLINE` / `TRANSFORMERS_OFFLINE`：置 1 避免视觉模型联网；`AGRI_AI_VISION_MODE=mock` 强制 mock
 
 ## 测试与评估
 
 ```powershell
-# 单元测试（267 个，18 个测试文件 + conftest.py）
+# 单元测试（343 用例 / 24 个测试文件；pytest.ini 已将收集范围限定到 tests/）
 python -m pytest -q
 
-# 轻量回归：主图 / 规则 / LLM Judge 回退（3 套 × 3 场景）
+# 轻量回归：主图 / 规则 / LLM Judge 回退（3 套 × 3 场景；无 key 时第三套回退规则）
 python evals/smoke_eval.py
 
 # 固定场景回归（12 个确定性 crop/intent/病害 断言）
 python evals/fixture_eval.py
+
+# 最小交付评测（离线、确定性；生成 reports/delivery_eval/summary.{json,md}）
+python scripts/run_delivery_eval.py
 
 # Benchmark 评测（64 案例；输出含 capability_scores 与 Capability Performance）
 python evals/runner.py --dataset benchmarks.datasets.enriched

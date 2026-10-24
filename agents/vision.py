@@ -91,10 +91,22 @@ DISEASE_LABELS = {
 
 
 def _get_classifier():
-    """懒加载分类器（首次调用时才加载模型）"""
+    """懒加载分类器（首次调用时才加载模型）。
+
+    Vision is optional: in offline mode (or when explicitly disabled) we skip
+    the model entirely and use the deterministic mock classifier, so a demo
+    never blocks on a HuggingFace download.
+    """
     global _classifier, _current_model_name
     if _classifier is not None:
         return _classifier
+
+    if os.environ.get("AGRI_AI_VISION_MODE", "").strip().lower() == "mock":
+        return None
+    if os.environ.get("HF_HUB_OFFLINE", "").strip().lower() in {"1", "true", "yes"}:
+        return None
+    if os.environ.get("TRANSFORMERS_OFFLINE", "").strip().lower() in {"1", "true", "yes"}:
+        return None
 
     model_info = MODEL_REGISTRY[_current_model_name]
     model_id = model_info["model_id"]

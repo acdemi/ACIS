@@ -481,6 +481,7 @@ class JudgeAgent:
         labels = []
         attempts = 0
         failures = 0
+        failure_codes: dict[str, int] = {}
         # Retry transient gateway failures: a missing sample silently weakens the
         # only discriminative signal this system has.
         while len(labels) < k - 1 and attempts < (k - 1) * 3:
@@ -493,8 +494,16 @@ class JudgeAgent:
                     response_format={"type": "json_object"},
                 )
                 data = json.loads(resp.choices[0].message.content)
-            except Exception:  # noqa: BLE001 - keep sampling, count the failure
+            except Exception as exc:  # noqa: BLE001 - keep sampling, count the failure
                 failures += 1
+                code = classify_failure(exc)
+                failure_codes[code] = failure_codes.get(code, 0) + 1
+                _logger.warning(
+                    "Judge self-consistency sample failed: %s code=%s detail=%s",
+                    type(exc).__name__,
+                    code,
+                    redact_error_detail(exc, api_key=config.api_key),
+                )
                 continue
             text = data.get("final_diagnosis") or data.get("decision") or ""
             labels.append(_normalize_label({"decision": text}, known_labels=known))
@@ -505,6 +514,7 @@ class JudgeAgent:
                 "labels": [],
                 "primary_label": primary_label,
                 "failures": failures,
+                "failure_codes": failure_codes,
             }
         agreement = sum(1 for label in labels if label == primary_label) / len(labels)
         return {
@@ -514,6 +524,7 @@ class JudgeAgent:
             "primary_label": primary_label,
             "samples_used": len(labels),
             "failures": failures,
+            "failure_codes": failure_codes,
         }
 
     @staticmethod

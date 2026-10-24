@@ -17,12 +17,17 @@ from __future__ import annotations
 
 import argparse
 import json
+import logging
 import os
+import random
+from pathlib import Path
 
 from _env import load_env
 from planner import build_planner, ExecutionPlan
 from tool_router import ToolRouter, ToolRoutingResult
-from trace import Trace, collect_pipeline_trace
+from trace import Trace, collect_pipeline_trace, export_trace_json
+
+logger = logging.getLogger(__name__)
 
 load_env()  # 注入 .env（DEEPSEEK_API_KEY / NEO4J_PASSWORD）
 
@@ -142,9 +147,14 @@ class AgentOrchestrator:
                 final_state = self._compiled_graph.invoke({"query": query, "image_path": image_path})
                 return final_state["decision"]
             except Exception as exc:
+                logger.warning(
+                    "LangGraph execution failed; falling back to rules: %s: %s",
+                    type(exc).__name__,
+                    exc,
+                )
                 fallback_decision = self.run_rules(query, image_path)
                 fallback_decision.debate.missing_evidence.append(
-                    f"LangGraph 主图执行失败，已回退规则编排：{exc}"
+                    f"LangGraph 主图执行失败，已回退规则编排：{type(exc).__name__}: {exc}"
                 )
                 return fallback_decision
 
@@ -158,8 +168,14 @@ class AgentOrchestrator:
             from storage.repository import save_decision
             ctx = build_context(query, image_path)
             save_decision(decision, ctx, query)
-        except Exception:
-            pass
+        except Exception as exc:
+            # Persistence is an audit-trail side effect: a failure must not
+            # break the decision itself, but it must not be silent either.
+            logger.warning(
+                "SQLite persistence failed; decision returned without audit row: %s: %s",
+                type(exc).__name__,
+                exc,
+            )
 
     def run_rules(self, query: str, image_path: str | None = None) -> DecisionOutput:
         context = build_context(query, image_path)
@@ -257,15 +273,31 @@ def run_demo() -> None:
         print()
 
 
+def _decision_payload(decision: DecisionOutput, trace: Trace | None) -> dict:
+    """JSON-safe decision payload plus the run's trace identifiers."""
+    payload = json.loads(
+        json.dumps(decision, ensure_ascii=False, default=lambda value: value.__dict__)
+    )
+    if trace is not None:
+        payload["trace_id"] = trace.trace_id
+        payload["trace_stages"] = trace.stages_present
+    return payload
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description="农业 Agent v4 分层协作编排实验")
     parser.add_argument("query", nargs="*", help="用户问题")
     parser.add_argument("--image", dest="image_path", help="叶片图片路径")
-    parser.add_argument("--json", action="store_true", help="输出 JSON 调试信息")
+    parser.add_argument("--json", action="store_true", help="输出 JSON 调试信息（含 trace_id/trace_stages）")
+    parser.add_argument("--trace-out", metavar="PATH", help="把本次运行的统一 Trace 写成 JSON 文件")
+    parser.add_argument("--seed", type=int, default=None, help="固定 Python 随机种子，便于可复现演示/评测")
     parser.add_argument("--rules-only", action="store_true", help="禁用 LangGraph，直接使用规则编排")
     parser.add_argument("--llm-judge", action="store_true", help="启用 DeepSeek 结构化 Judge；失败时自动回退规则裁决")
     parser.add_argument("--llm-critic", action="store_true", help="启用 DeepSeek 结构化 Critic 反驳；无 key 或失败时回退规则反驳")
     args = parser.parse_args()
+
+    if args.seed is not None:
+        random.seed(args.seed)
 
     orchestrator = AgentOrchestrator(use_langgraph=not args.rules_only, use_llm_judge=args.llm_judge, use_llm_critic=args.llm_critic)
     query = " ".join(args.query).strip()
@@ -274,10 +306,17 @@ def main() -> None:
         return
 
     decision = orchestrator.run(query, args.image_path)
+    trace = orchestrator.last_trace
+    if args.trace_out:
+        trace_path = Path(args.trace_out)
+        trace_path.parent.mkdir(parents=True, exist_ok=True)
+        trace_path.write_text(export_trace_json(trace), encoding="utf-8")
     if args.json:
-        print(json.dumps(decision, ensure_ascii=False, default=lambda value: value.__dict__, indent=2))
+        print(json.dumps(_decision_payload(decision, trace), ensure_ascii=False, indent=2))
     else:
         print(format_decision(decision))
+        if trace is not None:
+            print(f"\n【Trace】{trace.trace_id} | {len(trace.stages_present)} stages | events={len(trace.events)}")
 
 
 if __name__ == "__main__":

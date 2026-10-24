@@ -1,0 +1,208 @@
+{
+  "fault_variants": [
+    {
+      "file": "fault_cli_judge.out.txt",
+      "judge_mode": "rules",
+      "confidence": 0.72,
+      "risk_level": "medium",
+      "need_human_review": false,
+      "decision": "病理判断首选：番茄叶霉病",
+      "agent_count": 12,
+      "kid": 41,
+      "judge_runtime_outcome": "fallback",
+      "fallback_reason_code": "server_error",
+      "fallback_detail": "InternalServerError: Error code: 502",
+      "retry_exhausted": true,
+      "endpoint_id": "http://127.0.0.1:9",
+      "timeout_seconds": 2.0,
+      "sdk_max_retries": 0,
+      "missing_evidence": [
+        "缺少有效图像证据，视觉 Agent 未参与确认",
+        "LLM Judge 不可用，已回退规则裁决 [server_error] InternalServerError: Error code: 502"
+      ],
+      "rag_backend": "fallback",
+      "kg_backend": "neo4j"
+    },
+    {
+      "file": "fault_cli_judge_timeout.out.txt",
+      "judge_mode": "rules",
+      "confidence": 0.72,
+      "risk_level": "medium",
+      "need_human_review": false,
+      "decision": "病理判断首选：番茄叶霉病",
+      "agent_count": 12,
+      "kid": 42,
+      "judge_runtime_outcome": "fallback",
+      "fallback_reason_code": "timeout",
+      "fallback_detail": "APITimeoutError: Request timed out.",
+      "retry_exhausted": true,
+      "endpoint_id": "http://10.255.255.1:81",
+      "timeout_seconds": 2.0,
+      "sdk_max_retries": 0,
+      "missing_evidence": [
+        "缺少有效图像证据，视觉 Agent 未参与确认",
+        "LLM Judge 不可用，已回退规则裁决 [timeout] APITimeoutError: Request timed out."
+      ],
+      "rag_backend": "fallback",
+      "kg_backend": "neo4j"
+    },
+    {
+      "file": "fault_cli_noproxy.out.txt",
+      "judge_mode": "rules",
+      "confidence": 0.72,
+      "risk_level": "medium",
+      "need_human_review": false,
+      "decision": "病理判断首选：番茄叶霉病",
+      "agent_count": 12,
+      "kid": 57,
+      "judge_runtime_outcome": "fallback",
+      "fallback_reason_code": "timeout",
+      "fallback_detail": "APITimeoutError: Request timed out.",
+      "retry_exhausted": true,
+      "endpoint_id": "http://127.0.0.1:9",
+      "timeout_seconds": 2.0,
+      "sdk_max_retries": 0,
+      "missing_evidence": [
+        "缺少有效图像证据，视觉 Agent 未参与确认",
+        "LLM Judge 不可用，已回退规则裁决 [timeout] APITimeoutError: Request timed out."
+      ],
+      "rag_backend": "qdrant",
+      "kg_backend": "neo4j"
+    },
+    {
+      "file": "fault_cli_conn.out.txt",
+      "judge_mode": "rules",
+      "confidence": 0.72,
+      "risk_level": "medium",
+      "need_human_review": false,
+      "decision": "病理判断首选：番茄叶霉病",
+      "agent_count": 12,
+      "kid": 59,
+      "judge_runtime_outcome": "fallback",
+      "fallback_reason_code": "connection_error",
+      "fallback_detail": "APIConnectionError: Connection error.",
+      "retry_exhausted": true,
+      "endpoint_id": "http://127.0.0.1:9",
+      "timeout_seconds": 10.0,
+      "sdk_max_retries": 0,
+      "missing_evidence": [
+        "缺少有效图像证据，视觉 Agent 未参与确认",
+        "LLM Judge 不可用，已回退规则裁决 [connection_error] APIConnectionError: Connection error."
+      ],
+      "rag_backend": "qdrant",
+      "kg_backend": "neo4j"
+    }
+  ],
+  "repeat_runs": [
+    {
+      "file": "repeat_rules_1.out.txt",
+      "judge_mode": "rules",
+      "confidence": 0.72,
+      "risk_level": "medium",
+      "need_human_review": false,
+      "decision": "病理判断首选：番茄叶霉病",
+      "agent_count": 12,
+      "kid": 54,
+      "judge_runtime_outcome": "rules",
+      "fallback_reason_code": "disabled_by_configuration",
+      "fallback_detail": "JudgeAgent(use_llm=False)",
+      "retry_exhausted": false,
+      "endpoint_id": "https://api.deepseek.com",
+      "timeout_seconds": 60.0,
+      "sdk_max_retries": 2,
+      "missing_evidence": [
+        "缺少有效图像证据，视觉 Agent 未参与确认"
+      ],
+      "rag_backend": "fallback",
+      "kg_backend": "neo4j"
+    },
+    {
+      "file": "repeat_rules_2.out.txt",
+      "judge_mode": "rules",
+      "confidence": 0.72,
+      "risk_level": "medium",
+      "need_human_review": false,
+      "decision": "病理判断首选：番茄叶霉病",
+      "agent_count": 12,
+      "kid": 55,
+      "judge_runtime_outcome": "rules",
+      "fallback_reason_code": "disabled_by_configuration",
+      "fallback_detail": "JudgeAgent(use_llm=False)",
+      "retry_exhausted": false,
+      "endpoint_id": "https://api.deepseek.com",
+      "timeout_seconds": 60.0,
+      "sdk_max_retries": 2,
+      "missing_evidence": [
+        "缺少有效图像证据，视觉 Agent 未参与确认"
+      ],
+      "rag_backend": "fallback",
+      "kg_backend": "neo4j"
+    },
+    {
+      "file": "repeat_rules_3.out.txt",
+      "judge_mode": "rules",
+      "confidence": 0.72,
+      "risk_level": "medium",
+      "need_human_review": false,
+      "decision": "病理判断首选：番茄叶霉病",
+      "agent_count": 12,
+      "kid": 56,
+      "judge_runtime_outcome": "rules",
+      "fallback_reason_code": "disabled_by_configuration",
+      "fallback_detail": "JudgeAgent(use_llm=False)",
+      "retry_exhausted": false,
+      "endpoint_id": "https://api.deepseek.com",
+      "timeout_seconds": 60.0,
+      "sdk_max_retries": 2,
+      "missing_evidence": [
+        "缺少有效图像证据，视觉 Agent 未参与确认"
+      ],
+      "rag_backend": "fallback",
+      "kg_backend": "neo4j"
+    },
+    {
+      "file": "cli_rules_only_json.out.txt",
+      "judge_mode": "rules",
+      "confidence": 0.72,
+      "risk_level": "medium",
+      "need_human_review": false,
+      "decision": "病理判断首选：番茄叶霉病",
+      "agent_count": 12,
+      "kid": 36,
+      "judge_runtime_outcome": "rules",
+      "fallback_reason_code": "disabled_by_configuration",
+      "fallback_detail": "JudgeAgent(use_llm=False)",
+      "retry_exhausted": false,
+      "endpoint_id": "https://api.deepseek.com",
+      "timeout_seconds": 60.0,
+      "sdk_max_retries": 2,
+      "missing_evidence": [
+        "缺少有效图像证据，视觉 Agent 未参与确认"
+      ],
+      "rag_backend": "fallback",
+      "kg_backend": "neo4j"
+    },
+    {
+      "file": "cli_rules_only_noproxy.out.txt",
+      "judge_mode": "rules",
+      "confidence": 0.72,
+      "risk_level": "medium",
+      "need_human_review": false,
+      "decision": "病理判断首选：番茄叶霉病",
+      "agent_count": 12,
+      "kid": 58,
+      "judge_runtime_outcome": "rules",
+      "fallback_reason_code": "disabled_by_configuration",
+      "fallback_detail": "JudgeAgent(use_llm=False)",
+      "retry_exhausted": false,
+      "endpoint_id": "https://api.deepseek.com",
+      "timeout_seconds": 2.0,
+      "sdk_max_retries": 0,
+      "missing_evidence": [
+        "缺少有效图像证据，视觉 Agent 未参与确认"
+      ],
+      "rag_backend": "qdrant",
+      "kg_backend": "neo4j"
+    }
+  ]
+}
