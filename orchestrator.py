@@ -20,6 +20,7 @@ import json
 import logging
 import os
 import random
+import sys
 from pathlib import Path
 
 from _env import load_env
@@ -28,6 +29,26 @@ from tool_router import ToolRouter, ToolRoutingResult
 from trace import Trace, collect_pipeline_trace, export_trace_json
 
 logger = logging.getLogger(__name__)
+
+
+def _print_safe(text: str) -> None:
+    """Print CLI text without crashing on consoles that cannot encode it.
+
+    Windows consoles often run a GBK code page while agent notes legitimately
+    contain symbols such as U+26A0.  A UTF-8 console keeps the text untouched;
+    a narrower one receives a best-effort transliteration instead of a
+    traceback that hides the diagnosis.
+    """
+    stream = sys.stdout
+    try:
+        print(text)
+        return
+    except UnicodeEncodeError:
+        pass
+    encoding = getattr(stream, "encoding", None) or "utf-8"
+    data = text.encode(encoding, errors="replace")
+    stream.write(data.decode(encoding, errors="replace") + "\n")
+    stream.flush()
 
 load_env()  # 注入 .env（DEEPSEEK_API_KEY / NEO4J_PASSWORD）
 
@@ -312,11 +333,14 @@ def main() -> None:
         trace_path.parent.mkdir(parents=True, exist_ok=True)
         trace_path.write_text(export_trace_json(trace), encoding="utf-8")
     if args.json:
-        print(json.dumps(_decision_payload(decision, trace), ensure_ascii=False, indent=2))
+        _print_safe(json.dumps(_decision_payload(decision, trace), ensure_ascii=False, indent=2))
     else:
-        print(format_decision(decision))
+        _print_safe(format_decision(decision))
         if trace is not None:
-            print(f"\n【Trace】{trace.trace_id} | {len(trace.stages_present)} stages | events={len(trace.events)}")
+            _print_safe(
+                f"\n【Trace】{trace.trace_id} | {len(trace.stages_present)} stages | "
+                f"events={len(trace.events)}"
+            )
 
 
 if __name__ == "__main__":

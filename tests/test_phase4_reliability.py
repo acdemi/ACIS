@@ -2,7 +2,15 @@
 
 from __future__ import annotations
 
-from scripts.run_phase4_2_real_agent import compare_decision_outputs
+import pytest
+
+# The Phase 4 evaluation harness is no longer shipped in this tree (removed in
+# f1c7e98); keep these regressions ready for whenever it returns instead of
+# breaking collection of the whole suite.
+compare_decision_outputs = pytest.importorskip(
+    "scripts.run_phase4_2_real_agent",
+    reason="Phase 4 evaluation harness absent from this tree",
+).compare_decision_outputs
 
 
 def test_r4_c2_abstention_is_not_compared_as_disease_confidence() -> None:

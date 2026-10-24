@@ -91,10 +91,10 @@ python orchestrator.py --rules-only --seed 7 "温室A番茄叶片出现黄斑，
 
 | 项目 | 结果 | 说明 |
 |---|---|---|
-| 测试套件 | 24 个测试文件 / **343 个用例** | 这是用例总数，不等于全部通过 |
+| 测试套件 | 26 个测试文件 / **344 个用例** | 这是用例总数，不等于全部通过 |
 | 交付契约测试 | **12 passed** | 正常流程、LangGraph/LLM/持久化回退、Trace、视觉解析、API |
-| 受限沙箱全量 | **340 passed / 3 failed** | 3 个失败均为沙箱禁止子进程管道（`test_experiments.py` 调 git），非业务断言失败 |
-| 沙箱原样全量 | 286 passed / 1 failed / 56 errors | 56 个 error 来自沙箱 `tmp_path` ACL；普通环境未复跑，不能声称全绿 |
+| 全量测试（本机复跑） | **342 passed / 2 skipped**，exit 0 | 2 个 skip 为 Phase 4 旧 harness 缺失（`importorskip` 显式标记）；沙箱中此前的 3 个失败未复现 |
+| 沙箱原样全量（历史记录） | 286 passed / 1 failed / 56 errors | 旧沙箱的 56 个 error 来自 `tmp_path` ACL；**非当前状态**，当前以上一行本机复跑为准 |
 | smoke / fixture | smoke exit 0；fixture **12/12** | 固定场景回归 |
 | 离线交付评测 | **12/12** 命中，2 例 Critic，平均置信度 0.6583；两次运行 SHA256 一致 | `scripts/run_delivery_eval.py`，零 API |
 | 真实 LLM 单次调用 | 成功：34.56s、10,354 tokens | 仅连通性验证，不是质量评测；规则路径默认不需要 |
@@ -120,7 +120,8 @@ python orchestrator.py --rules-only --seed 7 "温室A番茄叶片出现黄斑，
 - 规则 Judge 是默认路径，LLM Judge/Critic 可选且真实质量未做多 seed 评测；
 - Phase 6/Phase 4.2 实验为单 seed 或少量有效样本，不能外推为泛化能力；
 - 工具执行、Web UI、MCP 服务、Docker 部署未验证/未纳入 MVP；
-- 受限沙箱中的 3 个测试失败是环境限制，普通环境尚未复跑；
+- 全量测试已在本机复跑：`pytest -q` → **342 passed, 2 skipped**（跳过的 2 项因 Phase 4
+  评测 harness 已不在本仓库中，用 `importorskip` 显式标记）；此前记录的"3 个测试失败"未复现；
 - 没有真实田间数据、用户规模或生产运维经验。
 
 ## 7. 文档导航

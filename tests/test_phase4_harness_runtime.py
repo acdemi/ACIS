@@ -6,7 +6,12 @@ from typing import ClassVar
 
 import pytest
 
-from scripts import run_phase4_2
+# The Phase 4.2 direct harness is no longer shipped in this tree (removed in
+# f1c7e98); skip rather than break collection of the whole suite.
+run_phase4_2 = pytest.importorskip(
+    "scripts.run_phase4_2",
+    reason="Phase 4.2 direct harness absent from this tree",
+)
 
 
 class _Usage:
