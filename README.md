@@ -6,6 +6,74 @@ LangGraph 不可用或执行失败时自动回退规则编排。
 
 主图流程：`context → perception → memory → experts → debate → critic → judge`（含多轮辩论条件循环 `rebuttal`）。
 
+## 项目解决的问题
+
+温室/大棚种植者在病害早期缺少"可解释、可追溯"的诊断与处置建议：只看单一模型输出，
+很难知道结论依据了哪些传感器/天气/知识库证据，也不清楚何时应当弃权或转人工。
+ACIS 把一次问诊拆成可审计的多阶段流程，输出**诊断 + 置信度 + 风险 + 行动建议 + 证据链**，
+并在外部模型不可用时自动回退到确定性规则链路。
+
+## 系统能力与适用范围
+
+**能做（MVP 范围）**
+- 自然语言病害咨询：番茄（叶霉病/早疫病）为主，知识库另含黄瓜霜霉病、甜菜褐斑病/根腐病、棉花黄萎病/枯萎病；
+- 输出首选诊断、置信度、风险等级、是否需人工复核、6 条行动建议、辩论共识/冲突、KG 校验、推理摘要；
+- 三个入口：CLI、TUI（6 个演示场景）、FastAPI（诊断/历史/反馈/结果回灌）；
+- 离线运行：无 API key、无 Neo4j/Qdrant 也能跑；可选接入 Qdrant/Neo4j 与真实 LLM Judge；
+- 统一 Trace（10 阶段）、SQLite 决策审计、故障分类与自动回退。
+
+**不能做 / 不在范围**
+- 不做真实田间诊断、不替代农技专家；传感器/天气为**模拟数据**；
+- 图片识别默认 mock（可选真实模型但未验证质量）；
+- 不自动执行施药/灌溉（Tool Router 只生成请求，不执行工具）；
+- 未验证生产并发、SLA、跨作物泛化。
+
+## 架构与关键数据流
+
+```mermaid
+flowchart TD
+  CLI["CLI: orchestrator.py"] --> ORCH["AgentOrchestrator.run"]
+  TUI["TUI: ui/tui.py"] --> ORCH
+  API["FastAPI: gateway/app.py"] --> ORCH
+  ORCH --> LG{"LangGraph 可用?"}
+  LG -- "是" --> WF["workflow.py 主图：context→perception→memory→experts→debate→critic→judge"]
+  LG -- "否 / 异常" --> RULES["run_rules 规则编排"]
+  WF --> PER["感知层：视觉(可选/跳过) + 传感器(模拟) + 天气(模拟)"]
+  RULES --> PER
+  PER --> MEM["记忆层：RAG(Qdrant/内存) + KG(Neo4j/DISEASE_DB) + 案例/经验(SQLite)"]
+  MEM --> EXP["专家层：病理(规则+知识库) + 气象/栽培/经济/生态"]
+  EXP --> DEB["Debate：冲突/共识"]
+  DEB --> CRI["Critic：规则/可选 LLM 反驳降权"]
+  CRI --> JUD["Judge：规则/可选 LLM + 置信度策略"]
+  JUD --> OUT["DecisionOutput：裁决/置信度/风险/建议/证据"]
+  OUT --> DB[("SQLite decisions 审计")]
+  OUT --> TR["Unified Trace（10 阶段）"]
+  JUD -. "Planner 可选（默认关）" .-> PLAN["Planner"] --> ROUTER["ToolRouter 只生成请求"]
+```
+
+关键数据流：`用户输入 → 上下文解析 → 感知/记忆/专家证据 → Debate/Critic → Judge → 决策落库 + Trace`。
+`need_human_review` 在低置信、冲突、Critic escalate、KG 硬约束冲突时置真；人工反馈通过
+`/decisions/{id}/feedback`、`/outcome` 回灌，影响后续案例/经验回放。
+
+## 技术栈
+
+Python 3.13 / LangGraph（主图，失败回退规则）/ OpenAI-compatible SDK（可选 Judge/Critic）/
+FastAPI + Uvicorn / SQLite（标准库）/ rich（TUI）/ Qdrant（可选）/ Neo4j（可选）/ pytest。
+
+## 演示案例
+
+- 主案例：`温室A番茄叶片出现黄斑，叶背有灰色霉层，如何处理？` → 叶霉病、置信度 0.72–0.74、medium、6 条建议；
+- 冲突案例：`温室A番茄叶背灰色霉层，今天需要浇水吗？要兼顾病害风险` → Debate/Critic 降权；
+- 演示脚本与异常处理见 [docs/DEMO_RUNBOOK.md](docs/DEMO_RUNBOOK.md)（3–5 分钟）。
+
+## 验收与材料
+
+- 端到端验收记录：[reports/acceptance_20261024.md](reports/acceptance_20261024.md)
+- 最终交付判定：[reports/delivery_verdict_20261024.md](reports/delivery_verdict_20261024.md)
+- 实验与指标审计：[reports/experiment_audit_20261024.md](reports/experiment_audit_20261024.md)
+- 技术展示材料（架构/流程/请求示例/结果表/故障记录）：[docs/PORTFOLIO.md](docs/PORTFOLIO.md)
+- 简历项目描述：[docs/RESUME_ACIS.md](docs/RESUME_ACIS.md)
+
 ## 最小可交付版本（2026-10-24）
 
 当前仓库按"可运行、可演示、可验证"的最小交付版本维护。产品代码沿用 ACIS 2.1E 分层链路，
@@ -21,10 +89,9 @@ LangGraph 不可用或执行失败时自动回退规则编排。
 | 可观测性 | 统一 Trace 10 阶段；CLI `--trace-out` 可导出；SQLite 决策审计；API 返回 `trace_id` |
 | 已知限制 | 图片识别为 mock/可选模型（字段已修复，离线不下载模型）；LLM Judge/Critic 为可选增强；Docker 未在本环境验证；Phase 4/6 指标仅供研究记录 |
 
-> 下文"当前状态（2026-09-20）"与 Sprint/Phase 章节是历史记录，保留用于追溯；交付验收以本节和
-> `reports/delivery_eval/`、`docs/DEMO_RUNBOOK.md` 为准。
-
-## 历史状态（2026-09-20）
+> 下文 Sprint/Phase 章节是历史记录，保留用于追溯；交付验收以本节与
+> `reports/acceptance_20261024.md`、`reports/delivery_eval/`、`docs/DEMO_RUNBOOK.md` 为准。
+> 历史实验的指标口径混用，引用前请先读 `reports/experiment_audit_20261024.md`。
 
 ## 版本演进
 
@@ -42,7 +109,10 @@ LangGraph 不可用或执行失败时自动回退规则编排。
 
 ### Phase 4 — Challenge Set 评测战役（2026-08-09 ~ 2026-08-31）
 
-针对"架构是否带来真实能力增量"的问题，建立 Challenge Set v1（24 案例，5 类挑战）并做多轮评测：
+针对"架构是否带来真实能力增量"的问题，建立 Challenge Set v1（24 案例，5 类挑战）并做多轮评测。
+> 口径提示：本节为历史记录；Phase 4.1/4.2 与 R3 报告中的 "accuracy" 在部分报告中指 factor coverage
+> （见 `scripts/generate_stability_report.py:66-75`），**不是诊断准确率**；引用前先读
+> `reports/experiment_audit_20261024.md`。
 
 - **Phase 4.1 pilot（2026-08-09）**：3 configs × 24 cases = 72 calls；accuracy C0 0.5611 / C1 0.5451 / C2 0.5062；仅 ECE C1 略优（0.4571）。
 - **Phase 4.2 验证（2026-08-10）**：3 seeds（42/43/44）× 3 configs × 24 cases = 216 calls；C1/C2 相对 C0 弃权率下降（41/33/31）、平均置信度上升（0.39/0.50/0.52），但 accuracy 未显著改善；1 条 malformed output。
@@ -206,6 +276,8 @@ python orchestrator.py --llm-judge --llm-critic "温室A甜菜叶片圆形褐色
 - `ACIS_ENABLE_PLANNER`：启用 Planner（默认 0；Planner 在 Judge 之后运行，Tool Router 不执行工具）
 - `AGRI_AI_RAG_BACKEND` / `QDRANT_URL` / `QDRANT_COLLECTION` / `AGRI_AI_RAG_TOP_K`：RAG 后端
 - `AGRI_AI_KG_BACKEND` / `NEO4J_URI` / `NEO4J_USER` / `NEO4J_PASSWORD`：KG 后端
+- 若使用 opencode 网关：代码**不直接读取** `OPENCODE_*`，需把 `OPENCODE_BASE_URL`/`OPENCODE_API_KEY`
+  分别映射到 `AGRI_AI_JUDGE_BASE_URL`/`AGRI_AI_JUDGE_API_KEY`（验收中的真实调用即按此方式配置）
 - `HF_HUB_OFFLINE` / `TRANSFORMERS_OFFLINE`：置 1 避免视觉模型联网；`AGRI_AI_VISION_MODE=mock` 强制 mock
 
 ## 测试与评估
