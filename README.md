@@ -15,7 +15,7 @@ LangGraph 不可用或执行失败时自动回退规则编排。
 |---|---|
 | 主场景 | **温室番茄病害诊断与处置建议**（文本输入；4 作物 / 7 病害知识库；黄瓜保留兼容） |
 | 运行基线 | Python 3.13（`.venv`）；CLI / TUI / FastAPI 三入口；无 Neo4j / Qdrant / API key 也可离线运行 |
-| 单元测试 | 23 个测试文件 / **331 用例**；普通环境应全绿；沙箱/受限环境中 `tmp_path` ACL 与子进程管道会导致已知错误（见"测试与评估"） |
+| 单元测试 | 24 个测试文件 / **343 用例**；普通环境应全绿；沙箱/受限环境中 `tmp_path` ACL 与子进程管道会导致已知错误（见"测试与评估"） |
 | 回归 | `evals/smoke_eval.py`（3 套 × 3 场景，LLM Judge 套件在无 key 时回退规则）、`evals/fixture_eval.py`（12 场景） |
 | 固定评测 | `scripts/run_delivery_eval.py` → `reports/delivery_eval/summary.{json,md}`（12 例离线确定性评测，已提交） |
 | 可观测性 | 统一 Trace 10 阶段；CLI `--trace-out` 可导出；SQLite 决策审计；API 返回 `trace_id` |
@@ -211,7 +211,7 @@ python orchestrator.py --llm-judge --llm-critic "温室A甜菜叶片圆形褐色
 ## 测试与评估
 
 ```powershell
-# 单元测试（331 用例 / 23 个测试文件；pytest.ini 已将收集范围限定到 tests/）
+# 单元测试（343 用例 / 24 个测试文件；pytest.ini 已将收集范围限定到 tests/）
 python -m pytest -q
 
 # 轻量回归：主图 / 规则 / LLM Judge 回退（3 套 × 3 场景；无 key 时第三套回退规则）
