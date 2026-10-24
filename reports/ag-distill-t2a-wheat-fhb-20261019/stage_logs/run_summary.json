@@ -1,0 +1,185 @@
+{
+  "task_id": "AG-DISTILL-T2A",
+  "prompt_version": "t2a-p1",
+  "stages": [
+    {
+      "stage": "S1",
+      "status": "ok",
+      "model": "deepseek-chat",
+      "meta": {
+        "task_id": "AG-DISTILL-T2A",
+        "stage": "S1",
+        "prompt_version": "t2a-p1",
+        "attempt": 1,
+        "requested_model": "deepseek-chat",
+        "served_model": "deepseek-flash",
+        "usage": {
+          "prompt_tokens": 832,
+          "completion_tokens": 907,
+          "total_tokens": 1739,
+          "prompt_tokens_details": {
+            "cached_tokens": 0
+          },
+          "prompt_cache_hit_tokens": 0,
+          "prompt_cache_miss_tokens": 832
+        },
+        "elapsed_sec": 7.7,
+        "timestamp": "2026-10-19T12:37:06.724890+00:00"
+      }
+    },
+    {
+      "stage": "S2",
+      "status": "ok",
+      "model": "deepseek-chat",
+      "meta": {
+        "task_id": "AG-DISTILL-T2A",
+        "stage": "S2",
+        "prompt_version": "t2a-p1",
+        "attempt": 1,
+        "requested_model": "deepseek-chat",
+        "served_model": "deepseek-flash",
+        "usage": {
+          "prompt_tokens": 804,
+          "completion_tokens": 2951,
+          "total_tokens": 3755,
+          "prompt_tokens_details": {
+            "cached_tokens": 512
+          },
+          "prompt_cache_hit_tokens": 512,
+          "prompt_cache_miss_tokens": 292
+        },
+        "elapsed_sec": 15.4,
+        "timestamp": "2026-10-19T12:37:22.098100+00:00"
+      }
+    },
+    {
+      "stage": "S3",
+      "status": "ok",
+      "model": "deepseek-chat",
+      "meta": {
+        "task_id": "AG-DISTILL-T2A",
+        "stage": "S3",
+        "prompt_version": "t2a-p1",
+        "attempt": 1,
+        "requested_model": "deepseek-chat",
+        "served_model": "deepseek-flash",
+        "usage": {
+          "prompt_tokens": 832,
+          "completion_tokens": 3099,
+          "total_tokens": 3931,
+          "prompt_tokens_details": {
+            "cached_tokens": 512
+          },
+          "prompt_cache_hit_tokens": 512,
+          "prompt_cache_miss_tokens": 320
+        },
+        "elapsed_sec": 19.1,
+        "timestamp": "2026-10-19T12:37:41.171420+00:00"
+      }
+    },
+    {
+      "stage": "S4",
+      "status": "ok",
+      "model": "deepseek-chat",
+      "meta": {
+        "task_id": "AG-DISTILL-T2A",
+        "stage": "S4",
+        "prompt_version": "t2a-p1",
+        "attempt": 1,
+        "requested_model": "deepseek-chat",
+        "served_model": "deepseek-flash",
+        "usage": {
+          "prompt_tokens": 819,
+          "completion_tokens": 1758,
+          "total_tokens": 2577,
+          "prompt_tokens_details": {
+            "cached_tokens": 512
+          },
+          "prompt_cache_hit_tokens": 512,
+          "prompt_cache_miss_tokens": 307
+        },
+        "elapsed_sec": 10.9,
+        "timestamp": "2026-10-19T12:37:52.130654+00:00"
+      }
+    },
+    {
+      "stage": "S5",
+      "status": "ok",
+      "model": "deepseek-chat",
+      "meta": {
+        "task_id": "AG-DISTILL-T2A",
+        "stage": "S5",
+        "prompt_version": "t2a-p1",
+        "attempt": 1,
+        "requested_model": "deepseek-chat",
+        "served_model": "deepseek-flash",
+        "usage": {
+          "prompt_tokens": 806,
+          "completion_tokens": 2402,
+          "total_tokens": 3208,
+          "prompt_tokens_details": {
+            "cached_tokens": 512
+          },
+          "prompt_cache_hit_tokens": 512,
+          "prompt_cache_miss_tokens": 294
+        },
+        "elapsed_sec": 14.9,
+        "timestamp": "2026-10-19T12:38:07.011426+00:00"
+      }
+    },
+    {
+      "stage": "S6",
+      "status": "ok",
+      "model": "deepseek-chat",
+      "meta": {
+        "task_id": "AG-DISTILL-T2A",
+        "stage": "S6",
+        "prompt_version": "t2a-p1",
+        "attempt": 1,
+        "requested_model": "deepseek-chat",
+        "served_model": "deepseek-flash",
+        "usage": {
+          "prompt_tokens": 834,
+          "completion_tokens": 3928,
+          "total_tokens": 4762,
+          "prompt_tokens_details": {
+            "cached_tokens": 512
+          },
+          "prompt_cache_hit_tokens": 512,
+          "prompt_cache_miss_tokens": 322
+        },
+        "elapsed_sec": 18.8,
+        "timestamp": "2026-10-19T12:38:25.866686+00:00"
+      }
+    },
+    {
+      "stage": "S7",
+      "status": "ok",
+      "model": "deepseek-reasoner",
+      "meta": {
+        "task_id": "AG-DISTILL-T2A",
+        "stage": "S7",
+        "prompt_version": "t2a-p1",
+        "attempt": 1,
+        "requested_model": "deepseek-reasoner",
+        "served_model": "deepseek-flash",
+        "usage": {
+          "prompt_tokens": 5930,
+          "completion_tokens": 7015,
+          "total_tokens": 12945,
+          "prompt_tokens_details": {
+            "cached_tokens": 0
+          },
+          "completion_tokens_details": {
+            "reasoning_tokens": 5263
+          },
+          "prompt_cache_hit_tokens": 0,
+          "prompt_cache_miss_tokens": 5930
+        },
+        "elapsed_sec": 33.6,
+        "timestamp": "2026-10-19T12:38:59.453277+00:00"
+      }
+    }
+  ],
+  "s7_status": "ok"
+}

@@ -1,0 +1,3508 @@
+{
+  "package_id": "AG-DISTILL-T2A-WHE02-CANDIDATES-v1",
+  "round": "AG-DISTILL-T2A",
+  "created": "2026-10-19",
+  "topic_id": "WHE-02",
+  "topic_title": "小麦赤霉病与毒素管理",
+  "crop": "小麦",
+  "growth_stage_scope": "抽穗扬花期核心，覆盖收获-储运链",
+  "conditions_scope": "通用条件（区域未指定；区域差分写在各单元 uncertainties）",
+  "status": "candidate / 待人工审查与证据核验",
+  "adaptation_status": "待适配",
+  "existing_schema_alignment": {
+    "referenced_structures": [
+      "rag/knowledge_base.py DISEASE_DB 条目结构（作物病害诊断域）",
+      "kg_adapter.py query_kg 契约：diseases/triples/triple_strings/rules/hard_constraints",
+      "kg_adapter.py _hard_constraints 字段：metric/operator/threshold/raw/description"
+    ],
+    "notes": "仓库无候选知识入库正式 Schema；本包按单元结构输出并标记字符串 image: 待适配"
+  },
+  "quantitative_null_policy": "本轮未获得任何文献/标准文本，所有 value=null 且 value_status=needs-verification（对照数学换算除外，本包无此类项）",
+  "units": [
+    {
+      "unit_id": "WHE02-D-01",
+      "title": "小麦赤霉病病原分类认知",
+      "statement": "小麦赤霉病主要由镰刀菌属真菌引起，优势种因区域气候与作物轮作而异，并非单一物种。",
+      "knowledge_layer": "definition",
+      "provenance": "model-candidate",
+      "provenance_note": "属名层面共识明确，种级优势度需区域数据核验",
+      "main_triple": {
+        "subject": "小麦赤霉病",
+        "predicate": "主要病原属于",
+        "object": "镰刀菌属真菌"
+      },
+      "conditions": [
+        "适用于小麦各生育期病原归属判断"
+      ],
+      "failure_modes": [
+        "将赤霉病症状直接归因于单一镰刀菌种，忽略种间差异"
+      ],
+      "side_effects": [],
+      "applicability": {
+        "growth_stage": "全生育期",
+        "region": null,
+        "production_system": null,
+        "variety_note": null
+      },
+      "quantitative": [],
+      "verification_methods": [
+        "病穗组织分离培养与形态/分子鉴定",
+        "区域病原种群监测报告比对"
+      ],
+      "related_units": [
+        "WHE02-D-02",
+        "WHE02-D-08"
+      ],
+      "uncertainties": [
+        "优势种组成存在区域与年份差异，本单元不指定具体种名比例"
+      ],
+      "stage_source": "stage-log:S2",
+      "audit": {
+        "verdict": "pass",
+        "reason": "单一分类结论，无未登记数字",
+        "revisions": []
+      }
+    },
+    {
+      "unit_id": "WHE02-D-02",
+      "title": "赤霉病症状类型：穗腐为主",
+      "statement": "赤霉病典型表现为穗腐，小穗基部出现水渍状褐变并向上扩展，潮湿时病部可见粉红色霉层。",
+      "knowledge_layer": "diagnostic",
+      "provenance": "model-candidate",
+      "provenance_note": "症状描述为通用植病学共识，具体色泽受环境影响",
+      "main_triple": {
+        "subject": "小麦穗部",
+        "predicate": "表现",
+        "object": "穗腐型赤霉病症状"
+      },
+      "conditions": [
+        "抽穗后至灌浆期田间观察",
+        "高湿条件下霉层易显现"
+      ],
+      "failure_modes": [
+        "干燥天气下霉层不明显，仅见褐变，易与其他穗部病害混淆"
+      ],
+      "side_effects": [],
+      "applicability": {
+        "growth_stage": "抽穗扬花期至灌浆期",
+        "region": null,
+        "production_system": null,
+        "variety_note": null
+      },
+      "quantitative": [],
+      "verification_methods": [
+        "田间症状记录与病穗分离培养对照",
+        "与颖枯病、黑颖病等症状鉴别"
+      ],
+      "related_units": [
+        "WHE02-D-01",
+        "WHE02-D-03"
+      ],
+      "uncertainties": [
+        "症状严重度不能等同于籽粒毒素污染程度"
+      ],
+      "stage_source": "stage-log:S2",
+      "audit": {
+        "verdict": "pass",
+        "reason": "单一症状结论，无未登记数字",
+        "revisions": []
+      }
+    },
+    {
+      "unit_id": "WHE02-D-03",
+      "title": "赤霉病症状类型：茎基腐与秆腐",
+      "statement": "镰刀菌侵染还可引起茎基腐和秆腐，表现为茎基部或茎秆褐变、输导组织坏死，与穗腐属同一病原复合体的不同侵染类型。",
+      "knowledge_layer": "definition",
+      "provenance": "model-candidate",
+      "provenance_note": "类型划分属共识，各类型经济重要性区域差异大",
+      "main_triple": {
+        "subject": "镰刀菌侵染小麦",
+        "predicate": "可表现为",
+        "object": "茎基腐与秆腐类型"
+      },
+      "conditions": [
+        "适用于全生育期病害类型识别"
+      ],
+      "failure_modes": [
+        "仅凭穗部无症状即判定无镰刀菌侵染，忽略茎基腐存在"
+      ],
+      "side_effects": [],
+      "applicability": {
+        "growth_stage": "苗期至成熟期",
+        "region": null,
+        "production_system": null,
+        "variety_note": null
+      },
+      "quantitative": [],
+      "verification_methods": [
+        "茎基部与茎秆病组织分离鉴定",
+        "田间系统调查记录各类型发生比例"
+      ],
+      "related_units": [
+        "WHE02-D-01",
+        "WHE02-D-02"
+      ],
+      "uncertainties": [
+        "茎基腐与秆腐在各地的发生比重与产量影响缺乏统一量化数据"
+      ],
+      "stage_source": "stage-log:S2",
+      "audit": {
+        "verdict": "revise",
+        "reason": "病原复合体表述过宽，需限定",
+        "revisions": [
+          {
+            "item": "将同一病原复合体限定为部分镰刀菌",
+            "resolution": "open"
+          },
+          {
+            "item": "补充物种与区域不确定性",
+            "resolution": "open"
+          }
+        ]
+      }
+    },
+    {
+      "unit_id": "WHE02-D-04",
+      "title": "初侵染源：病残体与带菌种子",
+      "statement": "赤霉病初侵染源主要为田间残留的病残体（如玉米秸秆、麦茬）及带菌种子，病原在残体上越冬后产生子囊壳释放子囊孢子。",
+      "knowledge_layer": "mechanism",
+      "provenance": "model-candidate",
+      "provenance_note": "侵染循环框架为共识，残体带菌量需本地调查",
+      "main_triple": {
+        "subject": "镰刀菌",
+        "predicate": "以",
+        "object": "病残体与带菌种子作为初侵染源"
+      },
+      "conditions": [
+        "前茬为玉米等寄主作物、残体还田量大的田块",
+        "越冬期温湿度适宜病原存活"
+      ],
+      "failure_modes": [
+        "深翻埋压或残体充分腐解后初侵染源显著减少，风险下降"
+      ],
+      "side_effects": [],
+      "applicability": {
+        "growth_stage": "越冬期至抽穗期",
+        "region": null,
+        "production_system": null,
+        "variety_note": null
+      },
+      "quantitative": [],
+      "verification_methods": [
+        "残体子囊壳镜检计数",
+        "种子带菌率检测"
+      ],
+      "related_units": [
+        "WHE02-D-05",
+        "WHE02-D-06"
+      ],
+      "uncertainties": [
+        "不同残体类型与还田方式对初侵染贡献比例缺乏通用数值"
+      ],
+      "stage_source": "stage-log:S2",
+      "audit": {
+        "verdict": "pass",
+        "reason": "初侵染源结论单一，无数字",
+        "revisions": []
+      }
+    },
+    {
+      "unit_id": "WHE02-D-05",
+      "title": "传播途径：气流与雨水溅射",
+      "statement": "子囊孢子主要借气流远距离传播，分生孢子则依赖雨水溅射在穗层间再侵染，传播效率受风速与降雨事件影响。",
+      "knowledge_layer": "mechanism",
+      "provenance": "model-candidate",
+      "provenance_note": "传播方式为植病学共识，量化传播距离需实测",
+      "main_triple": {
+        "subject": "镰刀菌孢子",
+        "predicate": "通过",
+        "object": "气流与雨水溅射传播"
+      },
+      "conditions": [
+        "抽穗扬花期遇降雨或高湿天气",
+        "田间存在充足菌源"
+      ],
+      "failure_modes": [
+        "持续干旱少雨时孢子传播与侵染受抑制"
+      ],
+      "side_effects": [],
+      "applicability": {
+        "growth_stage": "抽穗扬花期",
+        "region": null,
+        "production_system": null,
+        "variety_note": null
+      },
+      "quantitative": [],
+      "verification_methods": [
+        "孢子捕捉器监测空中孢子浓度",
+        "降雨事件与病穗率相关性分析"
+      ],
+      "related_units": [
+        "WHE02-D-04",
+        "WHE02-D-06",
+        "WHE02-D-07"
+      ],
+      "uncertainties": [
+        "孢子传播距离与浓度阈值缺乏统一标准"
+      ],
+      "stage_source": "stage-log:S2",
+      "audit": {
+        "verdict": "pass",
+        "reason": "传播途径结论清晰，无数字",
+        "revisions": []
+      }
+    },
+    {
+      "unit_id": "WHE02-D-06",
+      "title": "侵染部位与侵入途径",
+      "statement": "病原主要侵染花器，残存花药是重要侵入位点，也可经颖壳缝隙或伤口侵入，侵入后先在穗部组织内扩展。",
+      "knowledge_layer": "mechanism",
+      "provenance": "model-candidate",
+      "provenance_note": "花器侵染为经典机制，具体侵入比例需实验核验",
+      "main_triple": {
+        "subject": "镰刀菌",
+        "predicate": "主要侵染",
+        "object": "小麦花器与穗部组织"
+      },
+      "conditions": [
+        "扬花期花器开放、花药外露阶段"
+      ],
+      "failure_modes": [
+        "花期已过、花器闭合后侵染效率明显下降"
+      ],
+      "side_effects": [],
+      "applicability": {
+        "growth_stage": "抽穗扬花期",
+        "region": null,
+        "production_system": null,
+        "variety_note": null
+      },
+      "quantitative": [],
+      "verification_methods": [
+        "花期人工接种与组织学观察",
+        "不同花期阶段接种对比试验"
+      ],
+      "related_units": [
+        "WHE02-D-05",
+        "WHE02-D-07"
+      ],
+      "uncertainties": [
+        "不同品种花器结构与开花习性对侵入途径的影响缺乏系统比较"
+      ],
+      "stage_source": "stage-log:S2",
+      "audit": {
+        "verdict": "pass",
+        "reason": "侵染部位结论单一，无数字",
+        "revisions": []
+      }
+    },
+    {
+      "unit_id": "WHE02-D-07",
+      "title": "花期感病窗口机制",
+      "statement": "小麦抽穗扬花期花器开放、组织幼嫩且外露花药提供营养，是赤霉病最易感病的窗口期，窗口长短与开花持续时间和天气密切相关。",
+      "knowledge_layer": "mechanism",
+      "provenance": "model-candidate",
+      "provenance_note": "花期高风险为共识，窗口天数需品种与气候核验",
+      "main_triple": {
+        "subject": "小麦抽穗扬花期",
+        "predicate": "构成",
+        "object": "赤霉病高感病窗口"
+      },
+      "conditions": [
+        "抽穗至扬花阶段",
+        "窗口期内遇高湿或降雨"
+      ],
+      "failure_modes": [
+        "抽穗期避雨或花期短、开花集中的品种窗口相对收窄"
+      ],
+      "side_effects": [],
+      "applicability": {
+        "growth_stage": "抽穗扬花期",
+        "region": null,
+        "production_system": null,
+        "variety_note": "品种间开花习性与抽穗整齐度存在差异"
+      },
+      "quantitative": [
+        {
+          "metric": "感病窗口持续天数",
+          "value": null,
+          "unit": "天",
+          "operator": null,
+          "applicable_conditions": "抽穗扬花期，具体因品种与气候而异",
+          "comparison_baseline": null,
+          "value_status": "needs-verification"
+        }
+      ],
+      "verification_methods": [
+        "分期播种试验确定花期与病穗率关系",
+        "花期逐日接种对比"
+      ],
+      "related_units": [
+        "WHE02-D-06",
+        "WHE02-D-08"
+      ],
+      "uncertainties": [
+        "窗口天数无通用值，需按品种与当地气候核定"
+      ],
+      "stage_source": "stage-log:S2",
+      "audit": {
+        "verdict": "pass",
+        "reason": "花期窗口结论单一，阈值null",
+        "revisions": []
+      }
+    },
+    {
+      "unit_id": "WHE02-D-08",
+      "title": "潜育与显症过程",
+      "statement": "病原侵入后经潜育期在穗部组织内扩展，随后出现褐变与霉层，潜育期长短受温度与湿度调控，显症滞后于侵染。",
+      "knowledge_layer": "mechanism",
+      "provenance": "model-candidate",
+      "provenance_note": "潜育概念为共识，具体天数需温湿度控制实验",
+      "main_triple": {
+        "subject": "镰刀菌侵染",
+        "predicate": "经历",
+        "object": "潜育期后显症"
+      },
+      "conditions": [
+        "侵染后温湿度适宜病原扩展"
+      ],
+      "failure_modes": [
+        "低温干燥条件下潜育期延长，显症延迟，易误判为未发病"
+      ],
+      "side_effects": [],
+      "applicability": {
+        "growth_stage": "扬花期至灌浆期",
+        "region": null,
+        "production_system": null,
+        "variety_note": null
+      },
+      "quantitative": [
+        {
+          "metric": "潜育期",
+          "value": null,
+          "unit": "天",
+          "operator": null,
+          "applicable_conditions": "温度与湿度条件不同差异明显",
+          "comparison_baseline": null,
+          "value_status": "needs-verification"
+        }
+      ],
+      "verification_methods": [
+        "控制温湿度条件下人工接种观察显症时间",
+        "田间定点标记接种穗逐日观察"
+      ],
+      "related_units": [
+        "WHE02-D-06",
+        "WHE02-D-07"
+      ],
+      "uncertainties": [
+        "潜育期数值随温度变化大，不宜给出单一通用值"
+      ],
+      "stage_source": "stage-log:S2",
+      "audit": {
+        "verdict": "pass",
+        "reason": "潜育显症结论单一，阈值null",
+        "revisions": []
+      }
+    },
+    {
+      "unit_id": "WHE02-D-09",
+      "title": "病害流行条件依赖",
+      "statement": "赤霉病流行取决于菌源基数、花期降雨或高湿、以及感病品种三者叠加，任一条件缺失时流行程度显著降低。",
+      "knowledge_layer": "mechanism",
+      "provenance": "model-candidate",
+      "provenance_note": "三要素框架为共识，各要素权重需区域数据",
+      "main_triple": {
+        "subject": "赤霉病流行",
+        "predicate": "依赖",
+        "object": "菌源、花期天气与感病品种的共同作用"
+      },
+      "conditions": [
+        "抽穗扬花期遇连续阴雨或高湿",
+        "田间菌源充足",
+        "种植感病品种"
+      ],
+      "failure_modes": [
+        "花期持续干旱时即使菌源充足也难流行"
+      ],
+      "side_effects": [],
+      "applicability": {
+        "growth_stage": "抽穗扬花期",
+        "region": null,
+        "production_system": null,
+        "variety_note": null
+      },
+      "quantitative": [],
+      "verification_methods": [
+        "多年多点田间病情与气象因子回归分析",
+        "品种抗性对比试验"
+      ],
+      "related_units": [
+        "WHE02-D-04",
+        "WHE02-D-07",
+        "WHE02-D-08"
+      ],
+      "uncertainties": [
+        "各要素的相对贡献在不同区域差异较大，缺乏统一权重"
+      ],
+      "stage_source": "stage-log:S2",
+      "audit": {
+        "verdict": "revise",
+        "reason": "任一条件缺失显著降低过于绝对",
+        "revisions": [
+          {
+            "item": "将任一条件缺失显著降低改为通常降低",
+            "resolution": "open"
+          },
+          {
+            "item": "补充三因素条件与反例",
+            "resolution": "open"
+          }
+        ]
+      }
+    },
+    {
+      "unit_id": "WHE02-D-10",
+      "title": "误区：症状轻不等于毒素风险低",
+      "statement": "穗部症状轻微或未见明显霉层，并不代表籽粒毒素污染风险低，症状严重度与毒素含量不能相互替代判断。",
+      "knowledge_layer": "failure-mode",
+      "provenance": "model-inference",
+      "provenance_note": "基于症状与毒素形成路径不同的逻辑推断，需实测支持",
+      "main_triple": {
+        "subject": "赤霉病症状严重度",
+        "predicate": "不能等同于",
+        "object": "籽粒毒素污染风险"
+      },
+      "conditions": [
+        "适用于病害调查与粮食安全风险判断"
+      ],
+      "failure_modes": [
+        "以目测病穗率低为由判定粮食合格，忽略隐性污染"
+      ],
+      "side_effects": [],
+      "applicability": {
+        "growth_stage": "灌浆期至收获期",
+        "region": null,
+        "production_system": null,
+        "variety_note": null
+      },
+      "quantitative": [],
+      "verification_methods": [
+        "同批样品症状分级与毒素检测平行比对",
+        "收获籽粒毒素含量实验室测定"
+      ],
+      "related_units": [
+        "WHE02-D-02",
+        "WHE02-D-08"
+      ],
+      "uncertainties": [
+        "症状与毒素含量的定量关系需本地样品数据支持，本单元不作数值断言"
+      ],
+      "stage_source": "stage-log:S2",
+      "audit": {
+        "verdict": "pass",
+        "reason": "症状与毒素风险分离清楚",
+        "revisions": []
+      }
+    },
+    {
+      "unit_id": "WHE02-R-01",
+      "title": "抽穗扬花期是赤霉病防治的关键时窗",
+      "statement": "小麦赤霉病药剂防治的核心时窗位于抽穗至扬花期，防治决策应围绕该时段而非全生育期平均安排。",
+      "knowledge_layer": "rule",
+      "provenance": "model-candidate",
+      "provenance_note": "基于花期侵染规律的通识性时窗规则，未绑定具体文献",
+      "main_triple": {
+        "subject": "小麦赤霉病药剂防治",
+        "predicate": "关键时窗位于",
+        "object": "抽穗至扬花期"
+      },
+      "conditions": [
+        "小麦已进入抽穗期并临近扬花",
+        "当地存在赤霉病流行风险（菌源与天气条件具备）",
+        "以防病为目的而非已发病后的补救"
+      ],
+      "failure_modes": [
+        "错过扬花前后时窗后施药，防效显著下降",
+        "抽穗期持续阴雨导致无法及时作业，时窗被动压缩",
+        "品种抽穗扬花不同步，统一时窗覆盖不全"
+      ],
+      "side_effects": [
+        "时窗集中导致施药机械与人力紧张",
+        "为抢时窗可能在不利天气下作业，增加药害与流失风险"
+      ],
+      "applicability": {
+        "growth_stage": "抽穗期至扬花期",
+        "region": null,
+        "production_system": null,
+        "variety_note": null
+      },
+      "quantitative": [],
+      "verification_methods": [
+        "田间分期施药对比试验，比较不同生育期施药的病穗率差异",
+        "结合花期观测记录与施药日期回溯分析"
+      ],
+      "related_units": [
+        "WHE02-R-02",
+        "WHE02-R-03"
+      ],
+      "uncertainties": [
+        "不同生态区抽穗扬花持续天数差异未量化",
+        "时窗具体天数边界需按当地品种与气候核定"
+      ],
+      "stage_source": "stage-log:S3",
+      "audit": {
+        "verdict": "revise",
+        "reason": "清单未展示规则条件与失效模式",
+        "revisions": [
+          {
+            "item": "补齐conditions和failure_modes",
+            "resolution": "verified_in_full_unit(结构与原文复核：conditions/failure_modes 均非空)"
+          },
+          {
+            "item": "明确适用花期、区域与品种前提",
+            "resolution": "open"
+          }
+        ]
+      }
+    },
+    {
+      "unit_id": "WHE02-R-02",
+      "title": "花期遇连阴雨应提前启动防治决策",
+      "statement": "抽穗扬花期若预报持续阴雨高湿，应将该天气信号作为提前启动防治决策的触发条件，而非等待可见病状。",
+      "knowledge_layer": "rule",
+      "provenance": "model-candidate",
+      "provenance_note": "天气触发规则属通识推断，阈值未定",
+      "main_triple": {
+        "subject": "花期连阴雨高湿天气",
+        "predicate": "触发",
+        "object": "提前启动赤霉病防治决策"
+      },
+      "conditions": [
+        "小麦处于抽穗扬花期",
+        "天气预报显示花期将出现持续阴雨或高湿时段",
+        "当地具备赤霉病病菌侵染的气候基础"
+      ],
+      "failure_modes": [
+        "仅依据可见病穗决定施药，错过侵染前保护窗口",
+        "天气预报失准导致误判，造成不必要的施药",
+        "排水不畅田块高湿持续时间超出预期"
+      ],
+      "side_effects": [
+        "预防性施药增加投入与农药使用量",
+        "连续预警可能诱发重复施药"
+      ],
+      "applicability": {
+        "growth_stage": "抽穗期至扬花期",
+        "region": null,
+        "production_system": null,
+        "variety_note": null
+      },
+      "quantitative": [
+        {
+          "metric": "花期连阴雨持续天数阈值",
+          "value": null,
+          "unit": "天",
+          "operator": null,
+          "applicable_conditions": "需按区域气候核定",
+          "comparison_baseline": null,
+          "value_status": "needs-verification"
+        }
+      ],
+      "verification_methods": [
+        "对比预警触发施药与常规施药的病穗率与产量差异",
+        "气象站花期降雨记录与病情指数相关分析"
+      ],
+      "related_units": [
+        "WHE02-R-01",
+        "WHE02-R-04"
+      ],
+      "uncertainties": [
+        "连阴雨天数与降雨量阈值未确定",
+        "不同区域气候差异需分别标定"
+      ],
+      "stage_source": "stage-log:S3",
+      "audit": {
+        "verdict": "revise",
+        "reason": "阈值null诚实，但规则条件未展示",
+        "revisions": [
+          {
+            "item": "补齐conditions和failure_modes",
+            "resolution": "verified_in_full_unit(结构与原文复核：conditions/failure_modes 均非空)"
+          },
+          {
+            "item": "保留连阴雨阈值null并注明按当地预警核验",
+            "resolution": "open"
+          }
+        ]
+      }
+    },
+    {
+      "unit_id": "WHE02-R-03",
+      "title": "初次防治加补治的节奏规则",
+      "statement": "赤霉病药剂防治宜采用初次防治加必要补治的节奏安排，补治依据花期持续阴雨与病情进展决定，而非固定次数。",
+      "knowledge_layer": "rule",
+      "provenance": "model-candidate",
+      "provenance_note": "节奏规则为通识性表述，次数与间隔留空",
+      "main_triple": {
+        "subject": "赤霉病药剂防治",
+        "predicate": "宜采用",
+        "object": "初次防治加必要补治的节奏"
+      },
+      "conditions": [
+        "花期持续时间较长或期间出现多次降雨过程",
+        "初次防治后仍存在侵染风险",
+        "所选药剂持效期不足以覆盖整个花期"
+      ],
+      "failure_modes": [
+        "机械执行固定次数导致漏防或过量施药",
+        "补治间隔过短造成重复用药与抗性压力",
+        "花期短且天气干燥时补治无必要，增加成本"
+      ],
+      "side_effects": [
+        "增加施药次数带来的成本与环境负荷",
+        "多次施药提高病菌抗药性选择压力"
+      ],
+      "applicability": {
+        "growth_stage": "抽穗期至灌浆初期",
+        "region": null,
+        "production_system": null,
+        "variety_note": null
+      },
+      "quantitative": [
+        {
+          "metric": "防治次数",
+          "value": null,
+          "unit": "次",
+          "operator": null,
+          "applicable_conditions": "依花期长度与降雨过程确定",
+          "comparison_baseline": null,
+          "value_status": "needs-verification"
+        },
+        {
+          "metric": "补治间隔",
+          "value": null,
+          "unit": "天",
+          "operator": null,
+          "applicable_conditions": "依药剂持效期确定",
+          "comparison_baseline": null,
+          "value_status": "needs-verification"
+        }
+      ],
+      "verification_methods": [
+        "设置不同补治策略的田间对比试验",
+        "记录花期降雨过程与各次施药日期的对应关系"
+      ],
+      "related_units": [
+        "WHE02-R-01",
+        "WHE02-R-02"
+      ],
+      "uncertainties": [
+        "防治次数与间隔的具体数值需按药剂与区域核定",
+        "补治的判定指标尚未量化"
+      ],
+      "stage_source": "stage-log:S3",
+      "audit": {
+        "verdict": "revise",
+        "reason": "规则条件与失效模式未展示",
+        "revisions": [
+          {
+            "item": "补齐conditions和failure_modes",
+            "resolution": "verified_in_full_unit(结构与原文复核：conditions/failure_modes 均非空)"
+          },
+          {
+            "item": "补治间隔与次数按登记标签或本地试验核验",
+            "resolution": "open"
+          }
+        ]
+      }
+    },
+    {
+      "unit_id": "WHE02-R-04",
+      "title": "菌源削减应在抽穗前完成",
+      "statement": "秸秆与病残体带菌是赤霉病初侵染来源之一，菌源削减措施应在抽穗前完成，抽穗后实施对当季花期侵染的削减作用有限。",
+      "knowledge_layer": "rule",
+      "provenance": "model-candidate",
+      "provenance_note": "农艺降险通识规则，效果量未量化",
+      "main_triple": {
+        "subject": "菌源削减措施",
+        "predicate": "应在",
+        "object": "抽穗前完成"
+      },
+      "conditions": [
+        "田块及周边存在秸秆或病残体带菌",
+        "以降低当季初侵染菌量为目标",
+        "小麦尚未进入抽穗期"
+      ],
+      "failure_modes": [
+        "抽穗后才处理残体，对当季花期侵染几乎无作用",
+        "秸秆还田方式不当反而增加地表菌源",
+        "周边田块菌源未同步处理，效果被抵消"
+      ],
+      "side_effects": [
+        "秸秆清除或深埋增加作业成本",
+        "过度清除秸秆影响土壤有机质归还"
+      ],
+      "applicability": {
+        "growth_stage": "播种至抽穗前",
+        "region": null,
+        "production_system": null,
+        "variety_note": null
+      },
+      "quantitative": [],
+      "verification_methods": [
+        "对比不同残体处理方式田块的初侵染菌量与病穗率",
+        "花期前调查地表病残体带菌率"
+      ],
+      "related_units": [
+        "WHE02-R-05",
+        "WHE02-R-06"
+      ],
+      "uncertainties": [
+        "菌源削减对病情的贡献比例未量化",
+        "不同还田方式的效果差异需分区验证"
+      ],
+      "stage_source": "stage-log:S3",
+      "audit": {
+        "verdict": "revise",
+        "reason": "规则条件与失效模式未展示",
+        "revisions": [
+          {
+            "item": "补齐conditions和failure_modes",
+            "resolution": "verified_in_full_unit(结构与原文复核：conditions/failure_modes 均非空)"
+          },
+          {
+            "item": "限定菌源削减方式与抽穗前时点",
+            "resolution": "open"
+          }
+        ]
+      }
+    },
+    {
+      "unit_id": "WHE02-R-05",
+      "title": "排水降湿作为花期降险的配套措施",
+      "statement": "花期田间高湿延长病菌侵染时间，通过排水降湿改善田间微环境可作为药剂防治之外的配套降险措施。",
+      "knowledge_layer": "rule",
+      "provenance": "model-candidate",
+      "provenance_note": "微环境调控通识规则，降湿幅度未量化",
+      "main_triple": {
+        "subject": "田间排水降湿",
+        "predicate": "作为",
+        "object": "花期赤霉病配套降险措施"
+      },
+      "conditions": [
+        "田块排水不畅或地下水位偏高",
+        "花期遭遇降雨或持续高湿",
+        "已配套药剂防治或其他降险措施"
+      ],
+      "failure_modes": [
+        "仅靠排水降湿替代药剂防治，防效不足",
+        "排水设施在花期前未疏通，降雨时无法发挥作用",
+        "地势低洼区域排水能力有限，降湿效果不明显"
+      ],
+      "side_effects": [
+        "排水工程投入与维护成本",
+        "过度排水可能影响后期灌浆水分供应"
+      ],
+      "applicability": {
+        "growth_stage": "抽穗期至灌浆期",
+        "region": null,
+        "production_system": null,
+        "variety_note": null
+      },
+      "quantitative": [],
+      "verification_methods": [
+        "对比排水处理与对照田块的田间湿度与病穗率",
+        "花期田间小气候观测记录"
+      ],
+      "related_units": [
+        "WHE02-R-04",
+        "WHE02-R-02"
+      ],
+      "uncertainties": [
+        "排水降湿对病情的独立贡献难以分离",
+        "不同土壤类型效果差异未验证"
+      ],
+      "stage_source": "stage-log:S3",
+      "audit": {
+        "verdict": "revise",
+        "reason": "规则条件与失效模式未展示",
+        "revisions": [
+          {
+            "item": "补齐conditions和failure_modes",
+            "resolution": "verified_in_full_unit(结构与原文复核：conditions/failure_modes 均非空)"
+          },
+          {
+            "item": "说明排水降湿仅作配套而非替代药剂",
+            "resolution": "open"
+          }
+        ]
+      }
+    },
+    {
+      "unit_id": "WHE02-R-06",
+      "title": "播期调节需权衡花期避雨与产量风险",
+      "statement": "通过调整播期使抽穗扬花期避开当地高频降雨时段可作为赤霉病区域性降险思路，但须同时评估晚播对产量与成熟期的负面影响。",
+      "knowledge_layer": "rule",
+      "provenance": "model-candidate",
+      "provenance_note": "播期避病为通识思路，区域适配未验证",
+      "main_triple": {
+        "subject": "播期调节",
+        "predicate": "用于",
+        "object": "使花期避开高频降雨时段"
+      },
+      "conditions": [
+        "当地花期降雨分布具有明显的时段规律",
+        "品种生育期可调且不影响安全成熟",
+        "具备灌溉等配套条件以弥补播期调整影响"
+      ],
+      "failure_modes": [
+        "盲目推迟播期导致灌浆期遇高温逼熟或秋霜风险",
+        "品种感病性差异大，播期调整无法覆盖全部田块",
+        "降雨规律年际波动大，调整后仍可能花期遇雨"
+      ],
+      "side_effects": [
+        "播期改变影响群体结构与产量构成",
+        "晚播可能增加后期病虫害叠加风险"
+      ],
+      "applicability": {
+        "growth_stage": "播种期决策",
+        "region": null,
+        "production_system": null,
+        "variety_note": null
+      },
+      "quantitative": [],
+      "verification_methods": [
+        "多年多点不同播期试验，比较花期降雨遭遇率与病穗率",
+        "结合当地气象资料分析花期降雨概率分布"
+      ],
+      "related_units": [
+        "WHE02-R-02",
+        "WHE02-R-05"
+      ],
+      "uncertainties": [
+        "各区域适宜播期窗口未标定",
+        "播期调整的产量代价需分品种评估"
+      ],
+      "stage_source": "stage-log:S3",
+      "audit": {
+        "verdict": "revise",
+        "reason": "规则条件未展示且区域性强",
+        "revisions": [
+          {
+            "item": "补齐conditions和failure_modes",
+            "resolution": "verified_in_full_unit(结构与原文复核：conditions/failure_modes 均非空)"
+          },
+          {
+            "item": "绑定区域降雨模式并评估晚播产量风险",
+            "resolution": "open"
+          }
+        ]
+      }
+    },
+    {
+      "unit_id": "WHE02-R-07",
+      "title": "药剂防治时窗与收获安全间隔的衔接规则",
+      "statement": "花期药剂防治须与收获期保持安全间隔，防治节奏安排应保证最后一次施药距收获有足够间隔，避免籽粒农药残留风险。",
+      "knowledge_layer": "rule",
+      "provenance": "model-candidate",
+      "provenance_note": "安全间隔属标签规定范畴，具体数值留空",
+      "main_triple": {
+        "subject": "花期药剂防治",
+        "predicate": "须衔接",
+        "object": "收获安全间隔要求"
+      },
+      "conditions": [
+        "花期实施了药剂防治",
+        "所用药剂标签规定有安全间隔期",
+        "收获期临近或已确定"
+      ],
+      "failure_modes": [
+        "为追求防效在灌浆后期仍施药，导致残留超标",
+        "忽视标签安全间隔，凭经验安排最后施药时间",
+        "不同药剂混用时间隔要求未分别核算"
+      ],
+      "side_effects": [
+        "为满足间隔要求可能放弃后期补治，影响防效",
+        "延长间隔可能压缩可用防治时窗"
+      ],
+      "applicability": {
+        "growth_stage": "扬花期至灌浆期",
+        "region": null,
+        "production_system": null,
+        "variety_note": null
+      },
+      "quantitative": [
+        {
+          "metric": "安全间隔期",
+          "value": null,
+          "unit": "天",
+          "operator": null,
+          "applicable_conditions": "依具体药剂标签规定",
+          "comparison_baseline": null,
+          "value_status": "needs-verification"
+        }
+      ],
+      "verification_methods": [
+        "核对农药标签安全间隔规定",
+        "收获期籽粒农药残留检测"
+      ],
+      "related_units": [
+        "WHE02-R-03"
+      ],
+      "uncertainties": [
+        "具体药剂安全间隔数值须以登记标签为准，本单元不填",
+        "残留限量标准需查现行国家标准文本"
+      ],
+      "stage_source": "stage-log:S3",
+      "audit": {
+        "verdict": "revise",
+        "reason": "安全间隔阈值null，规则条件未展示",
+        "revisions": [
+          {
+            "item": "补齐conditions和failure_modes",
+            "resolution": "verified_in_full_unit(结构与原文复核：conditions/failure_modes 均非空)"
+          },
+          {
+            "item": "安全间隔期须按具体药剂登记标签核验",
+            "resolution": "open"
+          }
+        ]
+      }
+    },
+    {
+      "unit_id": "WHE02-R-08",
+      "title": "扬花后补治的边际效益递减规则",
+      "statement": "扬花结束后补治对赤霉病侵染的阻断作用随灌浆推进而递减，补治决策应以花期是否已过为边界条件。",
+      "knowledge_layer": "rule",
+      "provenance": "model-inference",
+      "provenance_note": "由侵染窗口推断的边际效益规则，未量化",
+      "main_triple": {
+        "subject": "扬花后补治",
+        "predicate": "边际效益随",
+        "object": "灌浆推进而递减"
+      },
+      "conditions": [
+        "小麦已完成扬花进入灌浆期",
+        "前期防治存在遗漏或花期遇雨",
+        "评估是否值得追加施药"
+      ],
+      "failure_modes": [
+        "扬花后仍按花期节奏多次施药，收益低且增加残留风险",
+        "将补治作为已错失时窗的等效替代",
+        "病害已显症后施药，无法挽回已发生的侵染"
+      ],
+      "side_effects": [
+        "无效施药增加成本与环境负荷",
+        "延误对已发病田块的其他管理措施"
+      ],
+      "applicability": {
+        "growth_stage": "灌浆期",
+        "region": null,
+        "production_system": null,
+        "variety_note": null
+      },
+      "quantitative": [],
+      "verification_methods": [
+        "设置扬花后不同时间施药处理的防效对比",
+        "病穗率与施药时间的关系曲线分析"
+      ],
+      "related_units": [
+        "WHE02-R-01",
+        "WHE02-R-03"
+      ],
+      "uncertainties": [
+        "边际效益递减的具体拐点未确定",
+        "不同品种扬花持续期差异影响边界判定"
+      ],
+      "stage_source": "stage-log:S3",
+      "audit": {
+        "verdict": "revise",
+        "reason": "规则条件与失效模式未展示",
+        "revisions": [
+          {
+            "item": "补齐conditions和failure_modes",
+            "resolution": "verified_in_full_unit(结构与原文复核：conditions/failure_modes 均非空)"
+          },
+          {
+            "item": "明确扬花结束边界与补治失效条件",
+            "resolution": "open"
+          }
+        ]
+      }
+    },
+    {
+      "unit_id": "WHE02-K-01",
+      "title": "病穗率与籽粒DON污染非充分关系",
+      "statement": "田间病穗率或严重度升高提示赤霉病流行，但不能据此单向推定最终籽粒DON污染必然超标；病害流行等级只是毒素风险的指示性前因之一。",
+      "knowledge_layer": "risk-chain",
+      "provenance": "model-inference",
+      "provenance_note": "基于病害-毒素链逻辑推演，缺本地定量证据",
+      "main_triple": {
+        "subject": "田间病穗率与严重度",
+        "predicate": "不能单向充分决定",
+        "object": "最终籽粒DON污染水平"
+      },
+      "conditions": [
+        "抽穗扬花期至灌浆期赤霉病发生",
+        "以病穗率/严重度作为田间调查指标"
+      ],
+      "failure_modes": [
+        "将病穗率直接换算为毒素超标结论",
+        "以田间未见明显病穗推断毒素安全"
+      ],
+      "side_effects": [
+        "低估潜伏侵染导致的毒素累积",
+        "过度依赖目测调查而忽略检测"
+      ],
+      "applicability": {
+        "growth_stage": "抽穗扬花期至灌浆期",
+        "region": null,
+        "production_system": null,
+        "variety_note": null
+      },
+      "quantitative": [
+        {
+          "metric": "病穗率与DON污染的定量关系",
+          "value": null,
+          "unit": "",
+          "operator": null,
+          "applicable_conditions": "需本地多年多点数据",
+          "comparison_baseline": null,
+          "value_status": "needs-verification"
+        }
+      ],
+      "verification_methods": [
+        "同田块同步采集病穗调查数据与籽粒DON检测数据做相关分析",
+        "按现行小麦赤霉病测报调查规范记录病穗率与严重度"
+      ],
+      "related_units": [
+        "WHE02-K-02",
+        "WHE02-K-03"
+      ],
+      "uncertainties": [
+        "病穗率-DON关系的定量阈值因年份、品种、天气差异大，区域差分待补"
+      ],
+      "stage_source": "stage-log:S4",
+      "audit": {
+        "verdict": "pass",
+        "reason": "病穗率不能单向推定毒素超标",
+        "revisions": []
+      }
+    },
+    {
+      "unit_id": "WHE02-K-02",
+      "title": "毒素风险由病粒率与污染梯度承载",
+      "statement": "粮粒毒素风险应以病粒率、污染梯度及检测限量框架来表征，而非以田间病穗率或严重度替代；二者属不同观测对象与不同决策依据。",
+      "knowledge_layer": "risk-chain",
+      "provenance": "model-inference",
+      "provenance_note": "概念性解耦，限量数值未核实",
+      "main_triple": {
+        "subject": "粮粒毒素风险",
+        "predicate": "应由",
+        "object": "病粒率、污染梯度与检测限量框架表征"
+      },
+      "conditions": [
+        "收获后籽粒取样检测",
+        "存在真菌毒素限量标准框架"
+      ],
+      "failure_modes": [
+        "用田间病穗率替代籽粒病粒率",
+        "忽略批次间污染梯度差异"
+      ],
+      "side_effects": [
+        "抽样代表性不足导致误判",
+        "检测成本上升"
+      ],
+      "applicability": {
+        "growth_stage": "收获至储存期",
+        "region": null,
+        "production_system": null,
+        "variety_note": null
+      },
+      "quantitative": [
+        {
+          "metric": "DON限量值",
+          "value": null,
+          "unit": "",
+          "operator": null,
+          "applicable_conditions": "依现行国家真菌毒素限量标准文本",
+          "comparison_baseline": null,
+          "value_status": "needs-verification"
+        }
+      ],
+      "verification_methods": [
+        "按现行食品安全国家标准真菌毒素限量文本核对限量",
+        "对籽粒样品做病粒率计数与DON检测并比较批次梯度"
+      ],
+      "related_units": [
+        "WHE02-K-01",
+        "WHE02-K-04"
+      ],
+      "uncertainties": [
+        "限量标准编号与具体数值本轮未核实，需查标准原文"
+      ],
+      "stage_source": "stage-log:S4",
+      "audit": {
+        "verdict": "pass",
+        "reason": "病粒率与毒素框架区分清楚",
+        "revisions": []
+      }
+    },
+    {
+      "unit_id": "WHE02-K-03",
+      "title": "病害控制不等同毒素控制",
+      "statement": "降低田间赤霉病病穗率与严重度的防治措施，不必然同步等比例降低籽粒毒素含量；病害控制与毒素控制是需分别评价的两个目标。",
+      "knowledge_layer": "risk-chain",
+      "provenance": "model-inference",
+      "provenance_note": "解耦命题，缺本地对照试验数据",
+      "main_triple": {
+        "subject": "病害控制措施",
+        "predicate": "不必然等比例实现",
+        "object": "毒素控制目标"
+      },
+      "conditions": [
+        "以杀菌剂或农艺措施防控赤霉病",
+        "评价指标同时含病情与毒素"
+      ],
+      "failure_modes": [
+        "以防效数据直接宣称毒素达标",
+        "仅按病情决定是否检测毒素"
+      ],
+      "side_effects": [
+        "防治决策与粮食安全决策脱节",
+        "错过毒素超标批次的识别"
+      ],
+      "applicability": {
+        "growth_stage": "抽穗扬花期至收获期",
+        "region": null,
+        "production_system": null,
+        "variety_note": null
+      },
+      "quantitative": [
+        {
+          "metric": "防效与毒素降低率的对应关系",
+          "value": null,
+          "unit": "",
+          "operator": null,
+          "applicable_conditions": "需药剂-年份-品种多点试验",
+          "comparison_baseline": null,
+          "value_status": "needs-verification"
+        }
+      ],
+      "verification_methods": [
+        "设置用药与对照小区，同步测防效与籽粒DON含量",
+        "比较不同施药时期下病情与毒素的响应差异"
+      ],
+      "related_units": [
+        "WHE02-K-01",
+        "WHE02-K-04"
+      ],
+      "uncertainties": [
+        "防效与毒素降低的非同步程度受药剂、时期、天气影响，需本地验证"
+      ],
+      "stage_source": "stage-log:S4",
+      "audit": {
+        "verdict": "pass",
+        "reason": "病害控制与毒素控制分离清楚",
+        "revisions": []
+      }
+    },
+    {
+      "unit_id": "WHE02-K-04",
+      "title": "防治决策与毒素检测决策不同源",
+      "statement": "田间防治决策依据天气、花期与病情预测，而毒素风险管理决策依据籽粒检测与限量框架；两套决策信息源不同，不能相互替代。",
+      "knowledge_layer": "risk-chain",
+      "provenance": "model-inference",
+      "provenance_note": "决策解耦推断，无直接文献支撑",
+      "main_triple": {
+        "subject": "防治决策与毒素风险管理决策",
+        "predicate": "依据不同信息源",
+        "object": "天气花期病情预测与籽粒检测限量框架"
+      },
+      "conditions": [
+        "抽穗扬花期进行防治决策",
+        "收获后按批次进行毒素检测判定"
+      ],
+      "failure_modes": [
+        "以防治记录替代毒素检测记录",
+        "以检测合格反推田间无需防治"
+      ],
+      "side_effects": [
+        "管理链条割裂",
+        "责任边界不清"
+      ],
+      "applicability": {
+        "growth_stage": "抽穗扬花期与收获后",
+        "region": null,
+        "production_system": null,
+        "variety_note": null
+      },
+      "quantitative": [],
+      "verification_methods": [
+        "梳理防治决策记录与毒素检测报告的信息来源差异",
+        "对照现行测报规范与真菌毒素限量标准文本"
+      ],
+      "related_units": [
+        "WHE02-K-02",
+        "WHE02-K-03"
+      ],
+      "uncertainties": [
+        "不同收储主体执行流程差异大，区域差分待补"
+      ],
+      "stage_source": "stage-log:S4",
+      "audit": {
+        "verdict": "pass",
+        "reason": "两套决策信息源区分清楚",
+        "revisions": []
+      }
+    },
+    {
+      "unit_id": "WHE02-K-05",
+      "title": "误合并病害与毒素风险的失败模式",
+      "statement": "将病害风险与毒素风险合并为单一指标进行判断，会导致防治决策与粮食安全判定同时失真，属需明确规避的失败模式。",
+      "knowledge_layer": "failure-mode",
+      "provenance": "model-inference",
+      "provenance_note": "反例归纳，属框架内失败模式条目",
+      "main_triple": {
+        "subject": "病害风险与毒素风险误合并",
+        "predicate": "导致",
+        "object": "防治决策与粮食安全判定双重失真"
+      },
+      "conditions": [
+        "以单一指标同时承担病情与毒素判断",
+        "缺少独立检测环节"
+      ],
+      "failure_modes": [
+        "用病穗率代替病粒率",
+        "用防效代替毒素合格判定",
+        "以症状轻推断毒素风险低"
+      ],
+      "side_effects": [
+        "超标粮粒流入链条",
+        "无效防治或过度防治"
+      ],
+      "applicability": {
+        "growth_stage": "全生育期至收储期",
+        "region": null,
+        "production_system": null,
+        "variety_note": null
+      },
+      "quantitative": [],
+      "verification_methods": [
+        "审查决策流程中病情指标与毒素指标是否分列",
+        "抽查检测报告与防治记录的一致性"
+      ],
+      "related_units": [
+        "WHE02-K-01",
+        "WHE02-K-03",
+        "WHE02-K-04"
+      ],
+      "uncertainties": [
+        "误合并的实际发生率缺统计数据"
+      ],
+      "stage_source": "stage-log:S4",
+      "audit": {
+        "verdict": "pass",
+        "reason": "误合并风险的失败模式清楚",
+        "revisions": []
+      }
+    },
+    {
+      "unit_id": "WHE02-F-01",
+      "title": "白穗不等于赤霉病：需排除虫害与其他根茎病害",
+      "statement": "抽穗后出现的白穗可由赤霉病、麦茎蜂等虫害、全蚀病或纹枯病枯孕白穗等多种原因造成，仅凭白穗外观不能判定为赤霉病，须结合穗部霉层、小穗基部变色与茎秆/根系症状区分。",
+      "knowledge_layer": "diagnostic",
+      "provenance": "model-inference",
+      "provenance_note": "由白穗类症状多因性推理，未引具体文献",
+      "main_triple": {
+        "subject": "白穗症状",
+        "predicate": "不能单独作为",
+        "object": "赤霉病确诊依据"
+      },
+      "conditions": [
+        "症状出现在抽穗至灌浆期",
+        "田间同时存在虫害或其他根茎病害可能"
+      ],
+      "failure_modes": [
+        "把虫害造成的白穗误判为赤霉病并据此施药，导致药剂错配与延误",
+        "把赤霉病早期小穗枯白误判为缺素或冻害，错过防治窗口"
+      ],
+      "side_effects": [
+        "过度依赖单一症状易引发误诊与无效用药"
+      ],
+      "applicability": {
+        "growth_stage": "抽穗扬花期至灌浆期",
+        "region": null,
+        "production_system": null,
+        "variety_note": null
+      },
+      "quantitative": [],
+      "verification_methods": [
+        "田间拔取白穗检查穗部是否有粉红色霉层及小穗基部褐变",
+        "剖检茎秆与根系排查虫道、根腐与茎基病变",
+        "必要时送检进行病原分离鉴定"
+      ],
+      "related_units": [
+        "WHE02-F-02"
+      ],
+      "uncertainties": [
+        "不同生态区主要混淆对象（虫害或根病）权重不同，需区域数据补充"
+      ],
+      "stage_source": "stage-log:S5",
+      "audit": {
+        "verdict": "pass",
+        "reason": "白穗鉴别结论单一，无数字",
+        "revisions": []
+      }
+    },
+    {
+      "unit_id": "WHE02-F-02",
+      "title": "花期未见雨不等于无需防治的边界",
+      "statement": "赤霉病流行取决于花期降雨/高湿与菌源量的组合，花期无雨且菌源低时防治必要性下降，但若预报显示花后短期内有降雨或田间湿度持续偏高，仍不能以“未见雨”为由放弃预防。",
+      "knowledge_layer": "rule",
+      "provenance": "model-inference",
+      "provenance_note": "基于花期湿润与菌源共同决定流行的推理，未引具体阈值",
+      "main_triple": {
+        "subject": "花期降雨与菌源组合",
+        "predicate": "决定",
+        "object": "防治必要性"
+      },
+      "conditions": [
+        "以抽穗扬花期为判断窗口",
+        "具备可获取的花期天气预报与菌源监测信息"
+      ],
+      "failure_modes": [
+        "仅凭喷药当时无雨就判定全季无需防治，忽略花后降雨窗口",
+        "在菌源极低且花期持续干燥条件下仍机械施药，造成无效投入"
+      ],
+      "side_effects": [
+        "以单一天气指标决策易产生漏防或过防"
+      ],
+      "applicability": {
+        "growth_stage": "抽穗扬花期",
+        "region": null,
+        "production_system": null,
+        "variety_note": null
+      },
+      "quantitative": [],
+      "verification_methods": [
+        "对照花期逐日降雨与田间湿度记录与后期病穗率调查",
+        "设置不施药对照区比较病穗率与产量损失"
+      ],
+      "related_units": [
+        "WHE02-F-01",
+        "WHE02-F-03"
+      ],
+      "uncertainties": [
+        "触发防治的降雨量、湿度与菌源量阈值需按区域标定，本单元不给出数值"
+      ],
+      "stage_source": "stage-log:S5",
+      "audit": {
+        "verdict": "revise",
+        "reason": "rule单元缺条件与失效模式",
+        "revisions": [
+          {
+            "item": "补齐conditions和failure_modes",
+            "resolution": "verified_in_full_unit(结构与原文复核：conditions/failure_modes 均非空)"
+          },
+          {
+            "item": "明确菌源低与花后降雨预报的判定边界",
+            "resolution": "open"
+          }
+        ]
+      }
+    },
+    {
+      "unit_id": "WHE02-F-03",
+      "title": "雨后抢晴喷药的失败面",
+      "statement": "花期遇雨后在雨隙抢喷常因叶面未干、药液被冲刷或错过侵染关键期而防效下降，抢晴喷药不能等同于有效预防，需评估施药时距降雨的间隔与植株表面干燥程度。",
+      "knowledge_layer": "failure-mode",
+      "provenance": "model-inference",
+      "provenance_note": "由药剂附着与冲刷机理推理，未引具体试验数据",
+      "main_triple": {
+        "subject": "雨后抢晴喷药",
+        "predicate": "可能因",
+        "object": "药液冲刷与时机错位而失效"
+      },
+      "conditions": [
+        "花期已发生降雨且预报仍有降雨",
+        "采用常规叶面喷雾方式"
+      ],
+      "failure_modes": [
+        "雨前施药后遇雨冲刷，药剂未及吸收即被淋失",
+        "雨隙施药时穗部带水，药液稀释流失且难以附着",
+        "降雨已过侵染窗口才施药，防效显著下降"
+      ],
+      "side_effects": [
+        "反复抢喷增加用药次数与抗性选择压力"
+      ],
+      "applicability": {
+        "growth_stage": "抽穗扬花期",
+        "region": null,
+        "production_system": null,
+        "variety_note": null
+      },
+      "quantitative": [],
+      "verification_methods": [
+        "比较不同施药距降雨间隔处理的病穗率与防效",
+        "记录施药时穗面干湿状态并分层统计防效"
+      ],
+      "related_units": [
+        "WHE02-F-02"
+      ],
+      "uncertainties": [
+        "施药后耐雨水冲刷时间与剂型关系需按产品标签与试验核验"
+      ],
+      "stage_source": "stage-log:S5",
+      "audit": {
+        "verdict": "pass",
+        "reason": "抢晴喷药失败面表述清楚",
+        "revisions": []
+      }
+    },
+    {
+      "unit_id": "WHE02-F-04",
+      "title": "品种“耐病”误读为不需防治",
+      "statement": "品种耐病通常指发病后产量损失相对较小，并不表示不发病、不带菌或不产生毒素，将耐病品种当作免防品种会放大毒素污染与穗腐风险。",
+      "knowledge_layer": "failure-mode",
+      "provenance": "model-inference",
+      "provenance_note": "由耐病与抗病、抗侵染概念区分推理",
+      "main_triple": {
+        "subject": "品种耐病性",
+        "predicate": "不等于",
+        "object": "免于发病与毒素污染"
+      },
+      "conditions": [
+        "品种说明标注耐病或中等抗性",
+        "花期具备病害流行天气条件"
+      ],
+      "failure_modes": [
+        "因标注耐病而取消花期预防，导致病穗率与毒素水平上升",
+        "把耐病品种在重发年的低损失误推为普遍规律"
+      ],
+      "side_effects": [
+        "长期依赖耐病品种单一抗性可能加速病原群体变化"
+      ],
+      "applicability": {
+        "growth_stage": "抽穗扬花期",
+        "region": null,
+        "production_system": null,
+        "variety_note": "耐病品种仍需按花期天气决策防治"
+      },
+      "quantitative": [],
+      "verification_methods": [
+        "同一天气条件下比较耐病与感病品种在施药与不施药下的病穗率与毒素含量",
+        "核对品种审定公告中的抗性描述原文"
+      ],
+      "related_units": [
+        "WHE02-F-05"
+      ],
+      "uncertainties": [
+        "不同品种耐病性评价口径与毒素积累表现差异需区域试验数据"
+      ],
+      "stage_source": "stage-log:S5",
+      "audit": {
+        "verdict": "pass",
+        "reason": "耐病误读的失败模式清楚",
+        "revisions": []
+      }
+    },
+    {
+      "unit_id": "WHE02-F-05",
+      "title": "病害轻不等于毒素合格",
+      "statement": "赤霉病病穗率或病情指数偏低不能直接推断籽粒毒素含量符合限量，症状严重度与毒素积累并非一一对应，粮食是否合格须以毒素检测结果判定。",
+      "knowledge_layer": "risk-chain",
+      "provenance": "model-inference",
+      "provenance_note": "由症状与毒素形成路径不完全对应推理",
+      "main_triple": {
+        "subject": "病害症状严重度",
+        "predicate": "不能替代",
+        "object": "毒素检测结论"
+      },
+      "conditions": [
+        "收获籽粒拟进入粮食收购或加工环节",
+        "存在花期感染但症状表现轻微的可能"
+      ],
+      "failure_modes": [
+        "以田间目测病情轻为由省略入库毒素检测",
+        "把防效高直接当作粮食合格证明"
+      ],
+      "side_effects": [
+        "以病情替代毒素判定可能造成超标粮流入市场"
+      ],
+      "applicability": {
+        "growth_stage": "灌浆至收获期",
+        "region": null,
+        "production_system": null,
+        "variety_note": null
+      },
+      "quantitative": [],
+      "verification_methods": [
+        "按标准方法对籽粒样品进行毒素含量检测并与限量标准比对",
+        "同步记录田间病情与对应样品毒素数据做相关性分析"
+      ],
+      "related_units": [
+        "WHE02-F-04",
+        "WHE02-F-06"
+      ],
+      "uncertainties": [
+        "症状与毒素对应关系的量化程度受品种、菌株产毒力与天气影响，需本地数据"
+      ],
+      "stage_source": "stage-log:S5",
+      "audit": {
+        "verdict": "pass",
+        "reason": "病害轻不等于毒素合格清楚",
+        "revisions": []
+      }
+    },
+    {
+      "unit_id": "WHE02-F-06",
+      "title": "储粮受潮后毒素继续升高的边界",
+      "statement": "收获时毒素未超标的小麦，若入库水分偏高或储存期受潮，籽粒上残留的产毒真菌仍可继续生长并累积毒素，储存环节的防潮控湿是毒素风险控制的独立环节。",
+      "knowledge_layer": "risk-chain",
+      "provenance": "model-inference",
+      "provenance_note": "由产毒真菌在储粮条件下继续生长推理",
+      "main_triple": {
+        "subject": "储粮受潮",
+        "predicate": "可导致",
+        "object": "已收获籽粒毒素继续累积"
+      },
+      "conditions": [
+        "入库水分或储存环境湿度偏高",
+        "籽粒表面带有产毒真菌存活体"
+      ],
+      "failure_modes": [
+        "以收获时检测合格为由放松仓储防潮管理",
+        "受潮后仅做通风晾晒而不复检毒素"
+      ],
+      "side_effects": [
+        "反复受潮使整仓粮食毒素风险上升"
+      ],
+      "applicability": {
+        "growth_stage": "收获后储藏期",
+        "region": null,
+        "production_system": null,
+        "variety_note": null
+      },
+      "quantitative": [],
+      "verification_methods": [
+        "按储藏期分阶段取样检测毒素与水分",
+        "对比不同仓储湿度条件下的毒素变化"
+      ],
+      "related_units": [
+        "WHE02-F-05"
+      ],
+      "uncertainties": [
+        "安全储藏水分与温湿度阈值须依据国家储粮标准文本核验，本单元不给出数值"
+      ],
+      "stage_source": "stage-log:S5",
+      "audit": {
+        "verdict": "pass",
+        "reason": "储粮受潮毒素风险独立环节清楚",
+        "revisions": []
+      }
+    },
+    {
+      "unit_id": "WHE02-F-07",
+      "title": "防效评价误用：把一次施药防效当作全程结论",
+      "statement": "单次施药试验得到的防效只反映该次处理在特定天气与菌源条件下的效果，不能外推为整个花期的防治结论，也不能据此推断毒素控制效果。",
+      "knowledge_layer": "failure-mode",
+      "provenance": "model-inference",
+      "provenance_note": "由防效的条件依赖性与指标错位推理",
+      "main_triple": {
+        "subject": "单次施药防效",
+        "predicate": "不能外推为",
+        "object": "全程防治与毒素控制结论"
+      },
+      "conditions": [
+        "防效数据来自有限天气与菌源条件下的试验"
+      ],
+      "failure_modes": [
+        "以一次试验防效高为由减少后续关键期防治",
+        "把防效数值直接当作毒素降低幅度"
+      ],
+      "side_effects": [
+        "基于片面数据制定用药方案可能造成漏防"
+      ],
+      "applicability": {
+        "growth_stage": "抽穗扬花期",
+        "region": null,
+        "production_system": null,
+        "variety_note": null
+      },
+      "quantitative": [],
+      "verification_methods": [
+        "多点多年重复试验并记录天气与菌源背景",
+        "防效与毒素检测结果分别统计评价"
+      ],
+      "related_units": [
+        "WHE02-F-05",
+        "WHE02-F-03"
+      ],
+      "uncertainties": [
+        "防效与毒素控制的相关程度需专门试验数据支持"
+      ],
+      "stage_source": "stage-log:S5",
+      "audit": {
+        "verdict": "pass",
+        "reason": "单次防效外推失败模式清楚",
+        "revisions": []
+      }
+    },
+    {
+      "unit_id": "WHE02-Q-01",
+      "title": "赤霉病流行预警的气象触发阈值",
+      "statement": "抽穗扬花期连续阴雨或高湿且气温处于适宜区间时，可作为赤霉病流行预警的气象触发条件，其具体阈值需按当地预警模型核验。",
+      "knowledge_layer": "quantitative",
+      "provenance": "needs-verification",
+      "provenance_note": "阈值随区域模型不同，未给定具体数值",
+      "main_triple": {
+        "subject": "小麦抽穗扬花期",
+        "predicate": "受气象条件触发",
+        "object": "赤霉病流行预警"
+      },
+      "conditions": [
+        "小麦处于抽穗扬花期",
+        "存在连续降雨或高湿天气",
+        "当地已有可用的预警模型或指标"
+      ],
+      "failure_modes": [
+        "降雨短暂且迅速干燥时预警可能高估风险",
+        "品种抗性差异使同一气象条件风险不同"
+      ],
+      "side_effects": [
+        "预警偏保守可能导致不必要的施药"
+      ],
+      "applicability": {
+        "growth_stage": "抽穗扬花期",
+        "region": null,
+        "production_system": null,
+        "variety_note": null
+      },
+      "quantitative": [
+        {
+          "metric": "连续阴雨或高湿持续天数阈值",
+          "value": null,
+          "unit": "天",
+          "operator": ">=",
+          "applicable_conditions": "抽穗扬花期，当地预警模型适用",
+          "comparison_baseline": null,
+          "value_status": "needs-verification"
+        },
+        {
+          "metric": "预警触发日均气温下限",
+          "value": null,
+          "unit": "摄氏度",
+          "operator": ">=",
+          "applicable_conditions": "抽穗扬花期",
+          "comparison_baseline": null,
+          "value_status": "needs-verification"
+        }
+      ],
+      "verification_methods": [
+        "查阅当地植保部门发布的赤霉病预警技术资料中的气象指标",
+        "用历史气象与病情观测数据回代检验预警模型"
+      ],
+      "related_units": [
+        "WHE02-Q-02"
+      ],
+      "uncertainties": [
+        "不同区域预警模型的气象指标口径不一致",
+        "阈值是否区分品种抗性水平尚不明确"
+      ],
+      "stage_source": "stage-log:S6",
+      "audit": {
+        "verdict": "pass",
+        "reason": "预警阈值null诚实保留",
+        "revisions": []
+      }
+    },
+    {
+      "unit_id": "WHE02-Q-02",
+      "title": "病穗率与病情指数的调查分级指标",
+      "statement": "赤霉病田间调查通常以病穗率和病情指数作为定量分级指标，其分级界限需依据现行调查规范核验。",
+      "knowledge_layer": "quantitative",
+      "provenance": "needs-verification",
+      "provenance_note": "分级界限属规范文本内容，未给定数值",
+      "main_triple": {
+        "subject": "赤霉病田间调查",
+        "predicate": "采用",
+        "object": "病穗率与病情指数分级指标"
+      },
+      "conditions": [
+        "按统一调查规范取样",
+        "调查时期覆盖灌浆期病情稳定阶段"
+      ],
+      "failure_modes": [
+        "取样点代表性不足导致病穗率偏差",
+        "调查时期过早使病情指数低估"
+      ],
+      "side_effects": [],
+      "applicability": {
+        "growth_stage": "灌浆期",
+        "region": null,
+        "production_system": null,
+        "variety_note": null
+      },
+      "quantitative": [
+        {
+          "metric": "病穗率分级界限",
+          "value": null,
+          "unit": "%",
+          "operator": null,
+          "applicable_conditions": "按现行病害调查规范",
+          "comparison_baseline": null,
+          "value_status": "needs-verification"
+        },
+        {
+          "metric": "病情指数分级界限",
+          "value": null,
+          "unit": "无量纲",
+          "operator": null,
+          "applicable_conditions": "按现行病害调查规范",
+          "comparison_baseline": null,
+          "value_status": "needs-verification"
+        }
+      ],
+      "verification_methods": [
+        "查阅现行小麦赤霉病测报调查规范文本",
+        "田间多点取样复核病穗率与病情指数计算"
+      ],
+      "related_units": [
+        "WHE02-Q-01",
+        "WHE02-Q-03"
+      ],
+      "uncertainties": [
+        "不同规范版本的分级界限可能不同",
+        "病情指数严重度分级标准存在地区差异"
+      ],
+      "stage_source": "stage-log:S6",
+      "audit": {
+        "verdict": "pass",
+        "reason": "调查分级指标未写具体数值",
+        "revisions": []
+      }
+    },
+    {
+      "unit_id": "WHE02-Q-03",
+      "title": "病穗率与籽粒DON含量的相关性指标",
+      "statement": "病穗率与籽粒DON含量之间存在相关关系，但相关强度与换算关系需通过本地样品实测建立，不能直接以病穗率推断毒素是否合格。",
+      "knowledge_layer": "quantitative",
+      "provenance": "needs-verification",
+      "provenance_note": "相关性系数与换算关系需本地实测，未给定数值",
+      "main_triple": {
+        "subject": "赤霉病病穗率",
+        "predicate": "与",
+        "object": "籽粒DON含量相关性"
+      },
+      "conditions": [
+        "样品来自同一生态区与同一品种群",
+        "收获期取样并同步检测毒素"
+      ],
+      "failure_modes": [
+        "气候差异使同一病穗率对应不同毒素水平",
+        "品种与菌株产毒力差异削弱相关性"
+      ],
+      "side_effects": [
+        "以病穗率替代毒素检测可能造成误判"
+      ],
+      "applicability": {
+        "growth_stage": "成熟收获期",
+        "region": null,
+        "production_system": null,
+        "variety_note": null
+      },
+      "quantitative": [
+        {
+          "metric": "病穗率与DON含量相关系数",
+          "value": null,
+          "unit": "无量纲",
+          "operator": null,
+          "applicable_conditions": "同区域同品种群样品",
+          "comparison_baseline": null,
+          "value_status": "needs-verification"
+        },
+        {
+          "metric": "病穗率对应DON含量的换算斜率",
+          "value": null,
+          "unit": "微克每千克每百分点",
+          "operator": null,
+          "applicable_conditions": "本地实测数据拟合",
+          "comparison_baseline": null,
+          "value_status": "needs-verification"
+        }
+      ],
+      "verification_methods": [
+        "同批样品同步测定病穗率与DON含量并做回归分析",
+        "按现行毒素检测方法标准复核检测结果"
+      ],
+      "related_units": [
+        "WHE02-Q-02",
+        "WHE02-Q-04"
+      ],
+      "uncertainties": [
+        "相关关系是否稳定跨年跨区域尚不明确",
+        "病穗率不能等同于毒素风险水平"
+      ],
+      "stage_source": "stage-log:S6",
+      "audit": {
+        "verdict": "pass",
+        "reason": "相关性与换算关系需本地实测",
+        "revisions": []
+      }
+    },
+    {
+      "unit_id": "WHE02-Q-04",
+      "title": "籽粒DON与ZEN的限量指标",
+      "statement": "小麦籽粒中DON与ZEN的限量属于食品安全标准规定内容，其具体限值须以现行国家标准文本为准。",
+      "knowledge_layer": "quantitative",
+      "provenance": "needs-verification",
+      "provenance_note": "限量数值属标准文本，未给定具体数值",
+      "main_triple": {
+        "subject": "小麦籽粒",
+        "predicate": "受限于",
+        "object": "DON与ZEN限量标准"
+      },
+      "conditions": [
+        "以人食用小麦籽粒及其制品为对象",
+        "按现行食品安全国家标准判定"
+      ],
+      "failure_modes": [
+        "将饲料用限量误用于人食用判定",
+        "检测方法灵敏度不足导致结果偏差"
+      ],
+      "side_effects": [],
+      "applicability": {
+        "growth_stage": "收获后籽粒",
+        "region": null,
+        "production_system": null,
+        "variety_note": null
+      },
+      "quantitative": [
+        {
+          "metric": "DON限量",
+          "value": null,
+          "unit": "微克每千克",
+          "operator": "<=",
+          "applicable_conditions": "人食用小麦籽粒",
+          "comparison_baseline": null,
+          "value_status": "needs-verification"
+        },
+        {
+          "metric": "ZEN限量",
+          "value": null,
+          "unit": "微克每千克",
+          "operator": "<=",
+          "applicable_conditions": "人食用小麦籽粒",
+          "comparison_baseline": null,
+          "value_status": "needs-verification"
+        }
+      ],
+      "verification_methods": [
+        "查阅现行食品安全国家标准中真菌毒素限量条款",
+        "按标准指定检测方法进行复核检测"
+      ],
+      "related_units": [
+        "WHE02-Q-03",
+        "WHE02-Q-05"
+      ],
+      "uncertainties": [
+        "限量是否按用途与加工环节细分需以标准文本确认",
+        "标准修订可能导致限值变化"
+      ],
+      "stage_source": "stage-log:S6",
+      "audit": {
+        "verdict": "pass",
+        "reason": "未编造标准号，限值null",
+        "revisions": []
+      }
+    },
+    {
+      "unit_id": "WHE02-Q-05",
+      "title": "病粒率作为收购分类的定量指标",
+      "statement": "病粒率常被用作小麦收购环节的质量分类指标，其分级界限与判定口径需以现行收购质量标准文本核验。",
+      "knowledge_layer": "quantitative",
+      "provenance": "needs-verification",
+      "provenance_note": "收购分级界限属标准文本，未给定数值",
+      "main_triple": {
+        "subject": "小麦病粒率",
+        "predicate": "用于",
+        "object": "收购质量分类判定"
+      },
+      "conditions": [
+        "按收购质量标准规定方法取样",
+        "以籽粒外观病斑为判定依据"
+      ],
+      "failure_modes": [
+        "病粒率低但毒素超标时仅凭病粒率判定会漏判",
+        "不同检验员目测判定差异导致结果波动"
+      ],
+      "side_effects": [
+        "病粒率合格被误认为毒素合格"
+      ],
+      "applicability": {
+        "growth_stage": "收获后籽粒",
+        "region": null,
+        "production_system": null,
+        "variety_note": null
+      },
+      "quantitative": [
+        {
+          "metric": "病粒率收购分级界限",
+          "value": null,
+          "unit": "%",
+          "operator": null,
+          "applicable_conditions": "按现行小麦收购质量标准",
+          "comparison_baseline": null,
+          "value_status": "needs-verification"
+        }
+      ],
+      "verification_methods": [
+        "查阅现行小麦收购质量标准中病粒率条款",
+        "抽样复检并与毒素检测结果对照"
+      ],
+      "related_units": [
+        "WHE02-Q-04",
+        "WHE02-Q-03"
+      ],
+      "uncertainties": [
+        "病粒率与毒素合格之间不存在等价关系",
+        "不同收储主体执行口径可能不同"
+      ],
+      "stage_source": "stage-log:S6",
+      "audit": {
+        "verdict": "pass",
+        "reason": "收购分级界限null，未编造标准",
+        "revisions": []
+      }
+    },
+    {
+      "unit_id": "WHE02-Q-06",
+      "title": "杀菌剂对赤霉病的田间防效区间",
+      "statement": "登记杀菌剂在抽穗扬花期施用的赤霉病防效存在区间波动，具体防效数值需以登记试验与本地田间试验结果核验。",
+      "knowledge_layer": "quantitative",
+      "provenance": "needs-verification",
+      "provenance_note": "防效区间随药剂与年份变化，未给定数值",
+      "main_triple": {
+        "subject": "登记杀菌剂",
+        "predicate": "对赤霉病产生",
+        "object": "田间防效"
+      },
+      "conditions": [
+        "于抽穗扬花期按登记剂量施药",
+        "施药后遇适宜发病天气"
+      ],
+      "failure_modes": [
+        "施药时期偏晚导致防效下降",
+        "长期单一用药导致抗药性使防效降低"
+      ],
+      "side_effects": [
+        "防效高不等于籽粒毒素一定合格"
+      ],
+      "applicability": {
+        "growth_stage": "抽穗扬花期",
+        "region": null,
+        "production_system": null,
+        "variety_note": null
+      },
+      "quantitative": [
+        {
+          "metric": "赤霉病田间防效",
+          "value": null,
+          "unit": "%",
+          "operator": null,
+          "applicable_conditions": "抽穗扬花期按登记剂量施药",
+          "comparison_baseline": "空白对照",
+          "value_status": "needs-verification"
+        }
+      ],
+      "verification_methods": [
+        "查阅农药登记田间药效试验报告",
+        "按田间药效试验准则开展本地验证试验"
+      ],
+      "related_units": [
+        "WHE02-Q-07",
+        "WHE02-Q-01"
+      ],
+      "uncertainties": [
+        "防效与毒素控制效果并不一致",
+        "抗药性水平地区差异影响防效区间"
+      ],
+      "stage_source": "stage-log:S6",
+      "audit": {
+        "verdict": "pass",
+        "reason": "防效未写具体数值，登记信息未编造",
+        "revisions": []
+      }
+    },
+    {
+      "unit_id": "WHE02-Q-07",
+      "title": "施药时期对防效与毒素控制的定量影响",
+      "statement": "抽穗扬花期是赤霉病药剂防治的关键窗口，不同施药时期对防效和毒素控制的影响程度需通过分期施药试验量化。",
+      "knowledge_layer": "quantitative",
+      "provenance": "needs-verification",
+      "provenance_note": "时期效应需试验量化，未给定数值",
+      "main_triple": {
+        "subject": "施药时期",
+        "predicate": "影响",
+        "object": "赤霉病防效与毒素控制效果"
+      },
+      "conditions": [
+        "品种抽穗整齐",
+        "花期天气条件一致"
+      ],
+      "failure_modes": [
+        "抽穗期不整齐使统一施药时期难以把握",
+        "雨前雨后施药效果差异大"
+      ],
+      "side_effects": [
+        "错过窗口期施药可能增加用药次数"
+      ],
+      "applicability": {
+        "growth_stage": "抽穗扬花期",
+        "region": null,
+        "production_system": null,
+        "variety_note": null
+      },
+      "quantitative": [
+        {
+          "metric": "不同施药时期防效差异",
+          "value": null,
+          "unit": "百分点",
+          "operator": null,
+          "applicable_conditions": "分期施药对比试验",
+          "comparison_baseline": "适期施药处理",
+          "value_status": "needs-verification"
+        },
+        {
+          "metric": "不同施药时期籽粒DON含量差异",
+          "value": null,
+          "unit": "微克每千克",
+          "operator": null,
+          "applicable_conditions": "分期施药对比试验",
+          "comparison_baseline": "适期施药处理",
+          "value_status": "needs-verification"
+        }
+      ],
+      "verification_methods": [
+        "设置分期施药处理并同步调查病情与检测毒素",
+        "结合花期气象记录分析时期效应"
+      ],
+      "related_units": [
+        "WHE02-Q-06",
+        "WHE02-Q-01"
+      ],
+      "uncertainties": [
+        "时期效应受花期天气强烈调制",
+        "最佳窗口与品种抽穗特性关系尚不明确"
+      ],
+      "stage_source": "stage-log:S6",
+      "audit": {
+        "verdict": "pass",
+        "reason": "施药时期影响需试验量化",
+        "revisions": []
+      }
+    },
+    {
+      "unit_id": "WHE02-Q-08",
+      "title": "储粮水分安全界限",
+      "statement": "小麦收获后安全储存要求籽粒水分降至安全界限以下，具体界限值需按储粮技术规范与当地气候条件核验。",
+      "knowledge_layer": "quantitative",
+      "provenance": "needs-verification",
+      "provenance_note": "安全水分界限属规范内容，未给定数值",
+      "main_triple": {
+        "subject": "小麦籽粒",
+        "predicate": "需低于",
+        "object": "安全储存水分界限"
+      },
+      "conditions": [
+        "常规房式仓或农户储粮条件",
+        "储存期跨越高温高湿季节"
+      ],
+      "failure_modes": [
+        "入库水分达标但仓内结露导致局部返潮",
+        "通风不良使局部水分升高霉变"
+      ],
+      "side_effects": [
+        "过度干燥增加破碎粒与能耗"
+      ],
+      "applicability": {
+        "growth_stage": "收获后储存期",
+        "region": null,
+        "production_system": null,
+        "variety_note": null
+      },
+      "quantitative": [
+        {
+          "metric": "安全储存水分界限",
+          "value": null,
+          "unit": "%",
+          "operator": "<=",
+          "applicable_conditions": "常规储存条件",
+          "comparison_baseline": null,
+          "value_status": "needs-verification"
+        },
+        {
+          "metric": "短期储存允许水分上限",
+          "value": null,
+          "unit": "%",
+          "operator": "<=",
+          "applicable_conditions": "短期存放并配套通风",
+          "comparison_baseline": null,
+          "value_status": "needs-verification"
+        }
+      ],
+      "verification_methods": [
+        "查阅储粮技术规范中安全水分条款",
+        "入库与储存期水分监测记录复核"
+      ],
+      "related_units": [
+        "WHE02-Q-09"
+      ],
+      "uncertainties": [
+        "安全水分界限随储粮生态区不同",
+        "不同仓型与储存期对应界限可能不同"
+      ],
+      "stage_source": "stage-log:S6",
+      "audit": {
+        "verdict": "pass",
+        "reason": "储粮水分界限null诚实保留",
+        "revisions": []
+      }
+    },
+    {
+      "unit_id": "WHE02-Q-09",
+      "title": "收获后毒素增长的定量监测指标",
+      "statement": "收获后籽粒在水分与温度适宜时DON含量可能继续增长，其增长幅度需通过储存期定时取样检测量化。",
+      "knowledge_layer": "quantitative",
+      "provenance": "needs-verification",
+      "provenance_note": "增长幅度需储存试验量化，未给定数值",
+      "main_triple": {
+        "subject": "收获后籽粒储存",
+        "predicate": "引起",
+        "object": "DON含量变化"
+      },
+      "conditions": [
+        "籽粒水分高于安全界限",
+        "储存环境温度适宜产毒"
+      ],
+      "failure_modes": [
+        "干燥充分时毒素增长不明显",
+        "检测取样不具代表性导致误判"
+      ],
+      "side_effects": [
+        "储存期毒素增长使原本合格粮食变为不合格"
+      ],
+      "applicability": {
+        "growth_stage": "收获后储存期",
+        "region": null,
+        "production_system": null,
+        "variety_note": null
+      },
+      "quantitative": [
+        {
+          "metric": "储存期DON含量增长幅度",
+          "value": null,
+          "unit": "微克每千克",
+          "operator": null,
+          "applicable_conditions": "高水分储存条件",
+          "comparison_baseline": "入库时DON含量",
+          "value_status": "needs-verification"
+        },
+        {
+          "metric": "储存期毒素检测取样频次",
+          "value": null,
+          "unit": "次",
+          "operator": null,
+          "applicable_conditions": "高温高湿季节储存",
+          "comparison_baseline": null,
+          "value_status": "needs-verification"
+        }
+      ],
+      "verification_methods": [
+        "设置不同水分梯度储存试验并定时检测DON",
+        "按现行毒素检测方法标准复核"
+      ],
+      "related_units": [
+        "WHE02-Q-08",
+        "WHE02-Q-04"
+      ],
+      "uncertainties": [
+        "增长幅度受温湿度与籽粒带菌量共同影响",
+        "取样频次尚无统一规定"
+      ],
+      "stage_source": "stage-log:S6",
+      "audit": {
+        "verdict": "pass",
+        "reason": "收获后毒素增长需监测量化",
+        "revisions": []
+      }
+    },
+    {
+      "unit_id": "WHE02-Q-10",
+      "title": "防效与毒素合格率的定量区分指标",
+      "statement": "病害防效与籽粒毒素合格率是两个独立定量指标，评价防控效果时应分别测定，不能以防效数值替代毒素合格判定。",
+      "knowledge_layer": "quantitative",
+      "provenance": "model-inference",
+      "provenance_note": "由防效与毒素控制目标分离推得",
+      "main_triple": {
+        "subject": "赤霉病防控评价",
+        "predicate": "需区分",
+        "object": "防效指标与毒素合格率指标"
+      },
+      "conditions": [
+        "同步开展病情调查与籽粒毒素检测",
+        "样品来自同一处理小区"
+      ],
+      "failure_modes": [
+        "仅报告防效而不检测毒素导致评价不完整",
+        "毒素样品与病情调查小区不对应"
+      ],
+      "side_effects": [
+        "增加检测成本"
+      ],
+      "applicability": {
+        "growth_stage": "灌浆至成熟期",
+        "region": null,
+        "production_system": null,
+        "variety_note": null
+      },
+      "quantitative": [
+        {
+          "metric": "毒素合格率",
+          "value": null,
+          "unit": "%",
+          "operator": null,
+          "applicable_conditions": "按限量标准判定",
+          "comparison_baseline": "对照处理",
+          "value_status": "needs-verification"
+        },
+        {
+          "metric": "防效与毒素合格率的差值",
+          "value": null,
+          "unit": "百分点",
+          "operator": null,
+          "applicable_conditions": "同一处理小区同步测定",
+          "comparison_baseline": null,
+          "value_status": "needs-verification"
+        }
+      ],
+      "verification_methods": [
+        "同一小区同步调查病穗率并检测籽粒DON",
+        "按限量标准统计合格率并与防效对照"
+      ],
+      "related_units": [
+        "WHE02-Q-06",
+        "WHE02-Q-04"
+      ],
+      "uncertainties": [
+        "两者差值在不同年份与药剂间波动",
+        "合格率统计口径需与限量标准一致"
+      ],
+      "stage_source": "stage-log:S6",
+      "audit": {
+        "verdict": "pass",
+        "reason": "防效与毒素合格率分开评价",
+        "revisions": []
+      }
+    }
+  ],
+  "quarantined_units": [],
+  "unit_to_stage_map": {
+    "WHE02-D-01": "WHE02-D",
+    "WHE02-D-02": "WHE02-D",
+    "WHE02-D-03": "WHE02-D",
+    "WHE02-D-04": "WHE02-D",
+    "WHE02-D-05": "WHE02-D",
+    "WHE02-D-06": "WHE02-D",
+    "WHE02-D-07": "WHE02-D",
+    "WHE02-D-08": "WHE02-D",
+    "WHE02-D-09": "WHE02-D",
+    "WHE02-D-10": "WHE02-D",
+    "WHE02-R-01": "WHE02-R",
+    "WHE02-R-02": "WHE02-R",
+    "WHE02-R-03": "WHE02-R",
+    "WHE02-R-04": "WHE02-R",
+    "WHE02-R-05": "WHE02-R",
+    "WHE02-R-06": "WHE02-R",
+    "WHE02-R-07": "WHE02-R",
+    "WHE02-R-08": "WHE02-R",
+    "WHE02-K-01": "WHE02-K",
+    "WHE02-K-02": "WHE02-K",
+    "WHE02-K-03": "WHE02-K",
+    "WHE02-K-04": "WHE02-K",
+    "WHE02-K-05": "WHE02-K",
+    "WHE02-F-01": "WHE02-F",
+    "WHE02-F-02": "WHE02-F",
+    "WHE02-F-03": "WHE02-F",
+    "WHE02-F-04": "WHE02-F",
+    "WHE02-F-05": "WHE02-F",
+    "WHE02-F-06": "WHE02-F",
+    "WHE02-F-07": "WHE02-F",
+    "WHE02-Q-01": "WHE02-Q",
+    "WHE02-Q-02": "WHE02-Q",
+    "WHE02-Q-03": "WHE02-Q",
+    "WHE02-Q-04": "WHE02-Q",
+    "WHE02-Q-05": "WHE02-Q",
+    "WHE02-Q-06": "WHE02-Q",
+    "WHE02-Q-07": "WHE02-Q",
+    "WHE02-Q-08": "WHE02-Q",
+    "WHE02-Q-09": "WHE02-Q",
+    "WHE02-Q-10": "WHE02-Q"
+  },
+  "candidate_evidence_map": [
+    {
+      "unit_id": "WHE02-D-01",
+      "provenance": "model-candidate",
+      "verification_methods": [
+        "病穗组织分离培养与形态/分子鉴定",
+        "区域病原种群监测报告比对"
+      ]
+    },
+    {
+      "unit_id": "WHE02-D-02",
+      "provenance": "model-candidate",
+      "verification_methods": [
+        "田间症状记录与病穗分离培养对照",
+        "与颖枯病、黑颖病等症状鉴别"
+      ]
+    },
+    {
+      "unit_id": "WHE02-D-03",
+      "provenance": "model-candidate",
+      "verification_methods": [
+        "茎基部与茎秆病组织分离鉴定",
+        "田间系统调查记录各类型发生比例"
+      ]
+    },
+    {
+      "unit_id": "WHE02-D-04",
+      "provenance": "model-candidate",
+      "verification_methods": [
+        "残体子囊壳镜检计数",
+        "种子带菌率检测"
+      ]
+    },
+    {
+      "unit_id": "WHE02-D-05",
+      "provenance": "model-candidate",
+      "verification_methods": [
+        "孢子捕捉器监测空中孢子浓度",
+        "降雨事件与病穗率相关性分析"
+      ]
+    },
+    {
+      "unit_id": "WHE02-D-06",
+      "provenance": "model-candidate",
+      "verification_methods": [
+        "花期人工接种与组织学观察",
+        "不同花期阶段接种对比试验"
+      ]
+    },
+    {
+      "unit_id": "WHE02-D-07",
+      "provenance": "model-candidate",
+      "verification_methods": [
+        "分期播种试验确定花期与病穗率关系",
+        "花期逐日接种对比"
+      ]
+    },
+    {
+      "unit_id": "WHE02-D-08",
+      "provenance": "model-candidate",
+      "verification_methods": [
+        "控制温湿度条件下人工接种观察显症时间",
+        "田间定点标记接种穗逐日观察"
+      ]
+    },
+    {
+      "unit_id": "WHE02-D-09",
+      "provenance": "model-candidate",
+      "verification_methods": [
+        "多年多点田间病情与气象因子回归分析",
+        "品种抗性对比试验"
+      ]
+    },
+    {
+      "unit_id": "WHE02-D-10",
+      "provenance": "model-inference",
+      "verification_methods": [
+        "同批样品症状分级与毒素检测平行比对",
+        "收获籽粒毒素含量实验室测定"
+      ]
+    },
+    {
+      "unit_id": "WHE02-R-01",
+      "provenance": "model-candidate",
+      "verification_methods": [
+        "田间分期施药对比试验，比较不同生育期施药的病穗率差异",
+        "结合花期观测记录与施药日期回溯分析"
+      ]
+    },
+    {
+      "unit_id": "WHE02-R-02",
+      "provenance": "model-candidate",
+      "verification_methods": [
+        "对比预警触发施药与常规施药的病穗率与产量差异",
+        "气象站花期降雨记录与病情指数相关分析"
+      ]
+    },
+    {
+      "unit_id": "WHE02-R-03",
+      "provenance": "model-candidate",
+      "verification_methods": [
+        "设置不同补治策略的田间对比试验",
+        "记录花期降雨过程与各次施药日期的对应关系"
+      ]
+    },
+    {
+      "unit_id": "WHE02-R-04",
+      "provenance": "model-candidate",
+      "verification_methods": [
+        "对比不同残体处理方式田块的初侵染菌量与病穗率",
+        "花期前调查地表病残体带菌率"
+      ]
+    },
+    {
+      "unit_id": "WHE02-R-05",
+      "provenance": "model-candidate",
+      "verification_methods": [
+        "对比排水处理与对照田块的田间湿度与病穗率",
+        "花期田间小气候观测记录"
+      ]
+    },
+    {
+      "unit_id": "WHE02-R-06",
+      "provenance": "model-candidate",
+      "verification_methods": [
+        "多年多点不同播期试验，比较花期降雨遭遇率与病穗率",
+        "结合当地气象资料分析花期降雨概率分布"
+      ]
+    },
+    {
+      "unit_id": "WHE02-R-07",
+      "provenance": "model-candidate",
+      "verification_methods": [
+        "核对农药标签安全间隔规定",
+        "收获期籽粒农药残留检测"
+      ]
+    },
+    {
+      "unit_id": "WHE02-R-08",
+      "provenance": "model-inference",
+      "verification_methods": [
+        "设置扬花后不同时间施药处理的防效对比",
+        "病穗率与施药时间的关系曲线分析"
+      ]
+    },
+    {
+      "unit_id": "WHE02-K-01",
+      "provenance": "model-inference",
+      "verification_methods": [
+        "同田块同步采集病穗调查数据与籽粒DON检测数据做相关分析",
+        "按现行小麦赤霉病测报调查规范记录病穗率与严重度"
+      ]
+    },
+    {
+      "unit_id": "WHE02-K-02",
+      "provenance": "model-inference",
+      "verification_methods": [
+        "按现行食品安全国家标准真菌毒素限量文本核对限量",
+        "对籽粒样品做病粒率计数与DON检测并比较批次梯度"
+      ]
+    },
+    {
+      "unit_id": "WHE02-K-03",
+      "provenance": "model-inference",
+      "verification_methods": [
+        "设置用药与对照小区，同步测防效与籽粒DON含量",
+        "比较不同施药时期下病情与毒素的响应差异"
+      ]
+    },
+    {
+      "unit_id": "WHE02-K-04",
+      "provenance": "model-inference",
+      "verification_methods": [
+        "梳理防治决策记录与毒素检测报告的信息来源差异",
+        "对照现行测报规范与真菌毒素限量标准文本"
+      ]
+    },
+    {
+      "unit_id": "WHE02-K-05",
+      "provenance": "model-inference",
+      "verification_methods": [
+        "审查决策流程中病情指标与毒素指标是否分列",
+        "抽查检测报告与防治记录的一致性"
+      ]
+    },
+    {
+      "unit_id": "WHE02-F-01",
+      "provenance": "model-inference",
+      "verification_methods": [
+        "田间拔取白穗检查穗部是否有粉红色霉层及小穗基部褐变",
+        "剖检茎秆与根系排查虫道、根腐与茎基病变",
+        "必要时送检进行病原分离鉴定"
+      ]
+    },
+    {
+      "unit_id": "WHE02-F-02",
+      "provenance": "model-inference",
+      "verification_methods": [
+        "对照花期逐日降雨与田间湿度记录与后期病穗率调查",
+        "设置不施药对照区比较病穗率与产量损失"
+      ]
+    },
+    {
+      "unit_id": "WHE02-F-03",
+      "provenance": "model-inference",
+      "verification_methods": [
+        "比较不同施药距降雨间隔处理的病穗率与防效",
+        "记录施药时穗面干湿状态并分层统计防效"
+      ]
+    },
+    {
+      "unit_id": "WHE02-F-04",
+      "provenance": "model-inference",
+      "verification_methods": [
+        "同一天气条件下比较耐病与感病品种在施药与不施药下的病穗率与毒素含量",
+        "核对品种审定公告中的抗性描述原文"
+      ]
+    },
+    {
+      "unit_id": "WHE02-F-05",
+      "provenance": "model-inference",
+      "verification_methods": [
+        "按标准方法对籽粒样品进行毒素含量检测并与限量标准比对",
+        "同步记录田间病情与对应样品毒素数据做相关性分析"
+      ]
+    },
+    {
+      "unit_id": "WHE02-F-06",
+      "provenance": "model-inference",
+      "verification_methods": [
+        "按储藏期分阶段取样检测毒素与水分",
+        "对比不同仓储湿度条件下的毒素变化"
+      ]
+    },
+    {
+      "unit_id": "WHE02-F-07",
+      "provenance": "model-inference",
+      "verification_methods": [
+        "多点多年重复试验并记录天气与菌源背景",
+        "防效与毒素检测结果分别统计评价"
+      ]
+    },
+    {
+      "unit_id": "WHE02-Q-01",
+      "provenance": "needs-verification",
+      "verification_methods": [
+        "查阅当地植保部门发布的赤霉病预警技术资料中的气象指标",
+        "用历史气象与病情观测数据回代检验预警模型"
+      ]
+    },
+    {
+      "unit_id": "WHE02-Q-02",
+      "provenance": "needs-verification",
+      "verification_methods": [
+        "查阅现行小麦赤霉病测报调查规范文本",
+        "田间多点取样复核病穗率与病情指数计算"
+      ]
+    },
+    {
+      "unit_id": "WHE02-Q-03",
+      "provenance": "needs-verification",
+      "verification_methods": [
+        "同批样品同步测定病穗率与DON含量并做回归分析",
+        "按现行毒素检测方法标准复核检测结果"
+      ]
+    },
+    {
+      "unit_id": "WHE02-Q-04",
+      "provenance": "needs-verification",
+      "verification_methods": [
+        "查阅现行食品安全国家标准中真菌毒素限量条款",
+        "按标准指定检测方法进行复核检测"
+      ]
+    },
+    {
+      "unit_id": "WHE02-Q-05",
+      "provenance": "needs-verification",
+      "verification_methods": [
+        "查阅现行小麦收购质量标准中病粒率条款",
+        "抽样复检并与毒素检测结果对照"
+      ]
+    },
+    {
+      "unit_id": "WHE02-Q-06",
+      "provenance": "needs-verification",
+      "verification_methods": [
+        "查阅农药登记田间药效试验报告",
+        "按田间药效试验准则开展本地验证试验"
+      ]
+    },
+    {
+      "unit_id": "WHE02-Q-07",
+      "provenance": "needs-verification",
+      "verification_methods": [
+        "设置分期施药处理并同步调查病情与检测毒素",
+        "结合花期气象记录分析时期效应"
+      ]
+    },
+    {
+      "unit_id": "WHE02-Q-08",
+      "provenance": "needs-verification",
+      "verification_methods": [
+        "查阅储粮技术规范中安全水分条款",
+        "入库与储存期水分监测记录复核"
+      ]
+    },
+    {
+      "unit_id": "WHE02-Q-09",
+      "provenance": "needs-verification",
+      "verification_methods": [
+        "设置不同水分梯度储存试验并定时检测DON",
+        "按现行毒素检测方法标准复核"
+      ]
+    },
+    {
+      "unit_id": "WHE02-Q-10",
+      "provenance": "model-inference",
+      "verification_methods": [
+        "同一小区同步调查病穗率并检测籽粒DON",
+        "按限量标准统计合格率并与防效对照"
+      ]
+    }
+  ],
+  "quantitative_verification_list": [
+    {
+      "unit_id": "WHE02-D-07",
+      "metric": "感病窗口持续天数",
+      "value": null,
+      "unit": "天",
+      "operator": null,
+      "applicable_conditions": "抽穗扬花期，具体因品种与气候而异",
+      "comparison_baseline": null,
+      "value_status": "needs-verification",
+      "verify_direction": "分期播种试验确定花期与病穗率关系"
+    },
+    {
+      "unit_id": "WHE02-D-08",
+      "metric": "潜育期",
+      "value": null,
+      "unit": "天",
+      "operator": null,
+      "applicable_conditions": "温度与湿度条件不同差异明显",
+      "comparison_baseline": null,
+      "value_status": "needs-verification",
+      "verify_direction": "控制温湿度条件下人工接种观察显症时间"
+    },
+    {
+      "unit_id": "WHE02-R-02",
+      "metric": "花期连阴雨持续天数阈值",
+      "value": null,
+      "unit": "天",
+      "operator": null,
+      "applicable_conditions": "需按区域气候核定",
+      "comparison_baseline": null,
+      "value_status": "needs-verification",
+      "verify_direction": "对比预警触发施药与常规施药的病穗率与产量差异"
+    },
+    {
+      "unit_id": "WHE02-R-03",
+      "metric": "防治次数",
+      "value": null,
+      "unit": "次",
+      "operator": null,
+      "applicable_conditions": "依花期长度与降雨过程确定",
+      "comparison_baseline": null,
+      "value_status": "needs-verification",
+      "verify_direction": "设置不同补治策略的田间对比试验"
+    },
+    {
+      "unit_id": "WHE02-R-03",
+      "metric": "补治间隔",
+      "value": null,
+      "unit": "天",
+      "operator": null,
+      "applicable_conditions": "依药剂持效期确定",
+      "comparison_baseline": null,
+      "value_status": "needs-verification",
+      "verify_direction": "设置不同补治策略的田间对比试验"
+    },
+    {
+      "unit_id": "WHE02-R-07",
+      "metric": "安全间隔期",
+      "value": null,
+      "unit": "天",
+      "operator": null,
+      "applicable_conditions": "依具体药剂标签规定",
+      "comparison_baseline": null,
+      "value_status": "needs-verification",
+      "verify_direction": "核对农药标签安全间隔规定"
+    },
+    {
+      "unit_id": "WHE02-K-01",
+      "metric": "病穗率与DON污染的定量关系",
+      "value": null,
+      "unit": "",
+      "operator": null,
+      "applicable_conditions": "需本地多年多点数据",
+      "comparison_baseline": null,
+      "value_status": "needs-verification",
+      "verify_direction": "同田块同步采集病穗调查数据与籽粒DON检测数据做相关分析"
+    },
+    {
+      "unit_id": "WHE02-K-02",
+      "metric": "DON限量值",
+      "value": null,
+      "unit": "",
+      "operator": null,
+      "applicable_conditions": "依现行国家真菌毒素限量标准文本",
+      "comparison_baseline": null,
+      "value_status": "needs-verification",
+      "verify_direction": "按现行食品安全国家标准真菌毒素限量文本核对限量"
+    },
+    {
+      "unit_id": "WHE02-K-03",
+      "metric": "防效与毒素降低率的对应关系",
+      "value": null,
+      "unit": "",
+      "operator": null,
+      "applicable_conditions": "需药剂-年份-品种多点试验",
+      "comparison_baseline": null,
+      "value_status": "needs-verification",
+      "verify_direction": "设置用药与对照小区，同步测防效与籽粒DON含量"
+    },
+    {
+      "unit_id": "WHE02-Q-01",
+      "metric": "连续阴雨或高湿持续天数阈值",
+      "value": null,
+      "unit": "天",
+      "operator": ">=",
+      "applicable_conditions": "抽穗扬花期，当地预警模型适用",
+      "comparison_baseline": null,
+      "value_status": "needs-verification",
+      "verify_direction": "查阅当地植保部门发布的赤霉病预警技术资料中的气象指标"
+    },
+    {
+      "unit_id": "WHE02-Q-01",
+      "metric": "预警触发日均气温下限",
+      "value": null,
+      "unit": "摄氏度",
+      "operator": ">=",
+      "applicable_conditions": "抽穗扬花期",
+      "comparison_baseline": null,
+      "value_status": "needs-verification",
+      "verify_direction": "查阅当地植保部门发布的赤霉病预警技术资料中的气象指标"
+    },
+    {
+      "unit_id": "WHE02-Q-02",
+      "metric": "病穗率分级界限",
+      "value": null,
+      "unit": "%",
+      "operator": null,
+      "applicable_conditions": "按现行病害调查规范",
+      "comparison_baseline": null,
+      "value_status": "needs-verification",
+      "verify_direction": "查阅现行小麦赤霉病测报调查规范文本"
+    },
+    {
+      "unit_id": "WHE02-Q-02",
+      "metric": "病情指数分级界限",
+      "value": null,
+      "unit": "无量纲",
+      "operator": null,
+      "applicable_conditions": "按现行病害调查规范",
+      "comparison_baseline": null,
+      "value_status": "needs-verification",
+      "verify_direction": "查阅现行小麦赤霉病测报调查规范文本"
+    },
+    {
+      "unit_id": "WHE02-Q-03",
+      "metric": "病穗率与DON含量相关系数",
+      "value": null,
+      "unit": "无量纲",
+      "operator": null,
+      "applicable_conditions": "同区域同品种群样品",
+      "comparison_baseline": null,
+      "value_status": "needs-verification",
+      "verify_direction": "同批样品同步测定病穗率与DON含量并做回归分析"
+    },
+    {
+      "unit_id": "WHE02-Q-03",
+      "metric": "病穗率对应DON含量的换算斜率",
+      "value": null,
+      "unit": "微克每千克每百分点",
+      "operator": null,
+      "applicable_conditions": "本地实测数据拟合",
+      "comparison_baseline": null,
+      "value_status": "needs-verification",
+      "verify_direction": "同批样品同步测定病穗率与DON含量并做回归分析"
+    },
+    {
+      "unit_id": "WHE02-Q-04",
+      "metric": "DON限量",
+      "value": null,
+      "unit": "微克每千克",
+      "operator": "<=",
+      "applicable_conditions": "人食用小麦籽粒",
+      "comparison_baseline": null,
+      "value_status": "needs-verification",
+      "verify_direction": "查阅现行食品安全国家标准中真菌毒素限量条款"
+    },
+    {
+      "unit_id": "WHE02-Q-04",
+      "metric": "ZEN限量",
+      "value": null,
+      "unit": "微克每千克",
+      "operator": "<=",
+      "applicable_conditions": "人食用小麦籽粒",
+      "comparison_baseline": null,
+      "value_status": "needs-verification",
+      "verify_direction": "查阅现行食品安全国家标准中真菌毒素限量条款"
+    },
+    {
+      "unit_id": "WHE02-Q-05",
+      "metric": "病粒率收购分级界限",
+      "value": null,
+      "unit": "%",
+      "operator": null,
+      "applicable_conditions": "按现行小麦收购质量标准",
+      "comparison_baseline": null,
+      "value_status": "needs-verification",
+      "verify_direction": "查阅现行小麦收购质量标准中病粒率条款"
+    },
+    {
+      "unit_id": "WHE02-Q-06",
+      "metric": "赤霉病田间防效",
+      "value": null,
+      "unit": "%",
+      "operator": null,
+      "applicable_conditions": "抽穗扬花期按登记剂量施药",
+      "comparison_baseline": "空白对照",
+      "value_status": "needs-verification",
+      "verify_direction": "查阅农药登记田间药效试验报告"
+    },
+    {
+      "unit_id": "WHE02-Q-07",
+      "metric": "不同施药时期防效差异",
+      "value": null,
+      "unit": "百分点",
+      "operator": null,
+      "applicable_conditions": "分期施药对比试验",
+      "comparison_baseline": "适期施药处理",
+      "value_status": "needs-verification",
+      "verify_direction": "设置分期施药处理并同步调查病情与检测毒素"
+    },
+    {
+      "unit_id": "WHE02-Q-07",
+      "metric": "不同施药时期籽粒DON含量差异",
+      "value": null,
+      "unit": "微克每千克",
+      "operator": null,
+      "applicable_conditions": "分期施药对比试验",
+      "comparison_baseline": "适期施药处理",
+      "value_status": "needs-verification",
+      "verify_direction": "设置分期施药处理并同步调查病情与检测毒素"
+    },
+    {
+      "unit_id": "WHE02-Q-08",
+      "metric": "安全储存水分界限",
+      "value": null,
+      "unit": "%",
+      "operator": "<=",
+      "applicable_conditions": "常规储存条件",
+      "comparison_baseline": null,
+      "value_status": "needs-verification",
+      "verify_direction": "查阅储粮技术规范中安全水分条款"
+    },
+    {
+      "unit_id": "WHE02-Q-08",
+      "metric": "短期储存允许水分上限",
+      "value": null,
+      "unit": "%",
+      "operator": "<=",
+      "applicable_conditions": "短期存放并配套通风",
+      "comparison_baseline": null,
+      "value_status": "needs-verification",
+      "verify_direction": "查阅储粮技术规范中安全水分条款"
+    },
+    {
+      "unit_id": "WHE02-Q-09",
+      "metric": "储存期DON含量增长幅度",
+      "value": null,
+      "unit": "微克每千克",
+      "operator": null,
+      "applicable_conditions": "高水分储存条件",
+      "comparison_baseline": "入库时DON含量",
+      "value_status": "needs-verification",
+      "verify_direction": "设置不同水分梯度储存试验并定时检测DON"
+    },
+    {
+      "unit_id": "WHE02-Q-09",
+      "metric": "储存期毒素检测取样频次",
+      "value": null,
+      "unit": "次",
+      "operator": null,
+      "applicable_conditions": "高温高湿季节储存",
+      "comparison_baseline": null,
+      "value_status": "needs-verification",
+      "verify_direction": "设置不同水分梯度储存试验并定时检测DON"
+    },
+    {
+      "unit_id": "WHE02-Q-10",
+      "metric": "毒素合格率",
+      "value": null,
+      "unit": "%",
+      "operator": null,
+      "applicable_conditions": "按限量标准判定",
+      "comparison_baseline": "对照处理",
+      "value_status": "needs-verification",
+      "verify_direction": "同一小区同步调查病穗率并检测籽粒DON"
+    },
+    {
+      "unit_id": "WHE02-Q-10",
+      "metric": "防效与毒素合格率的差值",
+      "value": null,
+      "unit": "百分点",
+      "operator": null,
+      "applicable_conditions": "同一处理小区同步测定",
+      "comparison_baseline": null,
+      "value_status": "needs-verification",
+      "verify_direction": "同一小区同步调查病穗率并检测籽粒DON"
+    }
+  ],
+  "knowledge_relations": [
+    {
+      "from": "WHE02-D-01",
+      "relation": "cross_ref",
+      "to": "WHE02-D-02"
+    },
+    {
+      "from": "WHE02-D-01",
+      "relation": "cross_ref",
+      "to": "WHE02-D-08"
+    },
+    {
+      "from": "WHE02-D-02",
+      "relation": "cross_ref",
+      "to": "WHE02-D-01"
+    },
+    {
+      "from": "WHE02-D-02",
+      "relation": "cross_ref",
+      "to": "WHE02-D-03"
+    },
+    {
+      "from": "WHE02-D-03",
+      "relation": "cross_ref",
+      "to": "WHE02-D-01"
+    },
+    {
+      "from": "WHE02-D-03",
+      "relation": "cross_ref",
+      "to": "WHE02-D-02"
+    },
+    {
+      "from": "WHE02-D-04",
+      "relation": "cross_ref",
+      "to": "WHE02-D-05"
+    },
+    {
+      "from": "WHE02-D-04",
+      "relation": "cross_ref",
+      "to": "WHE02-D-06"
+    },
+    {
+      "from": "WHE02-D-05",
+      "relation": "cross_ref",
+      "to": "WHE02-D-04"
+    },
+    {
+      "from": "WHE02-D-05",
+      "relation": "cross_ref",
+      "to": "WHE02-D-06"
+    },
+    {
+      "from": "WHE02-D-05",
+      "relation": "cross_ref",
+      "to": "WHE02-D-07"
+    },
+    {
+      "from": "WHE02-D-06",
+      "relation": "cross_ref",
+      "to": "WHE02-D-05"
+    },
+    {
+      "from": "WHE02-D-06",
+      "relation": "cross_ref",
+      "to": "WHE02-D-07"
+    },
+    {
+      "from": "WHE02-D-07",
+      "relation": "cross_ref",
+      "to": "WHE02-D-06"
+    },
+    {
+      "from": "WHE02-D-07",
+      "relation": "cross_ref",
+      "to": "WHE02-D-08"
+    },
+    {
+      "from": "WHE02-D-08",
+      "relation": "cross_ref",
+      "to": "WHE02-D-06"
+    },
+    {
+      "from": "WHE02-D-08",
+      "relation": "cross_ref",
+      "to": "WHE02-D-07"
+    },
+    {
+      "from": "WHE02-D-09",
+      "relation": "cross_ref",
+      "to": "WHE02-D-04"
+    },
+    {
+      "from": "WHE02-D-09",
+      "relation": "cross_ref",
+      "to": "WHE02-D-07"
+    },
+    {
+      "from": "WHE02-D-09",
+      "relation": "cross_ref",
+      "to": "WHE02-D-08"
+    },
+    {
+      "from": "WHE02-D-10",
+      "relation": "cross_ref",
+      "to": "WHE02-D-02"
+    },
+    {
+      "from": "WHE02-D-10",
+      "relation": "cross_ref",
+      "to": "WHE02-D-08"
+    },
+    {
+      "from": "WHE02-R-01",
+      "relation": "cross_ref",
+      "to": "WHE02-R-02"
+    },
+    {
+      "from": "WHE02-R-01",
+      "relation": "cross_ref",
+      "to": "WHE02-R-03"
+    },
+    {
+      "from": "WHE02-R-02",
+      "relation": "cross_ref",
+      "to": "WHE02-R-01"
+    },
+    {
+      "from": "WHE02-R-02",
+      "relation": "cross_ref",
+      "to": "WHE02-R-04"
+    },
+    {
+      "from": "WHE02-R-03",
+      "relation": "cross_ref",
+      "to": "WHE02-R-01"
+    },
+    {
+      "from": "WHE02-R-03",
+      "relation": "cross_ref",
+      "to": "WHE02-R-02"
+    },
+    {
+      "from": "WHE02-R-04",
+      "relation": "cross_ref",
+      "to": "WHE02-R-05"
+    },
+    {
+      "from": "WHE02-R-04",
+      "relation": "cross_ref",
+      "to": "WHE02-R-06"
+    },
+    {
+      "from": "WHE02-R-05",
+      "relation": "cross_ref",
+      "to": "WHE02-R-04"
+    },
+    {
+      "from": "WHE02-R-05",
+      "relation": "cross_ref",
+      "to": "WHE02-R-02"
+    },
+    {
+      "from": "WHE02-R-06",
+      "relation": "cross_ref",
+      "to": "WHE02-R-02"
+    },
+    {
+      "from": "WHE02-R-06",
+      "relation": "cross_ref",
+      "to": "WHE02-R-05"
+    },
+    {
+      "from": "WHE02-R-07",
+      "relation": "cross_ref",
+      "to": "WHE02-R-03"
+    },
+    {
+      "from": "WHE02-R-08",
+      "relation": "cross_ref",
+      "to": "WHE02-R-01"
+    },
+    {
+      "from": "WHE02-R-08",
+      "relation": "cross_ref",
+      "to": "WHE02-R-03"
+    },
+    {
+      "from": "WHE02-K-01",
+      "relation": "cross_ref",
+      "to": "WHE02-K-02"
+    },
+    {
+      "from": "WHE02-K-01",
+      "relation": "cross_ref",
+      "to": "WHE02-K-03"
+    },
+    {
+      "from": "WHE02-K-02",
+      "relation": "cross_ref",
+      "to": "WHE02-K-01"
+    },
+    {
+      "from": "WHE02-K-02",
+      "relation": "cross_ref",
+      "to": "WHE02-K-04"
+    },
+    {
+      "from": "WHE02-K-03",
+      "relation": "cross_ref",
+      "to": "WHE02-K-01"
+    },
+    {
+      "from": "WHE02-K-03",
+      "relation": "cross_ref",
+      "to": "WHE02-K-04"
+    },
+    {
+      "from": "WHE02-K-04",
+      "relation": "cross_ref",
+      "to": "WHE02-K-02"
+    },
+    {
+      "from": "WHE02-K-04",
+      "relation": "cross_ref",
+      "to": "WHE02-K-03"
+    },
+    {
+      "from": "WHE02-K-05",
+      "relation": "cross_ref",
+      "to": "WHE02-K-01"
+    },
+    {
+      "from": "WHE02-K-05",
+      "relation": "cross_ref",
+      "to": "WHE02-K-03"
+    },
+    {
+      "from": "WHE02-K-05",
+      "relation": "cross_ref",
+      "to": "WHE02-K-04"
+    },
+    {
+      "from": "WHE02-F-01",
+      "relation": "cross_ref",
+      "to": "WHE02-F-02"
+    },
+    {
+      "from": "WHE02-F-02",
+      "relation": "cross_ref",
+      "to": "WHE02-F-01"
+    },
+    {
+      "from": "WHE02-F-02",
+      "relation": "cross_ref",
+      "to": "WHE02-F-03"
+    },
+    {
+      "from": "WHE02-F-03",
+      "relation": "cross_ref",
+      "to": "WHE02-F-02"
+    },
+    {
+      "from": "WHE02-F-04",
+      "relation": "cross_ref",
+      "to": "WHE02-F-05"
+    },
+    {
+      "from": "WHE02-F-05",
+      "relation": "cross_ref",
+      "to": "WHE02-F-04"
+    },
+    {
+      "from": "WHE02-F-05",
+      "relation": "cross_ref",
+      "to": "WHE02-F-06"
+    },
+    {
+      "from": "WHE02-F-06",
+      "relation": "cross_ref",
+      "to": "WHE02-F-05"
+    },
+    {
+      "from": "WHE02-F-07",
+      "relation": "cross_ref",
+      "to": "WHE02-F-05"
+    },
+    {
+      "from": "WHE02-F-07",
+      "relation": "cross_ref",
+      "to": "WHE02-F-03"
+    },
+    {
+      "from": "WHE02-Q-01",
+      "relation": "cross_ref",
+      "to": "WHE02-Q-02"
+    },
+    {
+      "from": "WHE02-Q-02",
+      "relation": "cross_ref",
+      "to": "WHE02-Q-01"
+    },
+    {
+      "from": "WHE02-Q-02",
+      "relation": "cross_ref",
+      "to": "WHE02-Q-03"
+    },
+    {
+      "from": "WHE02-Q-03",
+      "relation": "cross_ref",
+      "to": "WHE02-Q-02"
+    },
+    {
+      "from": "WHE02-Q-03",
+      "relation": "cross_ref",
+      "to": "WHE02-Q-04"
+    },
+    {
+      "from": "WHE02-Q-04",
+      "relation": "cross_ref",
+      "to": "WHE02-Q-03"
+    },
+    {
+      "from": "WHE02-Q-04",
+      "relation": "cross_ref",
+      "to": "WHE02-Q-05"
+    },
+    {
+      "from": "WHE02-Q-05",
+      "relation": "cross_ref",
+      "to": "WHE02-Q-04"
+    },
+    {
+      "from": "WHE02-Q-05",
+      "relation": "cross_ref",
+      "to": "WHE02-Q-03"
+    },
+    {
+      "from": "WHE02-Q-06",
+      "relation": "cross_ref",
+      "to": "WHE02-Q-07"
+    },
+    {
+      "from": "WHE02-Q-06",
+      "relation": "cross_ref",
+      "to": "WHE02-Q-01"
+    },
+    {
+      "from": "WHE02-Q-07",
+      "relation": "cross_ref",
+      "to": "WHE02-Q-06"
+    },
+    {
+      "from": "WHE02-Q-07",
+      "relation": "cross_ref",
+      "to": "WHE02-Q-01"
+    },
+    {
+      "from": "WHE02-Q-08",
+      "relation": "cross_ref",
+      "to": "WHE02-Q-09"
+    },
+    {
+      "from": "WHE02-Q-09",
+      "relation": "cross_ref",
+      "to": "WHE02-Q-08"
+    },
+    {
+      "from": "WHE02-Q-09",
+      "relation": "cross_ref",
+      "to": "WHE02-Q-04"
+    },
+    {
+      "from": "WHE02-Q-10",
+      "relation": "cross_ref",
+      "to": "WHE02-Q-06"
+    },
+    {
+      "from": "WHE02-Q-10",
+      "relation": "cross_ref",
+      "to": "WHE02-Q-04"
+    }
+  ],
+  "audit_summary": {
+    "served_model": "deepseek-flash",
+    "total": 40,
+    "pass": 29,
+    "revise": 11,
+    "reject": 0,
+    "global_findings": [
+      "未发现statement中出现未在quantitative登记的数字，也未发现value=null却写具体数值的矛盾。",
+      "未发现具体文献、标准编号、农药登记号或试验数据被编造；needs-verification均以null保留。",
+      "规则型单元在清单中普遍未展示conditions与failure_modes，无法核验适用边界，应按schema补齐。",
+      "病害风险与毒素风险总体分离良好，D-10、K-01至K-05、F-05、Q-10形成一致链条。",
+      "D-03的同一病原复合体与D-09的任一条件缺失均存在过度概括，建议限定物种或条件并标注不确定性。",
+      "区域与品种适用性在清单中未系统展示，R-06、Q-04、Q-05等应绑定具体区域、标准文本或品种背景。",
+      "K-01、K-03、F-05、Q-10主题相邻但结论角度不同，建议在related_units中交叉引用而非合并。"
+    ],
+    "independence_note": "请求模型 deepseek-reasoner，但服务端实际返回 deepseek-flash（网关映射，见 stage_run）；审计与提取单元同属同一服务模型，模型独立性有限，本轮审计仅作机器初筛，不能替代人工审查与证据核验"
+  },
+  "coverage_gaps_and_next_questions": [
+    "本背景未给出赤霉病菌种类组成与区域优势种数据",
+    "缺乏花期降雨量、温度等具体气象阈值数值",
+    "缺乏品种抗性分级与区域品种抗性谱信息",
+    "缺乏病穗率与毒素含量定量关系数据",
+    "缺乏药剂登记、剂量与安全间隔期信息",
+    "缺乏收获水分、干燥温度等粮食安全限值",
+    "缺乏区域差分（江淮、黄淮、长江中下游等）证据",
+    "缺乏监测预警模型参数与验证结果",
+    "缺乏秸秆还田量对菌源基数影响的定量证据",
+    "AUDIT-OPEN-REV(尚未解决的修订需求): 将同一病原复合体限定为部分镰刀菌",
+    "AUDIT-OPEN-REV(尚未解决的修订需求): 补充物种与区域不确定性",
+    "AUDIT-OPEN-REV(尚未解决的修订需求): 将任一条件缺失显著降低改为通常降低",
+    "AUDIT-OPEN-REV(尚未解决的修订需求): 补充三因素条件与反例",
+    "AUDIT-OPEN-REV(尚未解决的修订需求): 明确适用花期、区域与品种前提",
+    "AUDIT-OPEN-REV(尚未解决的修订需求): 保留连阴雨阈值null并注明按当地预警核验",
+    "AUDIT-OPEN-REV(尚未解决的修订需求): 补治间隔与次数按登记标签或本地试验核验",
+    "AUDIT-OPEN-REV(尚未解决的修订需求): 限定菌源削减方式与抽穗前时点",
+    "AUDIT-OPEN-REV(尚未解决的修订需求): 说明排水降湿仅作配套而非替代药剂",
+    "AUDIT-OPEN-REV(尚未解决的修订需求): 绑定区域降雨模式并评估晚播产量风险",
+    "AUDIT-OPEN-REV(尚未解决的修订需求): 安全间隔期须按具体药剂登记标签核验",
+    "AUDIT-OPEN-REV(尚未解决的修订需求): 明确扬花结束边界与补治失效条件",
+    "AUDIT-OPEN-REV(尚未解决的修订需求): 明确菌源低与花后降雨预报的判定边界"
+  ],
+  "pending_human_decisions": [
+    "候选包是否进入人工审查通道及入库路径（现有知识库无写入接口，选型待定）",
+    "修订需求（区域绑定/标签核验/限定表述）是否在入库前完成人工修订",
+    "阈值之核验责任人与来源优先级（对应 quantitative_verification_list）",
+    "待适配 Schema 的正式定义归属（现有库无候选知识 Schema，须由用户/架构师决定）",
+    "其余 4 个 Top5 主题是否启动（本轮仅 WHE-02）",
+    "审计独立性降级（服务端统一映射 deepseek-flash）后是否重做独立审计或改用异构模型"
+  ],
+  "stage_run": [
+    {
+      "stage": "S2",
+      "requested_model": "deepseek-chat",
+      "served_model": "deepseek-flash",
+      "usage": {
+        "prompt_tokens": 804,
+        "completion_tokens": 2951,
+        "total_tokens": 3755,
+        "prompt_tokens_details": {
+          "cached_tokens": 512
+        },
+        "prompt_cache_hit_tokens": 512,
+        "prompt_cache_miss_tokens": 292
+      },
+      "elapsed_sec": 15.4
+    },
+    {
+      "stage": "S3",
+      "requested_model": "deepseek-chat",
+      "served_model": "deepseek-flash",
+      "usage": {
+        "prompt_tokens": 832,
+        "completion_tokens": 3099,
+        "total_tokens": 3931,
+        "prompt_tokens_details": {
+          "cached_tokens": 512
+        },
+        "prompt_cache_hit_tokens": 512,
+        "prompt_cache_miss_tokens": 320
+      },
+      "elapsed_sec": 19.1
+    },
+    {
+      "stage": "S4",
+      "requested_model": "deepseek-chat",
+      "served_model": "deepseek-flash",
+      "usage": {
+        "prompt_tokens": 819,
+        "completion_tokens": 1758,
+        "total_tokens": 2577,
+        "prompt_tokens_details": {
+          "cached_tokens": 512
+        },
+        "prompt_cache_hit_tokens": 512,
+        "prompt_cache_miss_tokens": 307
+      },
+      "elapsed_sec": 10.9
+    },
+    {
+      "stage": "S5",
+      "requested_model": "deepseek-chat",
+      "served_model": "deepseek-flash",
+      "usage": {
+        "prompt_tokens": 806,
+        "completion_tokens": 2402,
+        "total_tokens": 3208,
+        "prompt_tokens_details": {
+          "cached_tokens": 512
+        },
+        "prompt_cache_hit_tokens": 512,
+        "prompt_cache_miss_tokens": 294
+      },
+      "elapsed_sec": 14.9
+    },
+    {
+      "stage": "S6",
+      "requested_model": "deepseek-chat",
+      "served_model": "deepseek-flash",
+      "usage": {
+        "prompt_tokens": 834,
+        "completion_tokens": 3928,
+        "total_tokens": 4762,
+        "prompt_tokens_details": {
+          "cached_tokens": 512
+        },
+        "prompt_cache_hit_tokens": 512,
+        "prompt_cache_miss_tokens": 322
+      },
+      "elapsed_sec": 18.8
+    },
+    {
+      "stage": "S7",
+      "requested_model": "deepseek-reasoner",
+      "served_model": "deepseek-flash",
+      "usage": {
+        "prompt_tokens": 5930,
+        "completion_tokens": 7015,
+        "total_tokens": 12945,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 5263
+        },
+        "prompt_cache_hit_tokens": 0,
+        "prompt_cache_miss_tokens": 5930
+      },
+      "elapsed_sec": 33.6
+    }
+  ]
+}

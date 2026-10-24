@@ -1,0 +1,13 @@
+
+背景（T1 域探测 WHE-02 界定）：
+- 现有知识库（rag/knowledge_base.py）对小麦零覆盖，本主题全部条目均为新增域。
+- 重提取优先级 P1；核心生育期=抽穗扬花期；区域留空=通用条件，区域差分写入 uncertainties。
+- 对应域 A 病原与发生条件；B 生育期-花期风险；C 天气/田间微环境风险；D 监测预警边界；
+  E 农艺防控适用条件；F 毒素形成与籽粒污染；G 收获干燥储存粮食安全；H 病害控制与毒素控制的区别；
+  I 误区反例失败模式。
+
+任务 S6：定量知识及其证据需求提取。列出本主题的定量指标（流行学触发阈值、病穗率与毒素相关性指标、
+病粒率收购分类指标、DON/ZEN 限量、药剂防效区间、储粮水分安全界限等）。
+要求：所有 value=null + value_status=needs-verification；写清 unit、operator、applicable_conditions、
+comparison_baseline（缺则 null）；verification_methods 给出可定位核查方向（去向说明，不编标准编号）。
+产出 6~10 个（unit_id 前缀 WHE02-Q）。statement 中不得出现具体数字。
