@@ -42,7 +42,7 @@ show_hints() {
   echo "============================================"
   echo "  ACIS is up"
   echo "  API:        http://localhost:8000   (GET /health, POST /diagnose)"
-  echo "  Neo4j console: http://localhost:17474 (neo4j / agriai2026)"
+  echo "  Neo4j console: http://localhost:17474 (user: neo4j; password from NEO4J_PASSWORD)"
   echo "  Qdrant:     http://localhost:6333"
   echo "============================================"
   echo ""

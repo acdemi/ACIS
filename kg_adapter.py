@@ -1,4 +1,4 @@
-﻿"""Knowledge graph adapter for the Judge Agent.
+"""Knowledge graph adapter for the Judge Agent.
 
 Hybrid KG: prefers a real Neo4j + AgriKG graph when available, then falls back
 to the structured ``DISEASE_DB`` synthesis so the MVP stays runnable offline.
@@ -19,7 +19,7 @@ Env:
   AGRI_AI_KG_BACKEND=auto|neo4j|memory  (default auto)
   NEO4J_URI=bolt://localhost:7687
   NEO4J_USER=neo4j
-  NEO4J_PASSWORD=agriai2026
+  NEO4J_PASSWORD=<set in environment>
 """
 
 from __future__ import annotations
@@ -195,7 +195,7 @@ def _memory_kg(crop: str, query: str, top_k: int = 3) -> dict[str, Any]:
 
 NEO4J_URI = os.environ.get("NEO4J_URI", "bolt://localhost:7687")
 NEO4J_USER = os.environ.get("NEO4J_USER", "neo4j")
-NEO4J_PASSWORD = os.environ.get("NEO4J_PASSWORD", "agriai2026")
+NEO4J_PASSWORD = os.environ.get("NEO4J_PASSWORD")
 
 _driver = None
 
@@ -225,6 +225,8 @@ def _get_driver():
     global _driver
     if _driver is not None:
         return _driver
+    if not NEO4J_PASSWORD:
+        return None
     try:
         from neo4j import GraphDatabase
 
