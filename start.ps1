@@ -50,7 +50,7 @@ function Show-Hints {
     Write-Host "============================================" -ForegroundColor Cyan
     Write-Host "  ACIS 已启动" -ForegroundColor Cyan
     Write-Host "  API:        http://localhost:8000   (GET /health, POST /diagnose)" -ForegroundColor Cyan
-    Write-Host "  Neo4j 控制台: http://localhost:17474 (neo4j / agriai2026)" -ForegroundColor Cyan
+    Write-Host "  Neo4j 控制台: http://localhost:17474 (user: neo4j; password from NEO4J_PASSWORD)" -ForegroundColor Cyan
     Write-Host "  Qdrant:     http://localhost:6333" -ForegroundColor Cyan
     Write-Host "============================================" -ForegroundColor Cyan
     Write-Host ""

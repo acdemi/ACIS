@@ -24,8 +24,7 @@ from _env import load_env
 
 load_env()  # 注入 .env（DEEPSEEK_API_KEY / NEO4J_PASSWORD），须在 import orchestrator 前
 
-# 离线/编码兜底（.env 未覆盖时用默认值）
-os.environ.setdefault("NEO4J_PASSWORD", "agriai2026")
+# 离线/编码兜底；Neo4j 密码必须由 .env 或进程环境显式提供。
 os.environ.setdefault("NEO4J_URI", "bolt://localhost:7687")
 os.environ.setdefault("NEO4J_USER", "neo4j")
 os.environ.setdefault("HF_HUB_OFFLINE", "1")
@@ -218,7 +217,10 @@ def _render_status(use_llm_judge: bool, use_llm_critic: bool) -> None:
         ds = Text(f" DeepSeek: ✓ …{_DEEPSEEK_KEY[-4:]} ", style="green")
     else:
         ds = Text(" DeepSeek: ✗ 未配置 ", style="red")
-    neo = Text(" Neo4j: agriai2026 ", style="magenta")
+    if os.environ.get("NEO4J_PASSWORD"):
+        neo = Text(" Neo4j: 已配置 ", style="magenta")
+    else:
+        neo = Text(" Neo4j: ✗ 未配置 ", style="red")
     rag = Text(f" RAG: auto · KG后端:{_last_backend} ", style="cyan")
     j = Text(" Judge:开 ", style="black on green") if use_llm_judge else Text(" Judge:关 ", style="dim")
     c = Text(" Critic:开 ", style="black on green") if use_llm_critic else Text(" Critic:关 ", style="dim")
