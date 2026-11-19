@@ -14,11 +14,13 @@ export default defineConfig(({ mode }) => {
       proxy: {
         "/health": apiTarget,
         "/diagnose": apiTarget,
+        "/images": apiTarget,
         "/decisions": apiTarget,
       },
     },
     test: {
       environment: "jsdom",
+      include: ["src/**/*.test.ts"],
       restoreMocks: true,
     },
   };

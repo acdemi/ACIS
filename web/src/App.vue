@@ -10,6 +10,7 @@ import {
   getHealth,
   runDiagnosis as requestDiagnosis,
   sendFeedback,
+  uploadImage,
   type ApiHealth,
   type DecisionDetail,
   type DecisionSummary,
@@ -29,9 +30,11 @@ const healthError = ref("");
 const connectionError = ref("");
 const connectionMessage = ref("");
 const diagnosisError = ref("");
+const imageUploadError = ref("");
 const historyError = ref("");
 const isConnecting = ref(false);
 const isRunning = ref(false);
+const isUploadingImage = ref(false);
 const isLoadingHistory = ref(false);
 const isCopying = ref(false);
 const copyMessage = ref("");
@@ -39,6 +42,7 @@ const feedbackMessage = ref("");
 const history = ref<DecisionSummary[]>([]);
 const detail = ref<DecisionDetail | null>(null);
 const diagnosis = ref<DiagnosisResult | null>(null);
+const uploadedImage = ref<{ name: string; path: string } | null>(null);
 const activeDemoId = ref("");
 
 const selectedDemo = computed<DemoCase | null>(
@@ -134,6 +138,7 @@ async function submitDiagnosis(payload: {
     diagnosis.value = await requestDiagnosis(apiKey.value, payload.query, {
       useLlmJudge: payload.useLlmJudge,
       useLlmCritic: payload.useLlmCritic,
+      imagePath: uploadedImage.value?.path,
     });
     await loadHistory();
   } catch (error) {
@@ -141,6 +146,31 @@ async function submitDiagnosis(payload: {
   } finally {
     isRunning.value = false;
   }
+}
+
+async function stageDiagnosisImage(file: File): Promise<void> {
+  uploadedImage.value = null;
+  imageUploadError.value = "";
+  if (!apiKey.value) {
+    imageUploadError.value = "请先连接 ACIS API，再上传图片。";
+    return;
+  }
+
+  isUploadingImage.value = true;
+  try {
+    const stagedImage = await uploadImage(apiKey.value, file);
+    uploadedImage.value = { name: file.name, path: stagedImage.image_path };
+  } catch (error) {
+    imageUploadError.value = errorMessage(error);
+    if (error instanceof ApiError && error.status === 401) apiKey.value = "";
+  } finally {
+    isUploadingImage.value = false;
+  }
+}
+
+function clearDiagnosisImage(): void {
+  uploadedImage.value = null;
+  imageUploadError.value = "";
 }
 
 function reportMarkdown(result: DiagnosisResult): string {
@@ -275,7 +305,7 @@ onMounted(() => {
 
         <section class="workbench-heading"><div><p class="section-kicker">DIAGNOSTIC WORKSPACE</p><h2>农业智能诊断工作台</h2></div><span>● 输入 → 检索 → 分析 → 报告</span></section>
         <div v-if="diagnosisError" class="error-banner" role="alert">{{ diagnosisError }}</div>
-        <DiagnosisForm :judge-configured="Boolean(apiHealth?.judge_configured)" :is-running="isRunning" @run="submitDiagnosis" @demo-change="changeDemo" />
+        <DiagnosisForm :judge-configured="Boolean(apiHealth?.judge_configured)" :is-running="isRunning" :api-key-ready="Boolean(apiKey)" :is-uploading-image="isUploadingImage" :uploaded-image-name="uploadedImage?.name ?? ''" :image-upload-error="imageUploadError" @run="submitDiagnosis" @demo-change="changeDemo" @image-select="stageDiagnosisImage" @image-remove="clearDiagnosisImage" />
         <div v-if="isRunning" class="run-progress" role="status"><i></i><div><strong>任务已接收，诊断流程运行中</strong><p>后端当前只返回完成后的 Trace；不会伪造实时阶段进度。</p></div></div>
         <ResultPanel v-if="diagnosis" :result="diagnosis" :demo="selectedDemo" :is-copying="isCopying" :copy-message="copyMessage" @copy="copyDiagnosis" @history="showHistory" />
         <div v-else-if="!isRunning" class="welcome-strip"><span>↗</span><div><strong>从一条症状描述开始</strong><p>输入作物和观察到的症状，或选择固定案例体验真实诊断流程。</p></div><small>READY WHEN YOU ARE</small></div>

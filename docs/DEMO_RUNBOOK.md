@@ -36,7 +36,7 @@ $py = '.\.venv\Scripts\python.exe'
 讲：
 > "这是 ACIS 的 TUI 演示入口。主链是 感知 → 记忆 → 专家 → 辩论 → Critic → Judge，默认走离线规则裁决；右侧状态条显示 Neo4j / RAG / Judge 开关，没有外部服务时会自动降级。"
 
-指给观众看：菜单 6 个场景、状态条 `Judge:关 Critic:关`、`KG后端`、`RAG`。
+指给观众看：菜单 9 个场景（7–9 为固定案例并标明 `DEMO / FIXTURE MODE`）、状态行 `Judge:关 Critic:关`、最近 `KG` 后端与 RAG 状态。
 
 ### 0:30–1:40 · 正常任务（场景 1）
 输入 `1` 回车。
@@ -83,8 +83,36 @@ $env:AGRI_AI_JUDGE_MAX_RETRIES='0'
 4. stderr 三行日志：`Judge request:` → `Judge exception:` → `Judge fallback:`，且 **API key 已脱敏**（看不到 sk-）。
 > "从 401/402/429/超时/连接失败/非 JSON 输出，到 5xx，都有稳定的 reason_code、trace 字段和日志；这是评测和排障能对上的原因。"
 
+### 备选 · SQLite 审计记录（可选，约 20 秒，不占主时间轴）
+
+证据追溯还有第三个落点：**同一条决策写进了 SQLite 审计表**（表 `decisions`，默认库 `data/agri.db`）。两种查看方式任选：
+
+```powershell
+# 方式一：只读查询，不写库（推荐，无需起服务）
+& $py -c "import sqlite3; c=sqlite3.connect('file:data/agri.db?mode=ro',uri=True); [print(r) for r in c.execute('SELECT id,created_at,crop,judge_mode,confidence,need_human_review,substr(decision,1,20) FROM decisions ORDER BY id DESC LIMIT 3')]; c.close()"
+```
+预期：每行一条 `(id, created_at, crop, judge_mode, confidence, need_human_review, decision 前 20 字)`，最新记录的 `id` 等于刚才 Trace 里的 `decision_id`。
+
+```powershell
+# 方式二：走 API 契约，不起服务（与收尾的 /health 检查同一风格）
+& $py -c "import os; os.environ['ACIS_API_KEY']='local-test-key-0123456789abcdef0123456789'; from fastapi.testclient import TestClient; from gateway.app import app; c=TestClient(app); r=c.get('/decisions?limit=3', headers={'X-API-Key':os.environ['ACIS_API_KEY']}); print('status=',r.status_code); [print(x['id'], x['judge_mode'], x['confidence']) for x in r.json()]"
+```
+预期：`status= 200`，随后每行 `id judge_mode confidence`。该密钥仅用于本地 `TestClient` 示例；`GET /health` 可匿名访问，`GET /decisions`、`GET /decisions/{id}` 等数据接口需要 `X-API-Key`。
+
+讲：
+> "裁决不只停留在画面上：每次决策都写一条审计记录，字段包括裁剪/意图/裁决/置信度/风险/human-review 标记/行动建议全量/Trace。`judge_mode` 只有 `rules` 和 `deepseek` 两个取值——**规则回退不会被记成 LLM 结果**，这是可审计的前提。"
+
+> ⚠️ `judge_mode` 口径：`rules` = 离线规则裁决（默认演示路径），`deepseek` = 真实 LLM 裁决。演示时不要把 `rules` 讲成"模型诊断"。
+
+**演示前建议改用隔离库**（可选；不设则写入仓库内 `data/agri.db`）：
+
+```powershell
+$env:AGRI_AI_DB_PATH = "$env:TEMP/acis_demo.db"   # 已实测生效：CLI / TUI / API 都遵守
+Remove-Item Env:\AGRI_AI_DB_PATH                  # 取消隔离（或直接新开终端）
+```
+
 ### 4:10–4:40 · 收尾（二选一）
-- 规则/API：`& $py -c "from fastapi.testclient import TestClient; from gateway.app import app; c=TestClient(app); print(c.get('/health').status_code, c.post('/diagnose', json={'query':'番茄叶片黄斑，叶背灰色霉层'}).status_code)"` → `200 200`。
+- 规则/API：`& $py -c "import os; os.environ['ACIS_API_KEY']='local-test-key-0123456789abcdef0123456789'; from fastapi.testclient import TestClient; from gateway.app import app; c=TestClient(app); print(c.get('/health').status_code, c.post('/diagnose', json={'query':'番茄叶片黄斑，叶背灰色霉层'}, headers={'X-API-Key':os.environ['ACIS_API_KEY']}).status_code)"` → `200 200`。
 - 或指 SQLite：`decision_id` 已落库，说明有审计记录。
 
 收尾话术：
@@ -124,7 +152,7 @@ $env:AGRI_AI_JUDGE_MAX_RETRIES='0'
 | 多 Agent 真的更强吗？ | **不声称更强**：Challenge Set 上 C1 未优于 C0，排名跨 seed 翻转；我们把它定位为"可解释的证据聚合"，而不是"已证明的性能提升"。 |
 | 效果怎么验证？ | 固定 Challenge Set 24 例（4 组）+ 64 例 benchmark，标签/原始结果/评分脚本可对应；baseline 指标可复算；负向结果也如实保留。 |
 | 故障怎么办？ | Judge 8 类故障都有 reason_code + trace + 日志 + 脱敏；网络失败自动回退规则，进程不崩；已知缺口（持久化/图回退/采样失败静默）在审计报告里。 |
-| 环境怎么复现？ | 按 README 创建 `.venv` 并安装依赖；配置 `.env` 后启用真实 Judge。已知限制：`requirements-lock.txt` 为 Windows 平台生成，普通环境未复跑全量测试。 |
+| 环境怎么复现？ | 按 README 创建 `.venv` 并安装依赖；配置 `.env` 后启用真实 Judge。`requirements-lock.txt` 为 Windows + Python 3.13.3 生成；本次全量 pytest 为 **364 passed / 2 skipped / 1 warning**，运行于 Windows。Docker Compose 另以 Linux Python 3.11.14、Qdrant 1.18.2、Neo4j 2026.05.0 镜像完成隔离构建、三服务健康、API 诊断/Trace/持久化重启验证；测试库无导入语料，故仍走已标明的内存回退。 |
 
 **不要说的话**：❌"准确率 1.00"（依赖服务与配置）❌"完整架构优于基线"（证据不支持）❌"所有故障都有记录"（仍有静默路径）❌"每次决策 <1s"（实测 1.4–2.7s，冷启动 8–9s）。
 
@@ -138,3 +166,36 @@ $env:AGRI_AI_JUDGE_MAX_RETRIES='0'
 - [ ] 第二个终端已打开并 cd 到仓库根
 - [ ] 故障注入命令已复制到剪贴板
 - [ ] 不连生产/付费 API（演示默认离线；有 Key 才开 `[j]`）
+
+## 6. ACIS v1.0 诊断闭环案例
+
+以下三个固定输入可在 TUI 菜单 7–9、Web 快捷场景或命令行重复运行。离线复现使用内置 RAG/KG 数据，不调用外部模型；报告会标明 `memory` 后端和命中的知识来源。
+
+```powershell
+$env:AGRI_AI_RAG_BACKEND='memory'
+$env:AGRI_AI_KG_BACKEND='memory'
+& $py orchestrator.py --rules-only --seed 7 --json "玉米下部叶片出现长梭形灰绿色至灰褐色病斑，湿度高时病斑快速扩大，请诊断。"
+& $py orchestrator.py --rules-only --seed 7 --json "小麦叶片出现黄色粉状小疱，沿叶脉排列成条带；请与叶锈病鉴别。"
+& $py orchestrator.py --rules-only --seed 7 --json "玉米长势不好，叶片有点发黄，具体原因不清楚。"
+```
+
+预期核对：玉米病例首选“玉米大斑病”；小麦病例首选“小麦条锈病”并保留替代诊断；信息不足病例必须报告“证据不足”、人工复核和补充问题，不给出针对病害的喷施处置。每次 JSON 输出包含报告、知识来源、Agent 执行状态与完整 Trace；`tests/test_delivery_cases_v1.py` 对实际输出及 SQLite Trace 关联做自动化断言。
+
+
+## 7. Vue Web 工作台演示
+
+前端开发需 Node.js 22 LTS；不需要启动 Neo4j/Qdrant，默认演示使用本地内存检索后端。若尚未启动本地服务，在两个终端运行：
+
+```powershell
+# 终端一
+$env:ACIS_API_KEY='replace-with-a-private-key-of-at-least-32-characters'
+$env:AGRI_AI_RAG_BACKEND='memory'
+$env:AGRI_AI_KG_BACKEND='memory'
+uvicorn gateway.app:app --host 127.0.0.1 --port 8000
+
+# 终端二（首次安装依赖后可省略 npm ci）
+npm ci --prefix web
+npm --prefix web run dev
+```
+
+打开 `http://127.0.0.1:5173`，将同一个本地 Key 输入侧栏并连接 API。依次运行三个快捷案例：玉米大斑病、小麦锈病鉴别、玉米信息不足。案例卡只预填输入，界面会标注 `DEMO / FIXTURE MODE`，诊断、检索来源、Judge 与 Trace 均来自本次 API 响应；第三例应弃权并请求补充信息。可选上传 JPEG、PNG 或 BMP 图片（最大 10 MiB）；上传会由受保护 API 暂存，但视觉识别默认是 Mock，不应承诺真实图像诊断能力。

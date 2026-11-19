@@ -122,7 +122,7 @@ describe("ACIS Vue workbench", () => {
     await wrapper.get(".credential-card form").trigger("submit");
     await flushPromises();
 
-    const image = new File(["image bytes"], "leaf.png", { type: "image/png" });
+    const image = new File(["image bytes"], "leaf.png", { type: "application/octet-stream" });
     const imageInput = wrapper.get("#diagnosis-image").element as HTMLInputElement;
     Object.defineProperty(imageInput, "files", { configurable: true, value: [image] });
     await wrapper.get("#diagnosis-image").trigger("change");
@@ -142,5 +142,116 @@ describe("ACIS Vue workbench", () => {
 
     const diagnoseCall = vi.mocked(fetch).mock.calls.find(([input]) => String(input) === "/diagnose");
     expect(JSON.parse(String(diagnoseCall?.[1]?.body)).image_path).toBe("/tmp/acis-upload/leaf.png");
+  });
+
+  it("does not diagnose when image staging fails", async () => {
+    const originalFetch = vi.mocked(fetch).getMockImplementation();
+    vi.mocked(fetch).mockImplementation(async (input) => {
+      if (String(input) === "/images") {
+        return response({ detail: "upload unavailable" }, 503) as Response;
+      }
+      return originalFetch!(input);
+    });
+
+    const wrapper = mount(App);
+    await flushPromises();
+    await wrapper.get("#api-key").setValue(apiKey);
+    await wrapper.get(".credential-card form").trigger("submit");
+    await flushPromises();
+
+    const imageInput = wrapper.get("#diagnosis-image").element as HTMLInputElement;
+    Object.defineProperty(imageInput, "files", {
+      configurable: true,
+      value: [new File(["image bytes"], "leaf.png", { type: "image/png" })],
+    });
+    await wrapper.get("#diagnosis-image").trigger("change");
+    await flushPromises();
+
+    expect(wrapper.text()).toContain("ACIS API 尚未就绪");
+    await wrapper.findAll("button").find((button) => button.element.getAttribute("data-query") === demoQueries[0])!.trigger("click");
+    await flushPromises();
+    await wrapper.get(".diagnosis-form").trigger("submit");
+    await flushPromises();
+
+    expect(wrapper.text()).toContain("图片上传失败");
+    expect(vi.mocked(fetch).mock.calls.some(([input]) => String(input) === "/diagnose")).toBe(false);
+  });
+
+  it("renders an abstention response with follow-up questions", async () => {
+    const originalFetch = vi.mocked(fetch).getMockImplementation();
+    const abstention = {
+      ...diagnosisPayload,
+      decision: "证据不足，暂不能判断",
+      confidence: 0.25,
+      need_human_review: true,
+      report: {
+        ...diagnosisPayload.report,
+        confidence: { score: 0.25, band: "low", meaning: "现有症状不足以区分病因" },
+        follow_up_questions: ["请补充受害部位、发病时间及病斑照片。"],
+      },
+    };
+    vi.mocked(fetch).mockImplementation(async (input) => {
+      if (String(input) === "/diagnose") return response(abstention) as Response;
+      return originalFetch!(input);
+    });
+
+    const wrapper = mount(App);
+    await flushPromises();
+    await wrapper.get("#api-key").setValue(apiKey);
+    await wrapper.get(".credential-card form").trigger("submit");
+    await flushPromises();
+    await wrapper.findAll("button").find((button) => button.element.getAttribute("data-query") === demoQueries[2])!.trigger("click");
+    await flushPromises();
+    await wrapper.get(".diagnosis-form").trigger("submit");
+    await flushPromises();
+
+    expect(wrapper.text()).toContain("证据不足，暂不能判断");
+    expect(wrapper.text()).toContain("需要人工复核");
+    expect(wrapper.text()).toContain("建议补充信息");
+    expect(wrapper.text()).toContain("请补充受害部位、发病时间及病斑照片。");
+  });
+
+  it("loads a stored decision and its trace from history", async () => {
+    const originalFetch = vi.mocked(fetch).getMockImplementation();
+    const item = {
+      id: 7,
+      created_at: "2026-01-01T00:00:00Z",
+      crop: "玉米",
+      intent: "diagnosis",
+      query: "玉米叶片出现长梭形病斑",
+      decision: "玉米大斑病",
+      confidence: 0.84,
+      risk_level: "medium",
+      judge_mode: "rules",
+    };
+    const storedDecision = {
+      ...item,
+      action_plan: ["记录病斑变化并咨询当地植保人员。"],
+      report_json: diagnosisPayload.report,
+      trace_json: diagnosisPayload.trace,
+      trace_id: "trace-history-007",
+    };
+    vi.mocked(fetch).mockImplementation(async (input) => {
+      if (String(input) === "/decisions?limit=50") return response([item]) as Response;
+      if (String(input) === "/decisions/7") return response(storedDecision) as Response;
+      return originalFetch!(input);
+    });
+
+    const wrapper = mount(App);
+    await flushPromises();
+    await wrapper.get("#api-key").setValue(apiKey);
+    await wrapper.get(".credential-card form").trigger("submit");
+    await flushPromises();
+    await wrapper.findAll(".primary-nav button")[1].trigger("click");
+    await flushPromises();
+    expect(wrapper.text()).toContain("玉米叶片出现长梭形病斑");
+
+    await wrapper.get(".history-item").trigger("click");
+    await flushPromises();
+
+    expect(wrapper.text()).toContain("玉米大斑病");
+    expect(wrapper.text()).toContain("执行 Trace · trace-history-007");
+    const detailCall = vi.mocked(fetch).mock.calls.find(([input]) => String(input) === "/decisions/7");
+    expect(new Headers(detailCall?.[1]?.headers).get("X-API-Key")).toBe(apiKey);
   });
 });

@@ -1,23 +1,52 @@
 {
   "dataset": "evals.fixtures",
+  "dataset_scope": "engineering regression fixtures; not expert-confirmed field data",
   "case_count": 12,
   "seed": 7,
+  "simulation_time": "2026-06-15T10:00:00",
   "backends": {
     "rag": "memory",
     "kg": "memory",
     "llm_judge": "disabled",
+    "llm_critic": "disabled",
     "persist": "0"
   },
   "aggregate": {
-    "matched_expected": 12,
-    "matched_rate": 1.0,
+    "diagnosis_accuracy": {
+      "correct": 6,
+      "scored": 7,
+      "rate": 0.8571
+    },
+    "top3_accuracy": {
+      "correct": 7,
+      "scored": 7,
+      "rate": 1.0
+    },
+    "intent_accuracy": {
+      "correct": 12,
+      "scored": 12,
+      "rate": 1.0
+    },
+    "unscored_cases": 5,
     "critic_triggered": 2,
     "risk_counts": {
       "low": 0,
       "medium": 10,
       "high": 2
     },
-    "mean_confidence": 0.6583
+    "mean_confidence": 0.655,
+    "mean_latency_ms": 355.347,
+    "p50_latency_ms": 16.338,
+    "p95_latency_ms": 1847.31,
+    "not_measured": {
+      "macro_f1": "fixture set does not provide expert-reviewed multi-class labels",
+      "factor_coverage": "no reference factors are annotated for these fixtures",
+      "abstention_quality": "no expert-reviewed insufficient-evidence diagnosis set",
+      "confidence_calibration": "no held-out expert-reviewed calibration set",
+      "retrieval_recall_at_k": "no gold relevant-source identifiers",
+      "agent_fallback_rate": "no suite-wide normalized fallback denominator",
+      "token_cost": "LLM is disabled and provider pricing metadata is unavailable"
+    }
   },
   "environment": {
     "python": "3.13.3",
@@ -28,15 +57,103 @@
       "id": "tomato_leaf_mold",
       "crop": "tomato",
       "intent": "diagnose",
+      "expected_intent": "diagnose",
+      "intent_matches_expected": true,
       "expected": "叶霉病",
       "pathology_claim": "病理判断首选：番茄叶霉病",
-      "matches_expected": true,
+      "predicted_diagnosis_label": "番茄叶霉病",
       "decision": "病理判断首选：番茄叶霉病",
+      "candidate_names": [
+        "番茄叶霉病",
+        "番茄早疫病"
+      ],
+      "scored": true,
+      "matches_expected": true,
+      "top3_scored": true,
+      "top3_matches_expected": true,
       "confidence": 0.74,
       "risk_level": "medium",
       "judge_mode": "rules",
       "need_human_review": false,
       "critic_triggered": false,
+      "duration_ms": 4076.46,
+      "agent_execution": [
+        {
+          "agent": "视觉Agent",
+          "status": "skipped",
+          "mode": "not_requested"
+        },
+        {
+          "agent": "传感器Agent",
+          "status": "success",
+          "mode": "simulated"
+        },
+        {
+          "agent": "天气Agent",
+          "status": "success",
+          "mode": "simulated"
+        },
+        {
+          "agent": "RAG",
+          "status": "success",
+          "mode": "rag:memory"
+        },
+        {
+          "agent": "知识图谱",
+          "status": "success",
+          "mode": "kg:memory"
+        },
+        {
+          "agent": "历史案例库",
+          "status": "success",
+          "mode": "builtin_pattern"
+        },
+        {
+          "agent": "经验回放Agent",
+          "status": "no_results",
+          "mode": "sqlite"
+        },
+        {
+          "agent": "病理Agent",
+          "status": "success",
+          "mode": "rules"
+        },
+        {
+          "agent": "气象Agent",
+          "status": "success",
+          "mode": "rules"
+        },
+        {
+          "agent": "栽培Agent",
+          "status": "success",
+          "mode": "rules"
+        },
+        {
+          "agent": "经济Agent",
+          "status": "success",
+          "mode": "rules"
+        },
+        {
+          "agent": "生态Agent",
+          "status": "success",
+          "mode": "rules"
+        },
+        {
+          "agent": "病理Agent",
+          "status": "success",
+          "mode": "rules"
+        },
+        {
+          "agent": "气象Agent",
+          "status": "success",
+          "mode": "rules"
+        },
+        {
+          "agent": "栽培Agent",
+          "status": "success",
+          "mode": "rules"
+        }
+      ],
       "trace_stages": [
         "request",
         "perception",
@@ -55,15 +172,103 @@
       "id": "tomato_early_blight",
       "crop": "tomato",
       "intent": "diagnose",
+      "expected_intent": "diagnose",
+      "intent_matches_expected": true,
       "expected": "早疫病",
       "pathology_claim": "病理判断首选：番茄早疫病",
-      "matches_expected": true,
+      "predicted_diagnosis_label": "番茄早疫病",
       "decision": "病理判断首选：番茄早疫病",
+      "candidate_names": [
+        "番茄早疫病",
+        "番茄叶霉病"
+      ],
+      "scored": true,
+      "matches_expected": true,
+      "top3_scored": true,
+      "top3_matches_expected": true,
       "confidence": 0.75,
       "risk_level": "medium",
       "judge_mode": "rules",
       "need_human_review": false,
       "critic_triggered": false,
+      "duration_ms": 22.06,
+      "agent_execution": [
+        {
+          "agent": "视觉Agent",
+          "status": "skipped",
+          "mode": "not_requested"
+        },
+        {
+          "agent": "传感器Agent",
+          "status": "success",
+          "mode": "simulated"
+        },
+        {
+          "agent": "天气Agent",
+          "status": "success",
+          "mode": "simulated"
+        },
+        {
+          "agent": "RAG",
+          "status": "success",
+          "mode": "rag:memory"
+        },
+        {
+          "agent": "知识图谱",
+          "status": "success",
+          "mode": "kg:memory"
+        },
+        {
+          "agent": "历史案例库",
+          "status": "success",
+          "mode": "heuristic"
+        },
+        {
+          "agent": "经验回放Agent",
+          "status": "no_results",
+          "mode": "sqlite"
+        },
+        {
+          "agent": "病理Agent",
+          "status": "success",
+          "mode": "rules"
+        },
+        {
+          "agent": "气象Agent",
+          "status": "success",
+          "mode": "rules"
+        },
+        {
+          "agent": "栽培Agent",
+          "status": "success",
+          "mode": "rules"
+        },
+        {
+          "agent": "经济Agent",
+          "status": "success",
+          "mode": "rules"
+        },
+        {
+          "agent": "生态Agent",
+          "status": "success",
+          "mode": "rules"
+        },
+        {
+          "agent": "病理Agent",
+          "status": "success",
+          "mode": "rules"
+        },
+        {
+          "agent": "气象Agent",
+          "status": "success",
+          "mode": "rules"
+        },
+        {
+          "agent": "栽培Agent",
+          "status": "success",
+          "mode": "rules"
+        }
+      ],
       "trace_stages": [
         "request",
         "perception",
@@ -82,15 +287,85 @@
       "id": "tomato_irrigate_with_risk",
       "crop": "tomato",
       "intent": "irrigate",
+      "expected_intent": "irrigate",
+      "intent_matches_expected": true,
       "expected": null,
-      "pathology_claim": "病理证据不足，不能确认具体病害",
-      "matches_expected": true,
+      "pathology_claim": "病理证据不足，暂不进行病害定性",
+      "predicted_diagnosis_label": null,
       "decision": "气象条件支持灌溉",
-      "confidence": 0.58,
+      "candidate_names": [],
+      "scored": false,
+      "matches_expected": null,
+      "top3_scored": false,
+      "top3_matches_expected": null,
+      "confidence": 0.57,
       "risk_level": "medium",
       "judge_mode": "rules",
       "need_human_review": false,
       "critic_triggered": false,
+      "duration_ms": 15.68,
+      "agent_execution": [
+        {
+          "agent": "视觉Agent",
+          "status": "skipped",
+          "mode": "not_requested"
+        },
+        {
+          "agent": "传感器Agent",
+          "status": "success",
+          "mode": "simulated"
+        },
+        {
+          "agent": "天气Agent",
+          "status": "success",
+          "mode": "simulated"
+        },
+        {
+          "agent": "RAG",
+          "status": "no_results",
+          "mode": "rag:memory"
+        },
+        {
+          "agent": "知识图谱",
+          "status": "success",
+          "mode": "kg:memory"
+        },
+        {
+          "agent": "历史案例库",
+          "status": "success",
+          "mode": "heuristic"
+        },
+        {
+          "agent": "经验回放Agent",
+          "status": "no_results",
+          "mode": "sqlite"
+        },
+        {
+          "agent": "病理Agent",
+          "status": "success",
+          "mode": "rules"
+        },
+        {
+          "agent": "气象Agent",
+          "status": "success",
+          "mode": "rules"
+        },
+        {
+          "agent": "栽培Agent",
+          "status": "success",
+          "mode": "rules"
+        },
+        {
+          "agent": "经济Agent",
+          "status": "success",
+          "mode": "rules"
+        },
+        {
+          "agent": "生态Agent",
+          "status": "success",
+          "mode": "rules"
+        }
+      ],
       "trace_stages": [
         "request",
         "perception",
@@ -109,15 +384,85 @@
       "id": "tomato_monitor_no_disease",
       "crop": "tomato",
       "intent": "monitor",
+      "expected_intent": "monitor",
+      "intent_matches_expected": true,
       "expected": "证据不足",
-      "pathology_claim": "病理证据不足，不能确认具体病害",
-      "matches_expected": true,
+      "pathology_claim": "病理证据不足，暂不进行病害定性",
+      "predicted_diagnosis_label": null,
       "decision": "已生成栽培管理建议",
-      "confidence": 0.58,
+      "candidate_names": [],
+      "scored": false,
+      "matches_expected": null,
+      "top3_scored": false,
+      "top3_matches_expected": null,
+      "confidence": 0.57,
       "risk_level": "medium",
       "judge_mode": "rules",
       "need_human_review": false,
       "critic_triggered": false,
+      "duration_ms": 14.108,
+      "agent_execution": [
+        {
+          "agent": "视觉Agent",
+          "status": "skipped",
+          "mode": "not_requested"
+        },
+        {
+          "agent": "传感器Agent",
+          "status": "success",
+          "mode": "simulated"
+        },
+        {
+          "agent": "天气Agent",
+          "status": "success",
+          "mode": "simulated"
+        },
+        {
+          "agent": "RAG",
+          "status": "no_results",
+          "mode": "rag:memory"
+        },
+        {
+          "agent": "知识图谱",
+          "status": "success",
+          "mode": "kg:memory"
+        },
+        {
+          "agent": "历史案例库",
+          "status": "success",
+          "mode": "heuristic"
+        },
+        {
+          "agent": "经验回放Agent",
+          "status": "no_results",
+          "mode": "sqlite"
+        },
+        {
+          "agent": "病理Agent",
+          "status": "success",
+          "mode": "rules"
+        },
+        {
+          "agent": "气象Agent",
+          "status": "success",
+          "mode": "rules"
+        },
+        {
+          "agent": "栽培Agent",
+          "status": "success",
+          "mode": "rules"
+        },
+        {
+          "agent": "经济Agent",
+          "status": "success",
+          "mode": "rules"
+        },
+        {
+          "agent": "生态Agent",
+          "status": "success",
+          "mode": "rules"
+        }
+      ],
       "trace_stages": [
         "request",
         "perception",
@@ -136,15 +481,102 @@
       "id": "sugar_beet_leaf_spot",
       "crop": "sugar_beet",
       "intent": "diagnose",
+      "expected_intent": "diagnose",
+      "intent_matches_expected": true,
       "expected": "褐斑病",
       "pathology_claim": "病理判断首选：甜菜褐斑病",
-      "matches_expected": true,
+      "predicted_diagnosis_label": "甜菜褐斑病",
       "decision": "病理判断首选：甜菜褐斑病",
+      "candidate_names": [
+        "甜菜褐斑病"
+      ],
+      "scored": true,
+      "matches_expected": true,
+      "top3_scored": true,
+      "top3_matches_expected": true,
       "confidence": 0.75,
       "risk_level": "medium",
       "judge_mode": "rules",
       "need_human_review": false,
       "critic_triggered": false,
+      "duration_ms": 15.354,
+      "agent_execution": [
+        {
+          "agent": "视觉Agent",
+          "status": "skipped",
+          "mode": "not_requested"
+        },
+        {
+          "agent": "传感器Agent",
+          "status": "success",
+          "mode": "simulated"
+        },
+        {
+          "agent": "天气Agent",
+          "status": "success",
+          "mode": "simulated"
+        },
+        {
+          "agent": "RAG",
+          "status": "success",
+          "mode": "rag:memory"
+        },
+        {
+          "agent": "知识图谱",
+          "status": "success",
+          "mode": "kg:memory"
+        },
+        {
+          "agent": "历史案例库",
+          "status": "success",
+          "mode": "heuristic"
+        },
+        {
+          "agent": "经验回放Agent",
+          "status": "no_results",
+          "mode": "sqlite"
+        },
+        {
+          "agent": "病理Agent",
+          "status": "success",
+          "mode": "rules"
+        },
+        {
+          "agent": "气象Agent",
+          "status": "success",
+          "mode": "rules"
+        },
+        {
+          "agent": "栽培Agent",
+          "status": "success",
+          "mode": "rules"
+        },
+        {
+          "agent": "经济Agent",
+          "status": "success",
+          "mode": "rules"
+        },
+        {
+          "agent": "生态Agent",
+          "status": "success",
+          "mode": "rules"
+        },
+        {
+          "agent": "病理Agent",
+          "status": "success",
+          "mode": "rules"
+        },
+        {
+          "agent": "气象Agent",
+          "status": "success",
+          "mode": "rules"
+        },
+        {
+          "agent": "栽培Agent",
+          "status": "success",
+          "mode": "rules"
+        }
+      ],
       "trace_stages": [
         "request",
         "perception",
@@ -163,15 +595,102 @@
       "id": "sugar_beet_root_rot",
       "crop": "sugar_beet",
       "intent": "diagnose",
+      "expected_intent": "diagnose",
+      "intent_matches_expected": true,
       "expected": "根腐病",
       "pathology_claim": "病理判断首选：甜菜根腐病",
-      "matches_expected": true,
+      "predicted_diagnosis_label": "甜菜根腐病",
       "decision": "病理判断首选：甜菜根腐病",
+      "candidate_names": [
+        "甜菜根腐病"
+      ],
+      "scored": true,
+      "matches_expected": true,
+      "top3_scored": true,
+      "top3_matches_expected": true,
       "confidence": 0.75,
       "risk_level": "medium",
       "judge_mode": "rules",
       "need_human_review": false,
       "critic_triggered": false,
+      "duration_ms": 16.615,
+      "agent_execution": [
+        {
+          "agent": "视觉Agent",
+          "status": "skipped",
+          "mode": "not_requested"
+        },
+        {
+          "agent": "传感器Agent",
+          "status": "success",
+          "mode": "simulated"
+        },
+        {
+          "agent": "天气Agent",
+          "status": "success",
+          "mode": "simulated"
+        },
+        {
+          "agent": "RAG",
+          "status": "success",
+          "mode": "rag:memory"
+        },
+        {
+          "agent": "知识图谱",
+          "status": "success",
+          "mode": "kg:memory"
+        },
+        {
+          "agent": "历史案例库",
+          "status": "success",
+          "mode": "heuristic"
+        },
+        {
+          "agent": "经验回放Agent",
+          "status": "no_results",
+          "mode": "sqlite"
+        },
+        {
+          "agent": "病理Agent",
+          "status": "success",
+          "mode": "rules"
+        },
+        {
+          "agent": "气象Agent",
+          "status": "success",
+          "mode": "rules"
+        },
+        {
+          "agent": "栽培Agent",
+          "status": "success",
+          "mode": "rules"
+        },
+        {
+          "agent": "经济Agent",
+          "status": "success",
+          "mode": "rules"
+        },
+        {
+          "agent": "生态Agent",
+          "status": "success",
+          "mode": "rules"
+        },
+        {
+          "agent": "病理Agent",
+          "status": "success",
+          "mode": "rules"
+        },
+        {
+          "agent": "气象Agent",
+          "status": "success",
+          "mode": "rules"
+        },
+        {
+          "agent": "栽培Agent",
+          "status": "success",
+          "mode": "rules"
+        }
+      ],
       "trace_stages": [
         "request",
         "perception",
@@ -190,15 +709,85 @@
       "id": "sugar_beet_alert",
       "crop": "sugar_beet",
       "intent": "alert",
+      "expected_intent": "alert",
+      "intent_matches_expected": true,
       "expected": "证据不足",
-      "pathology_claim": "病理证据不足，不能确认具体病害",
-      "matches_expected": true,
+      "pathology_claim": "病理证据不足，暂不进行病害定性",
+      "predicted_diagnosis_label": null,
       "decision": "已生成栽培管理建议",
-      "confidence": 0.58,
+      "candidate_names": [],
+      "scored": false,
+      "matches_expected": null,
+      "top3_scored": false,
+      "top3_matches_expected": null,
+      "confidence": 0.57,
       "risk_level": "medium",
       "judge_mode": "rules",
       "need_human_review": false,
       "critic_triggered": false,
+      "duration_ms": 18.106,
+      "agent_execution": [
+        {
+          "agent": "视觉Agent",
+          "status": "skipped",
+          "mode": "not_requested"
+        },
+        {
+          "agent": "传感器Agent",
+          "status": "success",
+          "mode": "simulated"
+        },
+        {
+          "agent": "天气Agent",
+          "status": "success",
+          "mode": "simulated"
+        },
+        {
+          "agent": "RAG",
+          "status": "no_results",
+          "mode": "rag:memory"
+        },
+        {
+          "agent": "知识图谱",
+          "status": "success",
+          "mode": "kg:memory"
+        },
+        {
+          "agent": "历史案例库",
+          "status": "success",
+          "mode": "heuristic"
+        },
+        {
+          "agent": "经验回放Agent",
+          "status": "no_results",
+          "mode": "sqlite"
+        },
+        {
+          "agent": "病理Agent",
+          "status": "success",
+          "mode": "rules"
+        },
+        {
+          "agent": "气象Agent",
+          "status": "success",
+          "mode": "rules"
+        },
+        {
+          "agent": "栽培Agent",
+          "status": "success",
+          "mode": "rules"
+        },
+        {
+          "agent": "经济Agent",
+          "status": "success",
+          "mode": "rules"
+        },
+        {
+          "agent": "生态Agent",
+          "status": "success",
+          "mode": "rules"
+        }
+      ],
       "trace_stages": [
         "request",
         "perception",
@@ -217,15 +806,103 @@
       "id": "cotton_verticillium_wilt",
       "crop": "cotton",
       "intent": "diagnose",
+      "expected_intent": "diagnose",
+      "intent_matches_expected": true,
       "expected": "黄萎病",
       "pathology_claim": "病理判断首选：棉花黄萎病",
-      "matches_expected": true,
+      "predicted_diagnosis_label": "棉花黄萎病",
       "decision": "病理判断首选：棉花黄萎病",
+      "candidate_names": [
+        "棉花黄萎病",
+        "棉花枯萎病"
+      ],
+      "scored": true,
+      "matches_expected": true,
+      "top3_scored": true,
+      "top3_matches_expected": true,
       "confidence": 0.75,
       "risk_level": "medium",
       "judge_mode": "rules",
       "need_human_review": false,
       "critic_triggered": false,
+      "duration_ms": 23.46,
+      "agent_execution": [
+        {
+          "agent": "视觉Agent",
+          "status": "skipped",
+          "mode": "not_requested"
+        },
+        {
+          "agent": "传感器Agent",
+          "status": "success",
+          "mode": "simulated"
+        },
+        {
+          "agent": "天气Agent",
+          "status": "success",
+          "mode": "simulated"
+        },
+        {
+          "agent": "RAG",
+          "status": "success",
+          "mode": "rag:memory"
+        },
+        {
+          "agent": "知识图谱",
+          "status": "success",
+          "mode": "kg:memory"
+        },
+        {
+          "agent": "历史案例库",
+          "status": "success",
+          "mode": "heuristic"
+        },
+        {
+          "agent": "经验回放Agent",
+          "status": "no_results",
+          "mode": "sqlite"
+        },
+        {
+          "agent": "病理Agent",
+          "status": "success",
+          "mode": "rules"
+        },
+        {
+          "agent": "气象Agent",
+          "status": "success",
+          "mode": "rules"
+        },
+        {
+          "agent": "栽培Agent",
+          "status": "success",
+          "mode": "rules"
+        },
+        {
+          "agent": "经济Agent",
+          "status": "success",
+          "mode": "rules"
+        },
+        {
+          "agent": "生态Agent",
+          "status": "success",
+          "mode": "rules"
+        },
+        {
+          "agent": "病理Agent",
+          "status": "success",
+          "mode": "rules"
+        },
+        {
+          "agent": "气象Agent",
+          "status": "success",
+          "mode": "rules"
+        },
+        {
+          "agent": "栽培Agent",
+          "status": "success",
+          "mode": "rules"
+        }
+      ],
       "trace_stages": [
         "request",
         "perception",
@@ -244,15 +921,102 @@
       "id": "cotton_fusarium_wilt",
       "crop": "cotton",
       "intent": "diagnose",
+      "expected_intent": "diagnose",
+      "intent_matches_expected": true,
       "expected": "枯萎病",
       "pathology_claim": "病理判断首选：棉花枯萎病",
-      "matches_expected": true,
+      "predicted_diagnosis_label": "棉花枯萎病",
       "decision": "病理判断首选：棉花枯萎病",
+      "candidate_names": [
+        "棉花枯萎病"
+      ],
+      "scored": true,
+      "matches_expected": true,
+      "top3_scored": true,
+      "top3_matches_expected": true,
       "confidence": 0.65,
       "risk_level": "medium",
       "judge_mode": "rules",
       "need_human_review": false,
       "critic_triggered": false,
+      "duration_ms": 16.143,
+      "agent_execution": [
+        {
+          "agent": "视觉Agent",
+          "status": "skipped",
+          "mode": "not_requested"
+        },
+        {
+          "agent": "传感器Agent",
+          "status": "success",
+          "mode": "simulated"
+        },
+        {
+          "agent": "天气Agent",
+          "status": "success",
+          "mode": "simulated"
+        },
+        {
+          "agent": "RAG",
+          "status": "success",
+          "mode": "rag:memory"
+        },
+        {
+          "agent": "知识图谱",
+          "status": "success",
+          "mode": "kg:memory"
+        },
+        {
+          "agent": "历史案例库",
+          "status": "success",
+          "mode": "heuristic"
+        },
+        {
+          "agent": "经验回放Agent",
+          "status": "no_results",
+          "mode": "sqlite"
+        },
+        {
+          "agent": "病理Agent",
+          "status": "success",
+          "mode": "rules"
+        },
+        {
+          "agent": "气象Agent",
+          "status": "success",
+          "mode": "rules"
+        },
+        {
+          "agent": "栽培Agent",
+          "status": "success",
+          "mode": "rules"
+        },
+        {
+          "agent": "经济Agent",
+          "status": "success",
+          "mode": "rules"
+        },
+        {
+          "agent": "生态Agent",
+          "status": "success",
+          "mode": "rules"
+        },
+        {
+          "agent": "病理Agent",
+          "status": "success",
+          "mode": "rules"
+        },
+        {
+          "agent": "气象Agent",
+          "status": "success",
+          "mode": "rules"
+        },
+        {
+          "agent": "栽培Agent",
+          "status": "success",
+          "mode": "rules"
+        }
+      ],
       "trace_stages": [
         "request",
         "perception",
@@ -271,15 +1035,85 @@
       "id": "cotton_irrigate",
       "crop": "cotton",
       "intent": "irrigate",
+      "expected_intent": "irrigate",
+      "intent_matches_expected": true,
       "expected": "证据不足",
-      "pathology_claim": "病理证据不足，不能确认具体病害",
-      "matches_expected": true,
+      "pathology_claim": "病理证据不足，暂不进行病害定性",
+      "predicted_diagnosis_label": null,
       "decision": "气象条件支持灌溉",
-      "confidence": 0.58,
+      "candidate_names": [],
+      "scored": false,
+      "matches_expected": null,
+      "top3_scored": false,
+      "top3_matches_expected": null,
+      "confidence": 0.57,
       "risk_level": "medium",
       "judge_mode": "rules",
       "need_human_review": false,
       "critic_triggered": false,
+      "duration_ms": 15.26,
+      "agent_execution": [
+        {
+          "agent": "视觉Agent",
+          "status": "skipped",
+          "mode": "not_requested"
+        },
+        {
+          "agent": "传感器Agent",
+          "status": "success",
+          "mode": "simulated"
+        },
+        {
+          "agent": "天气Agent",
+          "status": "success",
+          "mode": "simulated"
+        },
+        {
+          "agent": "RAG",
+          "status": "no_results",
+          "mode": "rag:memory"
+        },
+        {
+          "agent": "知识图谱",
+          "status": "success",
+          "mode": "kg:memory"
+        },
+        {
+          "agent": "历史案例库",
+          "status": "success",
+          "mode": "heuristic"
+        },
+        {
+          "agent": "经验回放Agent",
+          "status": "no_results",
+          "mode": "sqlite"
+        },
+        {
+          "agent": "病理Agent",
+          "status": "success",
+          "mode": "rules"
+        },
+        {
+          "agent": "气象Agent",
+          "status": "success",
+          "mode": "rules"
+        },
+        {
+          "agent": "栽培Agent",
+          "status": "success",
+          "mode": "rules"
+        },
+        {
+          "agent": "经济Agent",
+          "status": "success",
+          "mode": "rules"
+        },
+        {
+          "agent": "生态Agent",
+          "status": "success",
+          "mode": "rules"
+        }
+      ],
       "trace_stages": [
         "request",
         "perception",
@@ -298,15 +1132,102 @@
       "id": "tomato_irrigate_with_disease",
       "crop": "tomato",
       "intent": "irrigate",
+      "expected_intent": "irrigate",
+      "intent_matches_expected": true,
       "expected": "叶霉病",
       "pathology_claim": "病理判断首选：番茄叶霉病",
-      "matches_expected": true,
+      "predicted_diagnosis_label": null,
       "decision": "气象条件支持灌溉",
+      "candidate_names": [
+        "番茄叶霉病"
+      ],
+      "scored": false,
+      "matches_expected": null,
+      "top3_scored": false,
+      "top3_matches_expected": null,
       "confidence": 0.59,
       "risk_level": "high",
       "judge_mode": "rules",
       "need_human_review": true,
       "critic_triggered": true,
+      "duration_ms": 16.534,
+      "agent_execution": [
+        {
+          "agent": "视觉Agent",
+          "status": "skipped",
+          "mode": "not_requested"
+        },
+        {
+          "agent": "传感器Agent",
+          "status": "success",
+          "mode": "simulated"
+        },
+        {
+          "agent": "天气Agent",
+          "status": "success",
+          "mode": "simulated"
+        },
+        {
+          "agent": "RAG",
+          "status": "success",
+          "mode": "rag:memory"
+        },
+        {
+          "agent": "知识图谱",
+          "status": "success",
+          "mode": "kg:memory"
+        },
+        {
+          "agent": "历史案例库",
+          "status": "success",
+          "mode": "builtin_pattern"
+        },
+        {
+          "agent": "经验回放Agent",
+          "status": "no_results",
+          "mode": "sqlite"
+        },
+        {
+          "agent": "病理Agent",
+          "status": "success",
+          "mode": "rules"
+        },
+        {
+          "agent": "气象Agent",
+          "status": "success",
+          "mode": "rules"
+        },
+        {
+          "agent": "栽培Agent",
+          "status": "success",
+          "mode": "rules"
+        },
+        {
+          "agent": "经济Agent",
+          "status": "success",
+          "mode": "rules"
+        },
+        {
+          "agent": "生态Agent",
+          "status": "success",
+          "mode": "rules"
+        },
+        {
+          "agent": "病理Agent",
+          "status": "success",
+          "mode": "rules"
+        },
+        {
+          "agent": "气象Agent",
+          "status": "success",
+          "mode": "rules"
+        },
+        {
+          "agent": "栽培Agent",
+          "status": "success",
+          "mode": "rules"
+        }
+      ],
       "trace_stages": [
         "request",
         "perception",
@@ -325,15 +1246,102 @@
       "id": "tomato_mold_low_humidity",
       "crop": "tomato",
       "intent": "diagnose",
+      "expected_intent": "diagnose",
+      "intent_matches_expected": true,
       "expected": "叶霉病",
       "pathology_claim": "病理判断首选：番茄叶霉病",
-      "matches_expected": true,
+      "predicted_diagnosis_label": null,
       "decision": "已生成栽培管理建议",
+      "candidate_names": [
+        "番茄叶霉病"
+      ],
+      "scored": true,
+      "matches_expected": false,
+      "top3_scored": true,
+      "top3_matches_expected": true,
       "confidence": 0.6,
       "risk_level": "high",
       "judge_mode": "rules",
       "need_human_review": true,
       "critic_triggered": true,
+      "duration_ms": 14.381,
+      "agent_execution": [
+        {
+          "agent": "视觉Agent",
+          "status": "skipped",
+          "mode": "not_requested"
+        },
+        {
+          "agent": "传感器Agent",
+          "status": "success",
+          "mode": "simulated"
+        },
+        {
+          "agent": "天气Agent",
+          "status": "success",
+          "mode": "simulated"
+        },
+        {
+          "agent": "RAG",
+          "status": "success",
+          "mode": "rag:memory"
+        },
+        {
+          "agent": "知识图谱",
+          "status": "success",
+          "mode": "kg:memory"
+        },
+        {
+          "agent": "历史案例库",
+          "status": "success",
+          "mode": "builtin_pattern"
+        },
+        {
+          "agent": "经验回放Agent",
+          "status": "no_results",
+          "mode": "sqlite"
+        },
+        {
+          "agent": "病理Agent",
+          "status": "success",
+          "mode": "rules"
+        },
+        {
+          "agent": "气象Agent",
+          "status": "success",
+          "mode": "rules"
+        },
+        {
+          "agent": "栽培Agent",
+          "status": "success",
+          "mode": "rules"
+        },
+        {
+          "agent": "经济Agent",
+          "status": "success",
+          "mode": "rules"
+        },
+        {
+          "agent": "生态Agent",
+          "status": "success",
+          "mode": "rules"
+        },
+        {
+          "agent": "病理Agent",
+          "status": "success",
+          "mode": "rules"
+        },
+        {
+          "agent": "气象Agent",
+          "status": "success",
+          "mode": "rules"
+        },
+        {
+          "agent": "栽培Agent",
+          "status": "success",
+          "mode": "rules"
+        }
+      ],
       "trace_stages": [
         "request",
         "perception",

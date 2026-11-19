@@ -131,7 +131,49 @@ npm ci --prefix web
 npm --prefix web run dev
 ```
 
-打开 `http://127.0.0.1:5173`，在侧栏输入与 API 环境变量相同的 Key。Vite 将 `/health`、`/diagnose` 和 `/decisions` 代理到本地 API；密钥只保存在当前页面内存，刷新后需重新输入。未配置模型时使用规则 Judge；固定案例会显示 `DEMO / FIXTURE MODE`，其报告仍由当前 API 实时生成。开发服务器与 API 分别按 `Ctrl+C` 停止。
+打开 `http://127.0.0.1:5173`，在侧栏输入与 API 环境变量相同的 Key。Vite 将 `/health`、`/diagnose`、`/images` 和 `/decisions` 代理到本地 API；密钥只保存在当前页面内存，刷新后需重新输入。未配置模型时使用规则 Judge；固定案例会显示 `DEMO / FIXTURE MODE`，其报告仍由当前 API 实时生成。开发服务器与 API 分别按 `Ctrl+C` 停止。
+
+### Windows 本地一键启动
+
+先准备 Python 3.11+ 环境（推荐复用项目 `.venv`）、配置 `.env` 中的本地 `ACIS_API_KEY`，并在前端源码更新后构建一次生产资源：
+
+```powershell
+npm ci --prefix web
+npm --prefix web run build
+```
+
+之后双击仓库根目录 `start_acis.bat`，脚本检查 Python、依赖导入与 `web/dist`，以 `127.0.0.1` 启动 FastAPI，健康检查成功后打开默认浏览器。双击 `stop_acis.bat` 停止本启动器管理的进程。启动器不创建或覆盖虚拟环境、不写入 `.env`、不杀占用端口的进程；启停操作串行化，停止前校验 PID、可执行路径、启动时间、app-dir 与端口。日志位于 `logs/acis-local-*.out.log` 和 `logs/acis-local-*.err.log`。默认端口为 `8000`，可用 `$env:ACIS_LOCAL_PORT='8010'` 改端口；API Key 仍需在 Web 侧栏输入。日常启动不需要运行 Node/Vite。
+
+### Windows 统一入口 `acis.bat`
+
+根目录 `acis.bat` 把 Docker 与本地两种启动方式合并为一个入口：Docker 命令对应 `start.ps1` / `start.sh`，本地命令对应 `scripts/start_acis.ps1`。原有脚本均保留，仍可单独使用。
+
+```powershell
+acis.bat                    # 默认等同 start：docker compose up -d --build + 健康检查（需 .env 中的 ACIS_API_KEY / NEO4J_PASSWORD）
+acis.bat status             # docker compose ps
+acis.bat logs               # docker compose logs -f api
+acis.bat import             # 导入真实 AgriKG 图谱（可选）
+acis.bat stop               # docker compose down（保留数据卷）
+acis.bat local start        # 本地原生启动（127.0.0.1，健康检查后打开浏览器）
+acis.bat local stop         # 停止本地启动器管理的进程
+acis.bat local start 8010   # 自定义本地端口（等价写法：local start -Port 8010）
+acis.bat help               # 查看全部用法
+```
+
+`start_acis.bat` / `stop_acis.bat` 保持原有行为；Linux / macOS 继续使用 `./start.sh`。
+
+### 浏览器 E2E
+
+使用 Node.js 22 LTS、项目 Python 环境和已安装的 Chromium：
+
+```powershell
+npm ci --prefix web
+npm --prefix web run build
+npx --prefix web playwright install chromium
+npm --prefix web run test:e2e
+```
+
+Playwright 会启动隔离的真实 FastAPI + Vue production build，执行 11 个 Chromium 场景；报告与截图写入新的 `reports/web-e2e-<run-id>/`，自定义 `ACIS_E2E_ARTIFACT_DIR` 时写入新建的 `run-*` 子目录。诊断案例运行真实 API 链路，但使用 rules Judge 与 memory RAG/KG；API 故障、空历史等场景使用显式浏览器网络拦截，不代表真实 LLM 或外部知识库效果。
 
 Docker 生产模式会先构建 Vue 静态资源，再由 FastAPI 在同源根路径提供页面；不需要额外运行 Node 服务。
 ### Docker Compose
@@ -203,13 +245,14 @@ KG参照疾病：番茄叶霉病、番茄早疫病；未触发KG硬约束否决�
 
 | 项目 | 结果 | 说明 |
 |---|---|---|
-| 测试套件 | 30 个测试文件 / **384 个收集项** | 本轮 `pytest -q` 实测；30 个文件，含 2 个显式 skip |
-| 全量 pytest（Windows + Python 3.13.3） | **382 passed / 2 skipped / 30 warnings**，316.86s，exit 0 | 两个 skip 因仓库外 Phase 4 harness 缺失；warning 为 1 条 Starlette 弃用提示与 29 条 Qdrant 服务版本探测告警 |
+| 测试套件 | 30 个测试文件 / **397 个收集项** | 本轮 `pytest -q` 实测；含 2 个显式 skip |
+| 全量 pytest（Windows + Python 3.13.3） | **395 passed / 2 skipped / 30 warnings**，311.94s，exit 0 | 两个 skip 因仓库外 Phase 4 harness 缺失；warning 为 1 条 Starlette 弃用提示与 29 条 Qdrant 服务版本探测告警 |
 | 交付诊断测试 | **38 passed / 8 warnings** | `tests/test_delivery_cases_v1.py` + `tests/test_delivery_contract.py`；包含实际诊断输出与 Trace 断言 |
-| Vue 前端 | **5 passed**；`npm run build` 通过 | Vitest；build 同时运行 `vue-tsc --noEmit` 与 Vite production build |
-| Vue 浏览器联调 | **3/3 固定案例完成** | 本机 FastAPI + Vite、memory RAG/KG、rules Judge；不是农业质量评测指标 |
+| Vue 前端 | **9 passed**；Node.js 22.22.2 下 `npm run build` 通过 | Vitest；build 同时运行 Vue 与 Playwright E2E TypeScript 检查及 Vite production build |
+| Vue 浏览器 E2E | **11 passed / 0 failed / 0 skipped** | Chromium + FastAPI + Vue production build；诊断使用 rules Judge / memory RAG-KG，受控故障由浏览器 route 注入；截图和 JSON 在 `reports/web-e2e-20261119064633-515c7dd4-9781-413a-a028-2887c3e6c9d6/` |
+| Web 依赖审计 | production 依赖 **0 项**；开发依赖 **10 项**（1 low / 6 moderate / 1 high / 2 critical） | `npm audit --registry=https://registry.npmjs.org/`；含 Vite/Vitest 测试工具链，尚未升级修复 |
 | Rich TUI 固定案例 | **3/3 完成** | 菜单 7–9；实际报告均落入隔离 SQLite smoke DB |
-| Compose 配置 | **通过**：`docker compose config --quiet` | 仅静态配置验证，未启动、停止或修改任何容器与数据卷 |
+| Compose 配置 | **通过**：`docker compose config --quiet` | 仅以进程级非密钥占位值做静态解析；未启动、停止或修改容器与数据卷 |
 | 当前 Docker 镜像构建 | **未验证** | Docker daemon 不可用；本轮未执行 `docker build`。2026-10-24 容器验收是 Vue 多阶段构建前的历史记录 |
 | 历史 Docker Compose 验收（2026-10-24） | 三个容器 healthy；API 鉴权、玉米诊断、22 个 Trace 事件、SQLite 重启读取通过 | Linux Python 3.11.14、Qdrant `v1.18.2`、Neo4j `2026.05.0-community`；不能证明当前 Vue 镜像可构建 |
 | 外部知识服务状态 | Qdrant 0 collections；Neo4j 可连接但 0 nodes | 仅历史 Docker 验收；当前浏览器案例使用 memory 后端，真实外部语料检索未验证 |
@@ -235,9 +278,9 @@ KG参照疾病：番茄叶霉病、番茄早疫病；未触发KG硬约束否决�
 - 传感器/天气为模拟；图片识别默认 mock，真实视觉模型未验证；
 - 规则 Judge 是默认路径，LLM Judge/Critic 可选且真实质量未做多 seed 评测；
 - Phase 6/Phase 4.2 实验为单 seed 或少量有效样本，不能外推为泛化能力；
-- 工具执行与 MCP 服务未纳入本轮验证；Vue Web 已完成浏览器三案例联调；当前 Docker 仅通过 Compose 静态配置检查，镜像构建因 Docker daemon 不可用未验证；2026-10-24 的容器验收不代表当前 Vue 镜像。外部 RAG/KG 语料仍未验证；
+- 工具执行与 MCP 服务未纳入本轮验证；本轮 Vue 浏览器 E2E 使用 rules Judge 与 memory RAG/KG，真实外部知识语料和 LLM 推理未验证；Compose 仅以非密钥占位环境变量通过静态解析，Docker daemon 不可用，镜像构建/运行未验证；2026-10-24 的容器验收不代表当前 Vue 镜像；
 - 农业诊断准确率、Macro-F1、Top-3、人工因子覆盖、弃权质量、置信度校准、Recall@K、泛化 fallback rate 和本次 Token Cost 均未测量；固定夹具命中率不可替代这些指标；
-- 全量测试本次结果为 `pytest -q` → **382 passed, 2 skipped, 30 warnings**（316.86s）；两个 skip 因 Phase 4 评测 harness 不在本仓库中，由 `importorskip` 显式标记；
+- 全量测试本次结果为 `pytest -q` → **395 passed, 2 skipped, 30 warnings**（311.94s）；两个 skip 因 Phase 4 评测 harness 不在本仓库中，由 `importorskip` 显式标记；
 - 没有真实田间数据、用户规模或生产运维经验。
 
 ## 10. 文档导航
