@@ -77,7 +77,7 @@ class Calibrator:
             return ("isotonic", ir)
         except Exception:
             # TODO: 迁移到 sklearn LogisticRegression；当前手写 Platt Scaling。
-            return ("platt", self._platt_fit(X, y))
+            return ("platt", Calibrator._platt_fit(X, y))
 
     @staticmethod
     def _platt_fit(X: list[float], y: list[int]) -> tuple[float, float]:

@@ -17,6 +17,9 @@ CROP_MAP = {
     "eggplant": "茄子",
     "sugar_beet": "甜菜",
     "cotton": "棉花",
+    "maize": "玉米",
+    "corn": "玉米",
+    "wheat": "小麦",
 }
 
 
@@ -252,6 +255,62 @@ DISEASE_DB = {
             "low": ["个别叶片轻度黄化"],
         },
     },
+    "maize_northern_leaf_blight": {
+        "name": "玉米大斑病",
+        "crop": "玉米",
+        "pathogen": "大斑凸脐蠕孢 (Exserohilum turcicum)",
+        "symptoms": [
+            "叶片出现长梭形灰绿色至灰褐色病斑",
+            "病斑可沿叶片扩展，严重时相互连接",
+            "常先出现在下部叶片，潮湿天气有利于扩展",
+        ],
+        "conditions": {"humidity": "持续高湿", "note": "需结合病斑形状和田间分布鉴别"},
+        "prevention": ["选用适宜当地的抗病品种", "清理病残体并改善田间通风"],
+        "treatment": ["先确认病害和发生程度；如需用药，按当地登记标签及植保建议执行"],
+        "severity_indicators": {"high": ["病斑连片并影响上部叶片"], "medium": ["多个叶片出现典型长梭形病斑"], "low": ["少量叶片出现单个病斑"]},
+    },
+    "maize_gray_leaf_spot": {
+        "name": "玉米灰斑病",
+        "crop": "玉米",
+        "pathogen": "尾孢属真菌 (Cercospora spp.)",
+        "symptoms": [
+            "叶片出现受叶脉限制的狭长矩形灰褐色病斑",
+            "病斑通常沿叶脉方向扩展",
+            "高湿条件下病斑数量可能增加",
+        ],
+        "conditions": {"humidity": "高湿", "note": "需与大斑病及其他叶斑病鉴别"},
+        "prevention": ["选用适宜当地的抗病品种", "轮作并管理病残体"],
+        "treatment": ["先确认病害和发生程度；如需用药，按当地登记标签及植保建议执行"],
+        "severity_indicators": {"high": ["叶片病斑密集或相互连接"], "medium": ["多个叶片出现典型矩形病斑"], "low": ["少量叶片出现孤立病斑"]},
+    },
+    "wheat_stripe_rust": {
+        "name": "小麦条锈病",
+        "crop": "小麦",
+        "pathogen": "条形柄锈菌 (Puccinia striiformis f. sp. tritici)",
+        "symptoms": [
+            "叶片出现黄色至橙黄色粉状疱斑",
+            "疱斑沿叶脉排列成条带",
+            "冷凉、湿润条件有利于流行",
+        ],
+        "conditions": {"temperature": "冷凉", "humidity": "湿润", "note": "需检查叶片正反面及田间扩散情况"},
+        "prevention": ["选用适宜当地的抗病品种", "及时监测并向当地植保机构报告疑似流行"],
+        "treatment": ["由当地植保机构确认后，按登记标签和区域指导采取措施"],
+        "severity_indicators": {"high": ["多片叶出现连续条带状疱斑"], "medium": ["叶片可见沿叶脉排列的黄色疱斑"], "low": ["少量叶片有零星疱斑"]},
+    },
+    "wheat_leaf_rust": {
+        "name": "小麦叶锈病",
+        "crop": "小麦",
+        "pathogen": "隐匿柄锈菌 (Puccinia triticina)",
+        "symptoms": [
+            "叶片出现橙褐色粉状疱斑",
+            "疱斑多散生而非沿叶脉成条带",
+            "需与条锈病及其他叶部病害鉴别",
+        ],
+        "conditions": {"temperature": "温暖", "humidity": "叶面湿润", "note": "症状和生育期需结合田间调查"},
+        "prevention": ["选用适宜当地的抗病品种", "定期调查叶片病斑分布"],
+        "treatment": ["由当地植保机构确认后，按登记标签和区域指导采取措施"],
+        "severity_indicators": {"high": ["多片叶病斑密集或扩展"], "medium": ["叶片出现散生橙褐色疱斑"], "low": ["少量叶片有零星疱斑"]},
+    },
 }
 
 # ============================================================
@@ -361,6 +420,10 @@ _DISEASE_KEYWORDS = {
     "sugar_beet_root_rot": ["根腐", "腐烂", "萎蔫", "黄化", "维管束", "根部"],
     "cotton_verticillium_wilt": ["黄萎", "黄绿", "斑驳", "掌状", "维管束", "枯"],
     "cotton_fusarium_wilt": ["枯萎", "萎蔫", "维管束", "半边", "凋萎", "黄化"],
+    "maize_northern_leaf_blight": ["长梭形", "灰绿色", "灰褐色病斑", "玉米大斑病"],
+    "maize_gray_leaf_spot": ["矩形", "受叶脉限制", "沿叶脉", "灰斑病"],
+    "wheat_stripe_rust": ["条锈", "条带", "黄色粉状", "沿叶脉", "橙黄色疱斑"],
+    "wheat_leaf_rust": ["叶锈", "橙褐色", "散生", "圆形疱斑"],
 }
 
 
@@ -396,7 +459,8 @@ def search_disease(symptoms: str, crop: str = "") -> list[dict]:
 
         # 方式2: 逐条匹配症状描述中的关键词
         query_words = ["黄斑", "霉层", "灰色", "霉", "枯", "烂", "斑", "卷",
-                       "轮纹", "多角", "水渍", "凹陷", "褐色", "灰白", "绒状", "背面"]
+                       "轮纹", "多角", "水渍", "凹陷", "褐色", "灰白", "绒状", "背面",
+                       "梭形", "灰绿色", "矩形", "条带", "疱斑", "散生"]
         for symptom in disease["symptoms"]:
             for word in query_words:
                 if word in symptoms and word in symptom:
@@ -516,11 +580,17 @@ def diagnose_and_advise(
             elif hum < 40:
                 condition_issues.append(f"湿度过低（{hum}%），可能影响授粉")
 
+    insufficient = not diseases
     return {
         "possible_diseases": diseases[:3],
         "environment_issues": condition_issues,
         "optimal_conditions": optimal.get("optimal_conditions", {}),
-        "recommended_actions": [
+        "missing_information": [
+            "作物生育期、品种及症状开始时间",
+            "病斑正反面近照、分布范围和扩展速度",
+            "近期温湿度、灌溉、施肥及施药记录",
+        ] if insufficient else [],
+        "recommended_actions": [] if insufficient else [
             "优先改善通风，降低湿度" if any("湿度" in i for i in condition_issues) else "维持当前环境管理",
             "密切观察症状变化，记录发展过程",
             "如症状加重，建议取样送检确认病原",

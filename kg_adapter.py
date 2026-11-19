@@ -230,7 +230,7 @@ def _get_driver():
     try:
         from neo4j import GraphDatabase
 
-        _driver = GraphDatabase.driver(NEO4J_URI, auth=(NEO4J_USER, NEO4J_PASSWORD))
+        _driver = GraphDatabase.driver(NEO4J_URI, auth=(NEO4J_USER, password))
         return _driver
     except Exception:
         return None

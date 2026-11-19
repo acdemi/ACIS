@@ -71,6 +71,7 @@ def _serialize_critic(debate: DebateResult) -> dict[str, Any]:
 
 def _serialize_decision(decision: DecisionOutput) -> dict[str, Any]:
     payload: dict[str, Any] = {
+        "status": getattr(decision, "status", "success"),
         "summary": decision.summary,
         "decision": decision.decision,
         "confidence": decision.confidence,
@@ -81,6 +82,7 @@ def _serialize_decision(decision: DecisionOutput) -> dict[str, Any]:
         "judge_analysis": dict(decision.judge_analysis),
         "action_plan": list(decision.action_plan),
         "decision_id": decision.decision_id,
+        "report": dict(getattr(decision, "report", {})),
     }
     if decision.token_usage is not None:
         payload["token_usage"] = dict(decision.token_usage)
@@ -111,6 +113,7 @@ def _build_metrics(
     plan: ExecutionPlan | None,
     tool_result: ToolRoutingResult | None,
     total_events: int,
+    duration_ms: float,
 ) -> dict[str, Any]:
     perception = sum(1 for o in agent_outputs if o.layer == _LAYER_PERCEPTION)
     memory = sum(1 for o in agent_outputs if o.layer == _LAYER_MEMORY)
@@ -145,6 +148,7 @@ def _build_metrics(
             "unresolved": len(tool_result.unresolved) if tool_result else 0,
         },
         "total_events": total_events,
+        "duration_ms": round(duration_ms, 3),
     }
 
 
@@ -204,6 +208,7 @@ class TraceCollector:
         decision: DecisionOutput,
         plan: ExecutionPlan | None,
         tool_result: ToolRoutingResult | None,
+        duration_ms: float,
     ) -> TraceEvent:
         total_events = len(self._trace.events) + 1  # include this metrics event
         return self.record(
@@ -215,6 +220,7 @@ class TraceCollector:
                 plan=plan,
                 tool_result=tool_result,
                 total_events=total_events,
+                duration_ms=duration_ms,
             ),
         )
 
@@ -229,6 +235,7 @@ def collect_pipeline_trace(
     tool_result: ToolRoutingResult | None,
     trace_id: str | None = None,
     clock: Callable[[], str] | None = None,
+    duration_ms: float = 0.0,
 ) -> Trace:
     """Build a complete :class:`Trace` from one orchestrator run's artifacts.
 
@@ -258,6 +265,7 @@ def collect_pipeline_trace(
         decision=decision,
         plan=plan,
         tool_result=tool_result,
+        duration_ms=duration_ms,
     )
     return collector.trace
 

@@ -28,9 +28,9 @@ class CaseMemoryAgent:
                 recommendations=[f"参考已确认案例 #{top['id']} 的处置经验，核对关键症状"],
             )
         if context.crop == "tomato" and any(k in context.query for k in ["黄斑", "霉层", "背面"]):
-            return AgentOutput(layer="记忆层", agent=self.name, claim="历史案例中高湿环境下番茄叶霉病相似度较高", confidence=0.68, evidence={"case_id": "case-tomato-leaf-mold-001", "pattern": "番茄 + 黄斑 + 叶背霉层 + 高湿风险"}, recommendations=["优先排查通风不足、叶面结露和下部老叶发病"])
+            return AgentOutput(layer="记忆层", agent=self.name, claim="内置示例模式与高湿环境下番茄叶霉病相似", confidence=0.55, evidence={"case_id": "case-tomato-leaf-mold-001", "source": "builtin_pattern", "pattern": "番茄 + 黄斑 + 叶背霉层 + 高湿风险"}, recommendations=["优先排查通风不足、叶面结露和下部老叶发病"], execution={"status": "success", "mode": "builtin_pattern"})
         if context.crop == "cucumber" and any(k in context.query for k in ["霉层", "多角", "结露"]):
-            return AgentOutput(layer="记忆层", agent=self.name, claim="历史案例中黄瓜霜霉病相似度较高", confidence=0.65, evidence={"case_id": "case-cucumber-downy-mildew-001", "pattern": "黄瓜 + 多角黄斑 + 叶背霉层 + 结露"}, recommendations=["重点检查清晨叶面结露和棚内湿度"])
+            return AgentOutput(layer="记忆层", agent=self.name, claim="内置示例模式与黄瓜霜霉病症状相似", confidence=0.55, evidence={"case_id": "case-cucumber-downy-mildew-001", "source": "builtin_pattern", "pattern": "黄瓜 + 多角黄斑 + 叶背霉层 + 结露"}, recommendations=["重点检查清晨叶面结露和棚内湿度"], execution={"status": "success", "mode": "builtin_pattern"})
         return AgentOutput(layer="记忆层", agent=self.name, claim="历史案例库暂无强匹配案例", confidence=0.3, evidence={"matched_case": None})
 
     def _recall_confirmed(self, context: RequestContext) -> list:

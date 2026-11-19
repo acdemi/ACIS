@@ -5,7 +5,8 @@
 #   .\start.ps1 status     查看服务状态
 #   .\start.ps1 logs       跟踪 API 日志
 #   .\start.ps1 stop       停止（保留数据卷）
-# 可选: 设置 $env:DEEPSEEK_API_KEY='sk-...' 后启动, 启用 LLM Judge/Critic
+# Docker Compose requires private ACIS_API_KEY and NEO4J_PASSWORD values in .env or the environment.
+# Optional: set DEEPSEEK_API_KEY to enable the external LLM Judge/Critic.
 
 param(
     [ValidateSet("start", "import", "status", "logs", "stop", "help")]
@@ -55,7 +56,9 @@ function Show-Hints {
     Write-Host "============================================" -ForegroundColor Cyan
     Write-Host ""
     Write-Host "提示:" -ForegroundColor Green
-    Write-Host "  - 启用 LLM Judge/Critic: 启动前设置 \$env:DEEPSEEK_API_KEY='sk-...'"
+    Write-Host "  - 请在 .env 中配置 ACIS_API_KEY 和 NEO4J_PASSWORD；不要提交密钥"
+    Write-Host "  - API 仅绑定 localhost；请求诊断时使用 X-API-Key 请求头"
+    Write-Host "  - 启用 LLM Judge/Critic: 启动前设置 \$env:DEEPSEEK_API_KEY"
     Write-Host "  - 导入真实 AgriKG 图谱:  .\start.ps1 import"
     Write-Host "  - 停止:                .\start.ps1 stop"
 }

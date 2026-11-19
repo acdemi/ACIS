@@ -117,13 +117,19 @@ class JudgeAgent:
             return _Passthrough()
 
     def run(self, context: RequestContext, outputs: list[AgentOutput], debate: DebateResult, debate_round: int = 1) -> DecisionOutput:
-        kg = query_kg(context.crop, context.query)
+        kg_output = next((output for output in outputs if output.agent == "知识图谱"), None)
+        kg = (
+            (kg_output.evidence or {}).get("knowledge_graph")
+            if kg_output is not None
+            else None
+        ) or query_kg(context.crop, context.query)
         runtime = resolve_judge_config()
         if self.use_llm:
             try:
-                return self._run_llm_judge(
+                decision = self._run_llm_judge(
                     context, outputs, debate, kg, debate_round, runtime=runtime
                 )
+                return self._enforce_abstention(decision, context, outputs)
             except Exception as exc:  # noqa: BLE001 - single Judge fallback boundary
                 reason_code = classify_judge_failure(exc)
                 decision = self._run_rule_judge(context, outputs, debate, kg, debate_round)
@@ -152,7 +158,7 @@ class JudgeAgent:
                     runtime.max_retries,
                     detail,
                 )
-                return decision
+                return self._enforce_abstention(decision, context, outputs)
         decision = self._run_rule_judge(context, outputs, debate, kg, debate_round)
         _attach_judge_runtime(
             decision,
@@ -163,6 +169,46 @@ class JudgeAgent:
                 detail="JudgeAgent(use_llm=False)",
             ),
         )
+        return self._enforce_abstention(decision, context, outputs)
+
+    @staticmethod
+    def _enforce_abstention(
+        decision: DecisionOutput,
+        context: RequestContext,
+        outputs: list[AgentOutput],
+    ) -> DecisionOutput:
+        if context.intent != "diagnose":
+            return decision
+        pathology = next((output for output in outputs if output.agent == "病理Agent"), None)
+        if pathology is None:
+            return decision
+        failed = (pathology.execution or {}).get("status") == "failed"
+        insufficient = "病理证据不足" in pathology.claim
+        if not failed and not insufficient:
+            return decision
+
+        decision.decision = (
+            "诊断通道执行失败，暂不生成病害结论"
+            if failed
+            else "证据不足，暂不进行病害定性"
+        )
+        decision.confidence = min(decision.confidence, 0.35)
+        decision.need_human_review = True
+        decision.action_plan = [
+            "请补充作物品种、生育期、症状开始时间及扩展速度",
+            "提供病株与健康株对比，以及叶片正反面的近距离照片",
+            "补充近期温湿度、灌溉、施肥和施药记录",
+        ]
+        decision.judge_analysis["abstention"] = {
+            "applied": True,
+            "reason": "pathology_agent_failed" if failed else "insufficient_diagnostic_evidence",
+            "follow_up_questions": list(decision.action_plan),
+        }
+        decision.reasoning_trace = (
+            decision.reasoning_trace + "；" if decision.reasoning_trace else ""
+        ) + "病理证据不足或诊断通道失败，Judge 选择弃权并请求补充信息"
+        if failed:
+            decision.status = "degraded"
         return decision
 
     @staticmethod
@@ -335,7 +381,7 @@ class JudgeAgent:
         summary = f"Orchestrator 已完成 {context.greenhouse_id}/{context.crop} 的{context.intent} 工作流：{decision}。风险等级：{debate.risk_level}。"
         if debate_round >= 2:
             summary = f"【第二轮辩论后裁决】{summary}"
-        return DecisionOutput(summary=summary, decision=decision, confidence=confidence, risk_level=debate.risk_level, action_plan=action_plan[:6], debate=debate, traces=outputs, judge_mode="rules", need_human_review=need_human_review, reasoning_trace="；".join(trace_parts), judge_analysis={"kg": {"diseases": consistency["kg_diseases"], "rules": kg.get("rules", []), "backend": kg.get("backend", "memory")}, "consistency": consistency, "sensor_readings": sensor_readings, "critic": debate.critic, "collective_omission": omission, "kg_evolution": kg_evo, "calibration": self.calibrator.status()})
+        return DecisionOutput(summary=summary, decision=decision, confidence=confidence, risk_level=debate.risk_level, action_plan=action_plan[:6], debate=debate, traces=outputs, judge_mode="rules", need_human_review=need_human_review, reasoning_trace="；".join(trace_parts), judge_analysis={"kg": {"diseases": consistency["kg_diseases"], "triples": kg.get("triples", []), "rules": kg.get("rules", []), "hard_constraints": kg.get("hard_constraints", []), "backend": kg.get("backend", "memory"), "neo4j_connected": kg.get("neo4j_connected", False), "error": kg.get("error")}, "consistency": consistency, "sensor_readings": sensor_readings, "critic": debate.critic, "collective_omission": omission, "kg_evolution": kg_evo, "calibration": self.calibrator.status()})
 
     def _run_llm_judge(self, context, outputs, debate, kg, debate_round=1, *, runtime=None):
         config = runtime or resolve_judge_config()
