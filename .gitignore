@@ -41,10 +41,6 @@ htmlcov/
 data/
 logs/
 results/
-benchmarks/
-context/
-docs/
-reports/
 # Pytest temp roots (pytest-of-<user>) and the torch inductor cache
 pytest-of-*/
 torchinductor_lkl/
