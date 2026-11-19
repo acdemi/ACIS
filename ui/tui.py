@@ -10,6 +10,7 @@
 from __future__ import annotations
 
 import json
+import logging
 import sys
 from pathlib import Path
 
@@ -19,13 +20,12 @@ if str(ROOT) not in sys.path:
 
 import os
 import random
-import time
 
 from _env import load_env
 
 load_env()  # 注入 .env（DEEPSEEK_API_KEY / NEO4J_PASSWORD），须在 import orchestrator 前
 
-# 离线/编码兜底；Neo4j 密码必须由 .env 或进程环境显式提供。
+# 离线/编码兜底
 os.environ.setdefault("NEO4J_URI", "bolt://localhost:7687")
 os.environ.setdefault("NEO4J_USER", "neo4j")
 os.environ.setdefault("HF_HUB_OFFLINE", "1")
@@ -34,15 +34,15 @@ os.environ.setdefault("PYTHONIOENCODING", "utf-8")
 
 _DEEPSEEK_CONFIGURED = bool(os.environ.get("DEEPSEEK_API_KEY", "").strip())
 _NEO4J_CONFIGURED = bool(os.environ.get("NEO4J_PASSWORD", "").strip())
+logger = logging.getLogger(__name__)
 
+from rich import box
 from rich.align import Align
 from rich.console import Console, Group
-from rich.live import Live
 from rich.panel import Panel
 from rich.prompt import Prompt
 from rich.table import Table
 from rich.text import Text
-from rich import box
 
 from orchestrator import AgentOrchestrator, build_context
 from rule_engine import sensor_anomaly
@@ -72,6 +72,17 @@ KG_MATCH_STYLE = {
     "部分匹配": "yellow",
     "冲突": "bold red",
     "无KG数据": "grey42",
+}
+EXECUTION_STATUS = {
+    "success": ("成功", "green"),
+    "completed": ("已完成", "green"),
+    "degraded": ("降级", "yellow"),
+    "failed": ("失败", "red"),
+    "error": ("失败", "red"),
+    "skipped": ("跳过", "dim"),
+    "pending": ("处理中", "cyan"),
+    "abstained": ("弃权（证据不足）", "yellow"),
+    "abstain": ("弃权（证据不足）", "yellow"),
 }
 
 DEMO_SCENARIOS = [
@@ -188,6 +199,14 @@ def _risk_badge(risk: str) -> Text:
     return Text(f" {label} ", style=f"bold white on {color}")
 
 
+def _status_text(status, mode: str = "") -> Text:
+    normalized = str(status or "").strip().lower()
+    if mode == "mock":
+        return Text("降级 / Mock", style="bold yellow")
+    label, style = EXECUTION_STATUS.get(normalized, (str(status or "已记录"), "dim"))
+    return Text(label, style=style)
+
+
 # ---------------------------------------------------------------------------
 # 渲染：横幅 / 架构 / 状态
 # ---------------------------------------------------------------------------
@@ -236,6 +255,18 @@ def _render_architecture() -> None:
 
 
 def _render_status(use_llm_judge: bool, use_llm_critic: bool) -> None:
+    if console.size.width < 92:
+        table = Table.grid(expand=True, padding=(0, 1))
+        table.add_column()
+        table.add_column()
+        table.add_row(
+            Text(f"DeepSeek: {'已配置' if _DEEPSEEK_CONFIGURED else '未配置'}", style="green" if _DEEPSEEK_CONFIGURED else "yellow"),
+            Text(f"Neo4j: {'已配置' if _NEO4J_CONFIGURED else '未配置'}", style="magenta" if _NEO4J_CONFIGURED else "dim"),
+        )
+        table.add_row(Text(f"最近 KG 后端: {_last_backend}", style="cyan"), Text(f"Judge {'开' if use_llm_judge else '关'} · Critic {'开' if use_llm_critic else '关'}", style="dim"))
+        console.print(Panel(table, title="系统状态", border_style="dim", padding=(0, 1)))
+        return
+
     t = Table.grid(expand=True, padding=(0, 2))
     t.add_column(justify="left")
     t.add_column(justify="left")
@@ -245,11 +276,11 @@ def _render_status(use_llm_judge: bool, use_llm_critic: bool) -> None:
         ds = Text(" DeepSeek: ✓ 已配置 ", style="green")
     else:
         ds = Text(" DeepSeek: ✗ 未配置 ", style="red")
-    if os.environ.get("NEO4J_PASSWORD"):
-        neo = Text(" Neo4j: 已配置 ", style="magenta")
-    else:
-        neo = Text(" Neo4j: ✗ 未配置 ", style="red")
-    rag = Text(f" RAG: auto · KG后端:{_last_backend} ", style="cyan")
+    neo = Text(
+        " Neo4j: ✓ 已配置 " if _NEO4J_CONFIGURED else " Neo4j: 未配置 ",
+        style="magenta",
+    )
+    rag = Text(f" 最近 KG 后端:{_last_backend} ", style="cyan")
     j = Text(" Judge:开 ", style="black on green") if use_llm_judge else Text(" Judge:关 ", style="dim")
     c = Text(" Critic:开 ", style="black on green") if use_llm_critic else Text(" Critic:关 ", style="dim")
     t.add_row(ds, neo, rag, Text.assemble(j, c))
@@ -263,20 +294,29 @@ def _menu(use_llm_judge: bool, use_llm_critic: bool) -> str:
     if any(s.get("fixture_mode") for s in DEMO_SCENARIOS):
         console.print(Text("DEMO / FIXTURE MODE · 固定案例输入由当前诊断服务实时处理", style="bold yellow"))
     t = Table(box=None, show_header=False, expand=True, padding=(0, 1))
-    t.add_column("序", width=3)
-    t.add_column("场景", ratio=2)
-    t.add_column("作物 / 意图", ratio=2)
-    t.add_column("演示亮点", ratio=4)
-    for i, s in enumerate(DEMO_SCENARIOS, 1):
-        title = Text(s["title"], style="bold")
-        if s.get("fixture_mode"):
-            title.append(" · DEMO / FIXTURE MODE", style="bold yellow")
-        t.add_row(
-            Text(str(i), style="bold cyan"),
-            title,
-            Text(f"{CROP_CN.get(s['crop'], '')} · {INTENT_CN.get(s['intent'], '')}", style="dim"),
-            Text(s["highlight"], style="dim"),
-        )
+    if console.size.width < 100:
+        t.add_column("场景")
+        for i, scenario in enumerate(DEMO_SCENARIOS, 1):
+            entry = Text(f"{i}. {scenario['title']}", style="bold")
+            if scenario.get("fixture_mode"):
+                entry.append(" · DEMO / FIXTURE MODE", style="bold yellow")
+            entry.append(f"\n{CROP_CN.get(scenario['crop'], '')} · {INTENT_CN.get(scenario['intent'], '')} · {scenario['highlight']}", style="dim")
+            t.add_row(entry)
+    else:
+        t.add_column("序", width=3)
+        t.add_column("场景", ratio=2)
+        t.add_column("作物 / 意图", ratio=2)
+        t.add_column("演示亮点", ratio=4)
+        for i, scenario in enumerate(DEMO_SCENARIOS, 1):
+            title = Text(scenario["title"], style="bold")
+            if scenario.get("fixture_mode"):
+                title.append(" · DEMO / FIXTURE MODE", style="bold yellow")
+            t.add_row(
+                Text(str(i), style="bold cyan"),
+                title,
+                Text(f"{CROP_CN.get(scenario['crop'], '')} · {INTENT_CN.get(scenario['intent'], '')}", style="dim"),
+                Text(scenario["highlight"], style="dim"),
+            )
     console.print(Panel(t, title="[bold]演示场景（输入序号运行）[/]", border_style="blue"))
 
     j_state = Text(" 开 ", style="black on green") if use_llm_judge else Text(" 关 ", style="white on red")
@@ -291,31 +331,49 @@ def _menu(use_llm_judge: bool, use_llm_critic: bool) -> str:
 # ---------------------------------------------------------------------------
 # 渲染：结果
 # ---------------------------------------------------------------------------
-def _animate_trace(decision) -> None:
-    table = Table(
-        box=box.SIMPLE_HEAVY,
-        show_header=True,
-        header_style="bold",
-        expand=True,
-        title="[dim]Agent 执行轨迹[/]",
-    )
-    table.add_column("层", width=6, no_wrap=True)
-    table.add_column("Agent", width=12, no_wrap=True)
-    table.add_column("诊断 / 结论", ratio=3)
-    table.add_column("置信度", justify="right", width=20, no_wrap=True)
-    with Live(table, console=console, refresh_per_second=20):
-        for out in decision.traces:
-            time.sleep(0.07)
-            claim = out.claim
-            if out.warnings:
-                claim += "\n" + "\n".join(f"⚠ {w}" for w in out.warnings[:2])
-            table.add_row(
-                Text(out.layer, style=LAYER_STYLE.get(out.layer, "white")),
-                Text(out.agent, style="bold"),
-                Text(claim),
-                _bar(out.confidence, 12),
+def _render_agent_trace(decision) -> None:
+    outputs = getattr(decision, "traces", []) or []
+    if not outputs:
+        return
+    if console.size.width < 100:
+        for index, output in enumerate(outputs, 1):
+            execution = output.execution or {}
+            claim = Text(output.claim or "未提供结论")
+            if output.warnings:
+                claim.append("\n" + "\n".join(f"⚠ {warning}" for warning in output.warnings[:2]), style="yellow")
+            details = Text.assemble(
+                _status_text(execution.get("status"), execution.get("mode")),
+                f" · 模式：{execution.get('mode') or '未记录'} · 置信度：{output.confidence:.0%}",
             )
-    console.print()
+            console.print(
+                Panel(
+                    Group(Text(f"{output.layer} · {output.agent}", style="bold"), claim, details),
+                    title=f"Agent {index}",
+                    border_style=LAYER_STYLE.get(output.layer, "dim"),
+                    padding=(0, 1),
+                )
+            )
+        return
+
+    table = Table(box=box.SIMPLE_HEAVY, show_header=True, header_style="bold", expand=True)
+    table.add_column("层")
+    table.add_column("Agent")
+    table.add_column("诊断 / 结论", ratio=3)
+    table.add_column("状态 / 模式")
+    table.add_column("置信度", justify="right")
+    for output in outputs:
+        execution = output.execution or {}
+        claim = output.claim or "未提供结论"
+        if output.warnings:
+            claim += "\n" + "\n".join(f"⚠ {warning}" for warning in output.warnings[:2])
+        table.add_row(
+            Text(output.layer, style=LAYER_STYLE.get(output.layer, "white")),
+            Text(output.agent, style="bold"),
+            Text(claim),
+            Text.assemble(_status_text(execution.get("status"), execution.get("mode")), f" · {execution.get('mode') or '未记录'}"),
+            _bar(output.confidence, 12),
+        )
+    console.print(Panel(table, title="Agent 执行记录（诊断服务已返回）", border_style="cyan", padding=(0, 1)))
 
 
 def _render_verdict(decision) -> None:
@@ -500,9 +558,12 @@ def _render_diagnosis_report(decision, trace) -> None:
     crop = report.get("crop", {})
     confidence = report.get("confidence", {})
     sources = report.get("knowledge_sources", {})
+    score = confidence.get("score")
+    score_label = f"{score:.0%}" if isinstance(score, (int, float)) else "未提供"
     lines = [
-        Text(f"作物：{crop.get('label', '未识别')} · 状态：{report.get('status', 'unknown')}"),
-        Text(f"置信度：{confidence.get('band', 'unknown')} ({confidence.get('score', 0):.0%})"),
+        Text(f"作物：{crop.get('label', '未识别')}"),
+        Text.assemble("诊断状态：", _status_text(report.get("status"))),
+        Text(f"置信度：{confidence.get('band', 'unknown')} ({score_label})"),
         Text(str(confidence.get("meaning", "")), style="dim"),
     ]
     if report.get("growth_stage"):
@@ -510,7 +571,7 @@ def _render_diagnosis_report(decision, trace) -> None:
     if report.get("environment"):
         lines.append(Text("环境数据：" + json.dumps(report["environment"], ensure_ascii=False, default=str)))
     if report.get("candidates"):
-        lines.append(Text("候选诊断：" + "；".join(item["name"] for item in report["candidates"])))
+        lines.append(Text("候选诊断：" + "；".join(item.get("name", "未命名候选") for item in report["candidates"])))
     differential = report.get("differential_analysis", {})
     if differential:
         lines.append(Text(f"鉴别分析：{differential.get('alternative', '')}；{differential.get('rejection_reason', '')}"))
@@ -520,6 +581,10 @@ def _render_diagnosis_report(decision, trace) -> None:
         lines.append(Text(f"  · {source.get('title') or source.get('source') or source.get('id')} [{source.get('backend')}]"))
     if report.get("follow_up_questions"):
         lines.append(Text("补充信息：" + "；".join(report["follow_up_questions"])))
+    if report.get("recommendations"):
+        lines.append(Text("建议措施：" + "；".join(report["recommendations"])))
+    if report.get("risk"):
+        lines.append(Text(f"风险等级：{report['risk']}"))
     if trace is not None:
         lines.append(Text(f"Trace ID：{trace.trace_id} · 阶段：{', '.join(trace.stages_present)}"))
         trace_table = Table(box=box.SIMPLE, show_header=True, header_style="dim")
@@ -535,7 +600,7 @@ def _render_diagnosis_report(decision, trace) -> None:
                 trace_table.add_row(
                     event.stage,
                     str(payload.get("agent", "")),
-                    str(execution.get("status", payload.get("status", ""))),
+                    _status_text(execution.get("status", payload.get("status", "")), execution.get("mode", "")),
                     str(execution.get("mode", "")),
                     str(execution.get("duration_ms", payload.get("duration_ms", ""))),
                 )
@@ -543,7 +608,41 @@ def _render_diagnosis_report(decision, trace) -> None:
     console.print(Panel(Group(*lines), title="完整诊断报告与执行 Trace", border_style="cyan"))
 
 
-def _render_result(decision, ctx, query, label, trace=None) -> None:
+def _render_vision_status(decision, image_path: str | None) -> None:
+    if not image_path:
+        console.print(Panel("未提供图片；视觉识别未执行，本次诊断依据文本和其他可用证据。", title="图片输入", border_style="dim", padding=(0, 1)))
+        return
+
+    vision = next(
+        (output for output in getattr(decision, "traces", []) or [] if output.agent == "视觉Agent"),
+        None,
+    )
+    filename = Path(image_path).name
+    if vision is None:
+        message = f"图片路径已提供：{filename}。Trace 未记录视觉 Agent 状态，请结合诊断依据复核。"
+        style = "yellow"
+    else:
+        execution = vision.execution or {}
+        mode = execution.get("mode", "")
+        status = execution.get("status", "")
+        if mode == "mock":
+            message = f"图片路径已提供：{filename}。视觉识别返回 Mock 模拟结果，并非真实模型推理。"
+            style = "yellow"
+        elif status == "success" and mode:
+            message = f"图片路径已提供：{filename}。视觉模型推理已完成（{mode}）。"
+            style = "green"
+        elif status == "failed":
+            error_type = execution.get("error_type")
+            detail = f"（{error_type}）" if error_type else ""
+            message = f"图片路径已提供：{filename}。视觉识别失败{detail}；请检查图片与模型配置。"
+            style = "red"
+        else:
+            message = f"图片路径已提供：{filename}。视觉识别状态：{_status_text(status, mode)}。"
+            style = "yellow"
+    console.print(Panel(Text(message, style=style), title="图片输入与视觉状态", border_style=style, padding=(0, 1)))
+
+
+def _render_result(decision, ctx, query, label, trace=None, image_path: str | None = None) -> None:
     crop_cn = CROP_CN.get(ctx.crop, ctx.crop)
     intent_cn = INTENT_CN.get(ctx.intent, ctx.intent)
     judge_tag = "DeepSeek AI 裁判" if decision.judge_mode == "deepseek" else "规则裁决"
@@ -553,7 +652,8 @@ def _render_result(decision, ctx, query, label, trace=None) -> None:
     left = Text.assemble(crop_cn, "  ", (intent_cn, "cyan"), "  ", (label, "bold"))
     hdr.add_row(left, Text(f" {judge_tag} ", style="black on cyan"))
     console.print(Panel(Group(hdr, Text(query, style="dim italic")), border_style="blue", padding=(1, 2)))
-    _animate_trace(decision)
+    _render_vision_status(decision, image_path)
+    _render_agent_trace(decision)
     _render_verdict(decision)
     _render_debate_critic(decision)
     _render_judge_analysis(decision)
@@ -564,6 +664,31 @@ def _render_result(decision, ctx, query, label, trace=None) -> None:
 def _render_trace(trace) -> None:
     if trace is None or not trace.events:
         console.print(Panel("尚无可查看的诊断 Trace。", title="执行追溯", border_style="yellow"))
+        return
+
+    if console.size.width < 100:
+        console.print(Panel(f"Trace ID：{trace.trace_id} · 记录时间：{trace.timestamp}", title="执行追溯", border_style="cyan", padding=(0, 1)))
+        for index, event in enumerate(trace.events, 1):
+            payload = event.payload or {}
+            execution = payload.get("execution", {}) or {}
+            status = execution.get("status", payload.get("status", "已记录"))
+            mode = execution.get("mode", "")
+            detail = Text.assemble(
+                _status_text(status, mode),
+                f" · {mode or '模式未记录'} · {execution.get('duration_ms', payload.get('duration_ms', '—'))} ms",
+            )
+            agent = str(payload.get("agent") or "系统阶段")
+            error_type = execution.get("error_type")
+            if error_type:
+                detail.append(f"\n错误类型：{error_type}", style="red")
+            console.print(
+                Panel(
+                    Group(Text(f"{event.stage} · {agent}", style="bold cyan"), detail),
+                    title=f"步骤 {index}",
+                    box=box.SIMPLE,
+                    padding=(0, 1),
+                )
+            )
         return
 
     table = Table(box=box.SIMPLE_HEAVY, expand=True)
@@ -580,7 +705,7 @@ def _render_trace(trace) -> None:
             str(index),
             event.stage,
             str(payload.get("agent", "")),
-            str(execution.get("status", payload.get("status", "已记录"))),
+            _status_text(execution.get("status", payload.get("status", "已记录")), execution.get("mode", "")),
             str(execution.get("mode", "")),
             str(execution.get("duration_ms", payload.get("duration_ms", ""))),
         )
@@ -593,35 +718,52 @@ def _render_history() -> None:
 
         rows = list_decisions(10)
     except Exception as exc:
-        console.print(Panel(f"历史记录暂不可用（{type(exc).__name__}）。", title="历史记录", border_style="red"))
+        console.print(Panel(f"历史记录暂不可用（{type(exc).__name__}）。请确认本地 SQLite 可访问后重试。", title="历史记录", border_style="red"))
         return
 
     if not rows:
         console.print(Panel("暂无历史诊断。完成一次诊断后，记录会保存在本地 SQLite。", title="历史记录", border_style="yellow"))
         return
 
-    table = Table(box=box.SIMPLE_HEAVY, expand=True)
-    table.add_column("ID", justify="right", style="cyan")
-    table.add_column("时间")
-    table.add_column("作物")
-    table.add_column("置信度", justify="right")
-    table.add_column("结论", overflow="ellipsis")
-    for row in rows:
-        table.add_row(
-            str(row["id"]),
-            str(row.get("created_at", "")),
-            CROP_CN.get(row.get("crop", ""), row.get("crop", "")),
-            f"{float(row.get('confidence') or 0):.0%}",
-            str(row.get("decision", "")),
-        )
-    console.print(Panel(table, title="最近 10 条本地决策记录", border_style="blue"))
+    if console.size.width < 92:
+        for row in rows:
+            confidence = float(row.get("confidence") or 0)
+            body = Text(f"{row.get('created_at', '时间未知')} · 置信度 {confidence:.0%}\n{row.get('decision', '')}")
+            console.print(
+                Panel(
+                    body,
+                    title=f"记录 #{row.get('id', '?')} · {CROP_CN.get(row.get('crop', ''), row.get('crop', '未知作物'))}",
+                    border_style="yellow" if confidence < 0.5 else "blue",
+                    box=box.SIMPLE,
+                    padding=(0, 1),
+                )
+            )
+    else:
+        table = Table(box=box.SIMPLE_HEAVY, expand=True)
+        table.add_column("ID", justify="right", style="cyan")
+        table.add_column("时间")
+        table.add_column("作物")
+        table.add_column("置信度", justify="right")
+        table.add_column("结论", overflow="ellipsis")
+        for row in rows:
+            table.add_row(
+                str(row["id"]),
+                str(row.get("created_at", "")),
+                CROP_CN.get(row.get("crop", ""), row.get("crop", "")),
+                f"{float(row.get('confidence') or 0):.0%}",
+                str(row.get("decision", "")),
+            )
+        console.print(Panel(table, title="最近 10 条本地决策记录", border_style="blue"))
     decision_id = Prompt.ask("输入记录 ID 查看报告，直接回车返回", default="").strip()
+    if not decision_id:
+        return
     if not decision_id.isdigit():
+        console.print("[yellow]请输入数字记录 ID；历史内容未修改，可以重新打开查询。[/]")
         return
     try:
         detail = get_decision(int(decision_id))
     except Exception as exc:
-        console.print(Panel(f"读取记录失败（{type(exc).__name__}）。", title="历史详情", border_style="red"))
+        console.print(Panel(f"读取记录失败（{type(exc).__name__}）。请检查记录 ID 和本地数据库状态。", title="历史详情", border_style="red"))
         return
     if detail is None:
         console.print("[yellow]没有找到该记录 ID。[/]")
@@ -633,18 +775,42 @@ def _render_history() -> None:
     trace = detail.get("trace_json")
     if trace:
         events = trace.get("events", []) if isinstance(trace, dict) else []
-        trace_table = Table(box=box.SIMPLE, expand=True)
-        trace_table.add_column("阶段", style="cyan")
-        trace_table.add_column("记录时间")
-        trace_table.add_column("执行单元")
-        for event in events:
-            payload = event.get("payload", {})
-            trace_table.add_row(
-                str(event.get("stage", "")),
-                str(event.get("timestamp", "")),
-                str(payload.get("agent", "")),
-            )
-        console.print(Panel(trace_table, title=f"历史 Trace · {detail.get('trace_id') or trace.get('trace_id', '')}", border_style="cyan"))
+        trace_id = detail.get("trace_id") or (trace.get("trace_id", "") if isinstance(trace, dict) else "")
+        if console.size.width < 100:
+            console.print(Panel(f"历史 Trace · {trace_id or 'ID 未记录'}", border_style="cyan", padding=(0, 1)))
+            for event in events:
+                payload = event.get("payload") or {}
+                execution = payload.get("execution", {}) or {}
+                console.print(Panel(
+                    Group(
+                        Text(f"{event.get('stage', '')} · {payload.get('agent') or '系统阶段'}", style="cyan"),
+                        Text.assemble(
+                            _status_text(execution.get("status", payload.get("status", "已记录")), execution.get("mode", "")),
+                            f" · {execution.get('mode') or '模式未记录'} · {execution.get('duration_ms', '—')} ms",
+                        ),
+                    ),
+                    title=str(event.get("timestamp", "")),
+                    box=box.SIMPLE,
+                    padding=(0, 1),
+                ))
+        else:
+            trace_table = Table(box=box.SIMPLE, expand=True)
+            trace_table.add_column("阶段", style="cyan")
+            trace_table.add_column("记录时间")
+            trace_table.add_column("执行单元")
+            trace_table.add_column("状态 / 模式")
+            trace_table.add_column("耗时 ms", justify="right")
+            for event in events:
+                payload = event.get("payload") or {}
+                execution = payload.get("execution", {}) or {}
+                trace_table.add_row(
+                    str(event.get("stage", "")),
+                    str(event.get("timestamp", "")),
+                    str(payload.get("agent", "")),
+                    Text.assemble(_status_text(execution.get("status", payload.get("status", "已记录")), execution.get("mode", "")), f" · {execution.get('mode', '')}"),
+                    str(execution.get("duration_ms", payload.get("duration_ms", ""))),
+                )
+            console.print(Panel(trace_table, title=f"历史 Trace · {trace_id}", border_style="cyan"))
 
 
 def _render_system_detail() -> None:
@@ -673,7 +839,7 @@ def _render_system_detail() -> None:
 def _render_help() -> None:
     help_text = (
         "输入 1–9：运行对应演示场景（固定案例会标明 DEMO / FIXTURE MODE）\n"
-        "x：输入自定义农业问题\n"
+        "x：输入自定义农业问题，可选填写本地叶片图片路径\n"
         "h：查看 SQLite 历史记录并打开详情\n"
         "t：查看最近一次运行的真实 Trace\n"
         "s：查看模型配置、KG 连接和最近 RAG 状态\n"
@@ -686,27 +852,51 @@ def _render_help() -> None:
 # ---------------------------------------------------------------------------
 # 运行
 # ---------------------------------------------------------------------------
-def _run_scenario(query, use_llm_judge, use_llm_critic, sensor_override, label, fixture_mode=False) -> None:
+def _prompt_image_path() -> str | None:
+    while True:
+        raw_path = Prompt.ask("本地图片路径（可选，直接回车跳过）", default="").strip()
+        if not raw_path:
+            return None
+        if len(raw_path) >= 2 and raw_path[0] == raw_path[-1] and raw_path[0] in {"'", '"'}:
+            raw_path = raw_path[1:-1]
+        image_path = Path(raw_path).expanduser()
+        if image_path.is_file():
+            return str(image_path.resolve())
+        console.print(Panel(
+            f"找不到该文件或路径不是文件：{image_path}\n检查路径后重新输入，或直接回车继续文本诊断。",
+            title="图片路径无效",
+            border_style="yellow",
+            padding=(0, 1),
+        ))
+
+
+def _run_scenario(query, use_llm_judge, use_llm_critic, sensor_override, label, fixture_mode=False, image_path=None) -> None:
     global _last_backend, _last_decision, _last_trace
-    ctx = build_context(query)
-    if sensor_override:
-        sensor_anomaly.ANOMALIES["gh-a"] = sensor_override
-    random.seed(7)
-    orch = _get_orchestrator(use_llm_judge, use_llm_critic)
-    tag = []
-    if use_llm_judge:
-        tag.append("DeepSeek Judge")
-    if use_llm_critic:
-        tag.append("Critic")
-    mode = " + ".join(tag) if tag else "规则编排"
     try:
+        ctx = build_context(query, image_path=image_path)
+        if sensor_override:
+            sensor_anomaly.ANOMALIES["gh-a"] = sensor_override
+        random.seed(7)
+        orch = _get_orchestrator(use_llm_judge, use_llm_critic)
+        tag = []
+        if use_llm_judge:
+            tag.append("DeepSeek Judge")
+        if use_llm_critic:
+            tag.append("Critic")
+        mode = " + ".join(tag) if tag else "规则编排"
         with console.status(f"[bold green]调度多智能体（{mode}）…[/]", spinner="dots"):
-            decision = orch.run(query)
+            decision = orch.run(query, image_path=image_path)
     except Exception as exc:
-        sensor_anomaly.ANOMALIES.pop("gh-a", None)
-        console.print(Panel(f"[red]执行失败：{exc}[/]", title="错误"))
+        logger.error("TUI diagnosis failed (type=%s, scenario=%s)", type(exc).__name__, label)
+        console.print(Panel(
+            f"诊断执行失败（{type(exc).__name__}），本次未生成新的诊断结论。请检查输入、图片路径和系统连接状态后重试。",
+            title="诊断未完成",
+            border_style="red",
+            padding=(0, 1),
+        ))
         return
-    sensor_anomaly.ANOMALIES.pop("gh-a", None)
+    finally:
+        sensor_anomaly.ANOMALIES.pop("gh-a", None)
     try:
         _last_backend = (decision.judge_analysis or {}).get("kg", {}).get("backend", _last_backend)
     except Exception:
@@ -714,10 +904,10 @@ def _run_scenario(query, use_llm_judge, use_llm_critic, sensor_override, label, 
     _last_decision = decision
     _last_trace = orch.last_trace
     display_label = f"{label} · DEMO / FIXTURE MODE" if fixture_mode else label
-    _render_result(decision, ctx, query, display_label, orch.last_trace)
+    _render_result(decision, ctx, query, display_label, orch.last_trace, image_path=image_path)
 
 
-def main() -> None:
+def _run_main() -> None:
     _render_banner()
     with console.status("[bold green]正在加载系统（传感器模型首次约 10s）…[/]", spinner="dots"):
         _warmup()
@@ -754,10 +944,13 @@ def main() -> None:
                 use_llm_critic = not use_llm_critic
                 console.print(f"[green]Critic 反驳：{'开' if use_llm_critic else '关'}[/]")
         elif choice == "x":
-            q = Prompt.ask("[bold]输入农业问题（作物与症状尽量描述具体）[/]")
+            q = Prompt.ask("[bold]输入农业问题（作物与症状尽量描述具体）[/]", default="").strip()
             if q.strip():
-                _run_scenario(q.strip(), use_llm_judge, use_llm_critic, None, "自定义查询")
+                image_path = _prompt_image_path()
+                _run_scenario(q, use_llm_judge, use_llm_critic, None, "自定义查询", image_path=image_path)
                 Prompt.ask("[dim]按回车返回菜单[/]", default="")
+            else:
+                console.print("[yellow]问题不能为空；可重新选择自定义诊断。[/]")
         elif choice.isdigit() and 1 <= int(choice) <= len(DEMO_SCENARIOS):
             s = DEMO_SCENARIOS[int(choice) - 1]
             _run_scenario(
@@ -771,6 +964,13 @@ def main() -> None:
             Prompt.ask("[dim]按回车返回菜单[/]", default="")
         else:
             console.print("[yellow]无效选择[/]")
+
+
+def main() -> None:
+    try:
+        _run_main()
+    except (KeyboardInterrupt, EOFError):
+        console.print("\n[yellow]终端输入已取消，安全退出；未完成的诊断不会显示为成功。[/]")
 
 
 if __name__ == "__main__":

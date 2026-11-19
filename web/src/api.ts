@@ -3,6 +3,12 @@ export interface ApiHealth {
   judge_configured: boolean;
 }
 
+export interface StagedImage {
+  image_path: string;
+  size_bytes: number;
+  content_type: string;
+}
+
 export interface AgentExecution {
   status?: string;
   mode?: string;
@@ -159,15 +165,34 @@ export function getDecision(apiKey: string, id: number): Promise<DecisionDetail>
   return requestJson<DecisionDetail>(`/decisions/${id}`, apiKey);
 }
 
+export function uploadImage(apiKey: string, file: File): Promise<StagedImage> {
+  const extension = file.name.split(".").pop()?.toLowerCase();
+  const contentTypeByExtension: Record<string, string> = {
+    jpg: "image/jpeg",
+    jpeg: "image/jpeg",
+    png: "image/png",
+    bmp: "image/bmp",
+  };
+  const contentType = Object.values(contentTypeByExtension).includes(file.type)
+    ? file.type
+    : contentTypeByExtension[extension ?? ""] || file.type || "application/octet-stream";
+  return requestJson<StagedImage>("/images", apiKey, {
+    method: "POST",
+    headers: { "Content-Type": contentType },
+    body: file,
+  });
+}
+
 export function runDiagnosis(
   apiKey: string,
   query: string,
-  options: { useLlmJudge: boolean; useLlmCritic: boolean },
+  options: { useLlmJudge: boolean; useLlmCritic: boolean; imagePath?: string },
 ): Promise<DiagnosisResult> {
   return requestJson<DiagnosisResult>("/diagnose", apiKey, {
     method: "POST",
     body: JSON.stringify({
       query,
+      image_path: options.imagePath,
       use_llm_judge: options.useLlmJudge,
       use_llm_critic: options.useLlmCritic,
     }),

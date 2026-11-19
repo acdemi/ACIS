@@ -10,6 +10,7 @@ import {
   getHealth,
   runDiagnosis as requestDiagnosis,
   sendFeedback,
+  uploadImage,
   type ApiHealth,
   type DecisionDetail,
   type DecisionSummary,
@@ -18,6 +19,7 @@ import {
 import { demoCases, type DemoCase } from "./demoCases";
 
 type ViewName = "diagnose" | "history";
+const API_KEY_SESSION_STORAGE = "acis.api-key";
 
 const currentView = ref<ViewName>("diagnose");
 const apiKeyDraft = ref("");
@@ -29,9 +31,11 @@ const healthError = ref("");
 const connectionError = ref("");
 const connectionMessage = ref("");
 const diagnosisError = ref("");
+const imageUploadError = ref("");
 const historyError = ref("");
 const isConnecting = ref(false);
 const isRunning = ref(false);
+const isUploadingImage = ref(false);
 const isLoadingHistory = ref(false);
 const isCopying = ref(false);
 const copyMessage = ref("");
@@ -39,6 +43,7 @@ const feedbackMessage = ref("");
 const history = ref<DecisionSummary[]>([]);
 const detail = ref<DecisionDetail | null>(null);
 const diagnosis = ref<DiagnosisResult | null>(null);
+const uploadedImage = ref<{ name: string; path: string } | null>(null);
 const activeDemoId = ref("");
 
 const selectedDemo = computed<DemoCase | null>(
@@ -49,6 +54,30 @@ function errorMessage(error: unknown): string {
   return error instanceof ApiError
     ? error.message
     : "发生意外错误，请稍后重试或检查服务日志。";
+}
+
+function clearApiKey(): void {
+  apiKey.value = "";
+  apiKeyDraft.value = "";
+  try {
+    window.sessionStorage.removeItem(API_KEY_SESSION_STORAGE);
+  } catch {
+    return;
+  }
+}
+
+function getStartupApiKey(): string {
+  const fragment = new URLSearchParams(window.location.hash.replace(/^#/, ""));
+  if (fragment.has("acis_key")) {
+    const key = fragment.get("acis_key") ?? "";
+    window.history.replaceState(window.history.state, "", window.location.pathname + window.location.search);
+    return key;
+  }
+  try {
+    return window.sessionStorage.getItem(API_KEY_SESSION_STORAGE) ?? "";
+  } catch {
+    return "";
+  }
 }
 
 async function refreshHealth(): Promise<void> {
@@ -75,7 +104,7 @@ async function loadHistory(): Promise<void> {
     history.value = await getDecisions(apiKey.value);
   } catch (error) {
     historyError.value = errorMessage(error);
-    if (error instanceof ApiError && error.status === 401) apiKey.value = "";
+    if (error instanceof ApiError && error.status === 401) clearApiKey();
   } finally {
     isLoadingHistory.value = false;
   }
@@ -95,10 +124,15 @@ async function connectApi(): Promise<void> {
   try {
     history.value = await getDecisions(candidate);
     apiKey.value = candidate;
+    try {
+      window.sessionStorage.setItem(API_KEY_SESSION_STORAGE, candidate);
+    } catch {
+      connectionMessage.value = "连接成功。浏览器未允许会话存储，刷新页面后请重新启动连接。";
+    }
     apiKeyDraft.value = "";
-    connectionMessage.value = "连接成功。密钥仅保存在当前页面内存中，刷新后需重新输入。";
+    if (!connectionMessage.value) connectionMessage.value = "连接成功。密钥仅保存在当前标签页会话中，关闭标签页后清除。";
   } catch (error) {
-    apiKey.value = "";
+    if (error instanceof ApiError && error.status === 401) clearApiKey();
     connectionError.value = errorMessage(error);
   } finally {
     isConnecting.value = false;
@@ -134,13 +168,40 @@ async function submitDiagnosis(payload: {
     diagnosis.value = await requestDiagnosis(apiKey.value, payload.query, {
       useLlmJudge: payload.useLlmJudge,
       useLlmCritic: payload.useLlmCritic,
+      imagePath: uploadedImage.value?.path,
     });
     await loadHistory();
   } catch (error) {
     diagnosisError.value = errorMessage(error);
+    if (error instanceof ApiError && error.status === 401) clearApiKey();
   } finally {
     isRunning.value = false;
   }
+}
+
+async function stageDiagnosisImage(file: File): Promise<void> {
+  uploadedImage.value = null;
+  imageUploadError.value = "";
+  if (!apiKey.value) {
+    imageUploadError.value = "请先连接 ACIS API，再上传图片。";
+    return;
+  }
+
+  isUploadingImage.value = true;
+  try {
+    const stagedImage = await uploadImage(apiKey.value, file);
+    uploadedImage.value = { name: file.name, path: stagedImage.image_path };
+  } catch (error) {
+    imageUploadError.value = errorMessage(error);
+    if (error instanceof ApiError && error.status === 401) clearApiKey();
+  } finally {
+    isUploadingImage.value = false;
+  }
+}
+
+function clearDiagnosisImage(): void {
+  uploadedImage.value = null;
+  imageUploadError.value = "";
 }
 
 function reportMarkdown(result: DiagnosisResult): string {
@@ -191,6 +252,7 @@ async function openDecision(item: DecisionSummary): Promise<void> {
     diagnosis.value = null;
   } catch (error) {
     historyError.value = errorMessage(error);
+    if (error instanceof ApiError && error.status === 401) clearApiKey();
   }
 }
 
@@ -203,6 +265,7 @@ async function markFeedback(feedback: "correct" | "incorrect" | "partial"): Prom
     feedbackMessage.value = "人工复核已保存。";
   } catch (error) {
     historyError.value = errorMessage(error);
+    if (error instanceof ApiError && error.status === 401) clearApiKey();
   }
 }
 
@@ -227,6 +290,11 @@ function changeDemo(id: string): void {
 
 onMounted(() => {
   void refreshHealth();
+  const startupApiKey = getStartupApiKey();
+  if (startupApiKey) {
+    apiKeyDraft.value = startupApiKey;
+    void connectApi();
+  }
 });
 </script>
 
@@ -248,15 +316,15 @@ onMounted(() => {
       </section>
 
       <section class="sidebar-card credential-card">
-        <div class="credential-heading"><span>⌑</span><div><strong>配置 API Key</strong><small>密钥仅保留在当前页面内存</small></div></div>
+        <div class="credential-heading"><span>⌑</span><div><strong>连接 ACIS API</strong><small>启动器可自动连接；密钥仅保留在当前标签页会话</small></div></div>
         <form @submit.prevent="connectApi">
           <label class="sr-only" for="api-key">本地 ACIS API Key</label>
-          <input id="api-key" v-model="apiKeyDraft" type="password" autocomplete="off" placeholder="输入本地 API Key" :disabled="isConnecting" />
+          <input id="api-key" v-model="apiKeyDraft" type="password" autocomplete="off" placeholder="手动启动 API 时输入本地密钥" :disabled="isConnecting" />
           <button type="submit" :disabled="isConnecting">{{ isConnecting ? '连接中…' : apiKey ? '重新连接' : '连接服务' }}</button>
         </form>
         <p v-if="connectionError" class="credential-error" role="alert">{{ connectionError }}</p>
         <p v-else-if="connectionMessage" class="credential-success" role="status">{{ connectionMessage }}</p>
-        <p v-else class="credential-hint">至少 32 个 ASCII 字符；刷新页面后需重新输入。</p>
+        <p v-else class="credential-hint">未使用启动器时，可输入至少 32 个 ASCII 字符的本地 API Key。</p>
       </section>
 
       <div class="sidebar-footer"><span>FIELD NOTES · TRACEABLE DECISIONS</span><b>ACIS v1.0</b></div>
@@ -275,7 +343,7 @@ onMounted(() => {
 
         <section class="workbench-heading"><div><p class="section-kicker">DIAGNOSTIC WORKSPACE</p><h2>农业智能诊断工作台</h2></div><span>● 输入 → 检索 → 分析 → 报告</span></section>
         <div v-if="diagnosisError" class="error-banner" role="alert">{{ diagnosisError }}</div>
-        <DiagnosisForm :judge-configured="Boolean(apiHealth?.judge_configured)" :is-running="isRunning" @run="submitDiagnosis" @demo-change="changeDemo" />
+        <DiagnosisForm :judge-configured="Boolean(apiHealth?.judge_configured)" :is-running="isRunning" :api-key-ready="Boolean(apiKey)" :is-uploading-image="isUploadingImage" :uploaded-image-name="uploadedImage?.name ?? ''" :image-upload-error="imageUploadError" @run="submitDiagnosis" @demo-change="changeDemo" @image-select="stageDiagnosisImage" @image-remove="clearDiagnosisImage" />
         <div v-if="isRunning" class="run-progress" role="status"><i></i><div><strong>任务已接收，诊断流程运行中</strong><p>后端当前只返回完成后的 Trace；不会伪造实时阶段进度。</p></div></div>
         <ResultPanel v-if="diagnosis" :result="diagnosis" :demo="selectedDemo" :is-copying="isCopying" :copy-message="copyMessage" @copy="copyDiagnosis" @history="showHistory" />
         <div v-else-if="!isRunning" class="welcome-strip"><span>↗</span><div><strong>从一条症状描述开始</strong><p>输入作物和观察到的症状，或选择固定案例体验真实诊断流程。</p></div><small>READY WHEN YOU ARE</small></div>

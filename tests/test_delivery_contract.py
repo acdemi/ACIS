@@ -261,6 +261,7 @@ def test_api_diagnose_contract(monkeypatch):
             return fake_decision
 
     monkeypatch.setattr(gateway_module, "AgentOrchestrator", _FakeOrchestrator)
+    monkeypatch.setenv("ACIS_API_KEY", "acis-test-key-0123456789abcdef0123456789")
     client = TestClient(gateway_module.app)
 
     health = client.get("/health")
@@ -268,9 +269,82 @@ def test_api_diagnose_contract(monkeypatch):
     assert health.json()["status"] == "ok"
     assert isinstance(health.json()["judge_configured"], bool)
 
-    response = client.post("/diagnose", json={"query": QUERY})
+    response = client.post(
+        "/diagnose",
+        json={"query": QUERY},
+        headers={"X-API-Key": "acis-test-key-0123456789abcdef0123456789"},
+    )
     assert response.status_code == 200
     body = response.json()
     assert body["decision"] == fake_decision.decision
     assert body["judge_mode"] == "rules"
     assert body["decision_id"] == 1
+
+
+@pytest.mark.parametrize(
+    ("failure_point", "expected_status", "expected_detail"),
+    [
+        ("constructor", 500, "diagnosis failed: RuntimeError"),
+        ("run", 500, "diagnosis failed: RuntimeError"),
+        ("payload", 500, "diagnosis failed: RuntimeError"),
+        ("value_error", 422, "invalid diagnosis input"),
+    ],
+)
+def test_api_failure_logs_do_not_include_exception_details(
+    monkeypatch, caplog, failure_point, expected_status, expected_detail
+):
+    from fastapi.testclient import TestClient
+
+    import gateway.app as gateway_module
+
+    secret_marker = "credential=must-not-appear-in-logs"
+
+    class _FailingOrchestrator:
+        last_trace = None
+
+        def __init__(self, **_kwargs):
+            if failure_point == "constructor":
+                raise RuntimeError(secret_marker)
+
+        def run(self, _query, image_path=None):
+            if failure_point == "value_error":
+                raise ValueError(secret_marker)
+            if failure_point == "run":
+                raise RuntimeError(secret_marker)
+            return DecisionOutput(
+                summary="test",
+                decision="test",
+                confidence=0.5,
+                risk_level="low",
+                action_plan=["test"],
+                debate=DebateResult([], [], [], "low"),
+                traces=[],
+            )
+
+    monkeypatch.setattr(gateway_module, "AgentOrchestrator", _FailingOrchestrator)
+    if failure_point == "payload":
+        def _fail_payload(*_args, **_kwargs):
+            raise RuntimeError(secret_marker)
+
+        monkeypatch.setattr(gateway_module, "_decision_payload", _fail_payload)
+    monkeypatch.setenv("ACIS_API_KEY", "acis-test-key-0123456789abcdef0123456789")
+    client = TestClient(gateway_module.app, raise_server_exceptions=False)
+
+    with caplog.at_level("ERROR", logger="gateway.app"):
+        response = client.post(
+            "/diagnose",
+            json={"query": QUERY},
+            headers={"X-API-Key": "acis-test-key-0123456789abcdef0123456789"},
+        )
+
+    assert response.status_code == expected_status
+    assert response.json()["detail"] == expected_detail
+    assert secret_marker not in caplog.text
+
+
+def test_api_key_comparison_rejects_non_ascii_without_raising():
+    import gateway.app as gateway_module
+
+    assert gateway_module._api_key_matches(
+        "é" * 32, "acis-test-key-0123456789abcdef0123456789"
+    ) is False
