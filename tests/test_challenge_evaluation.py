@@ -21,11 +21,11 @@ from typing import Any
 
 import pytest
 
-from evals.config import EvalCase, EvalConfig
-from evals.metrics import CaseMetrics
-from evals.runner import EvaluationResult
-from openmetaphysics.evaluation import challenge_report
-from openmetaphysics.evaluation.challenge_scorer import ChallengeScoringError
+from acis.evaluation.evals.config import EvalCase, EvalConfig
+from acis.evaluation.evals.metrics import CaseMetrics
+from acis.evaluation.evals.runner import EvaluationResult
+from acis.evaluation.openmetaphysics.evaluation import challenge_report
+from acis.evaluation.openmetaphysics.evaluation.challenge_scorer import ChallengeScoringError
 from scripts import run_challenge_evaluation as run_script
 
 SCRIPT_SOURCES = (
@@ -179,7 +179,7 @@ def _patch_fake_runner(
         calls.append({"config": config, "result": result})
         return result
 
-    monkeypatch.setattr("evals.runner.run_evaluation", fake_run_evaluation)
+    monkeypatch.setattr("acis.evaluation.evals.runner.run_evaluation", fake_run_evaluation)
     return calls
 
 

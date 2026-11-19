@@ -34,11 +34,11 @@ ROOT = Path(__file__).resolve().parents[1]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-from evals.config import EvalConfig
-from utils.judge_runtime import resolve_judge_config
+from acis.evaluation.evals.config import EvalConfig
+from acis.utils.judge_runtime import resolve_judge_config
 
 #: Challenge set source (Phase 4, frozen).
-CHALLENGE_PATH = ROOT / "benchmarks" / "challenge_set_v1.json"
+CHALLENGE_PATH = ROOT / "acis" / "evaluation" / "benchmarks" / "challenge_set_v1.json"
 
 #: Default raw-output root.
 DEFAULT_RAW_DIR = ROOT / "data" / "evaluation" / "challenge_raw"
@@ -176,7 +176,7 @@ def run_arm(
               "present (use --force to rerun)")
         return arm_dir
 
-    from evals.runner import run_evaluation
+    from acis.evaluation.evals.runner import run_evaluation
 
     flattened = write_flattened_dataset(
         cases, output_dir / "_flattened" / FLATTENED_DATASET_NAME

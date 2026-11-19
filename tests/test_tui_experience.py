@@ -1,11 +1,11 @@
 from io import StringIO
-from trace.types import Trace, TraceEvent
+from acis.observability.trace.types import Trace, TraceEvent
 from types import SimpleNamespace
 
 from rich.cells import cell_len
 from rich.console import Console
 
-from ui import tui
+from acis.ui import tui
 
 
 def test_image_path_prompt_recovers_after_invalid_path(monkeypatch, tmp_path):
@@ -82,7 +82,7 @@ def test_success_report_uses_success_status_label(monkeypatch):
 
 
 def test_history_invalid_id_has_recovery_hint_in_narrow_terminal(monkeypatch):
-    from storage import repository
+    from acis.knowledge.storage import repository
 
     output = StringIO()
     terminal = Console(file=output, width=64, force_terminal=False)
@@ -123,7 +123,7 @@ def test_main_handles_terminal_eof_without_traceback(monkeypatch):
 
 
 def test_failed_diagnosis_is_actionable_and_cleans_sensor_override(monkeypatch, caplog):
-    from rule_engine import sensor_anomaly
+    from acis.reasoning.rule_engine import sensor_anomaly
 
     output = StringIO()
     monkeypatch.setattr(tui, "console", Console(file=output, force_terminal=False))
@@ -147,7 +147,7 @@ def test_failed_diagnosis_is_actionable_and_cleans_sensor_override(monkeypatch, 
 
 
 def test_narrow_history_trace_keeps_trace_id_and_execution_state(monkeypatch):
-    from storage import repository
+    from acis.knowledge.storage import repository
 
     output = StringIO()
     monkeypatch.setattr(tui, "console", Console(file=output, width=68, force_terminal=False))

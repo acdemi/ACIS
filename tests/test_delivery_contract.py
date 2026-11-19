@@ -11,13 +11,13 @@ import json
 
 import pytest
 
-import storage.db as storage_db
-from agents.judge_agent import JudgeResponseFormatError
-from agents.types import AgentOutput, DebateResult, DecisionOutput, RequestContext
-from agents.vision_agent import VisionAgent
-from debate.critic import CriticEngine
-from orchestrator import AgentOrchestrator, _decision_payload, build_context
-from trace import STAGE_ORDER, export_trace_json, trace_to_dict
+import acis.knowledge.storage.db as storage_db
+from acis.agents.judge_agent import JudgeResponseFormatError
+from acis.core.types import AgentOutput, DebateResult, DecisionOutput, RequestContext
+from acis.agents.vision_agent import VisionAgent
+from acis.reasoning.debate.critic import CriticEngine
+from acis.core.orchestrator import AgentOrchestrator, _decision_payload, build_context
+from acis.observability.trace import STAGE_ORDER, export_trace_json, trace_to_dict
 
 QUERY = "温室A番茄叶片出现黄斑，叶背有灰色霉层，如何处理？"
 
@@ -71,7 +71,7 @@ def test_langgraph_flow_contract():
 
 
 def test_persistence_failure_is_non_fatal(monkeypatch, caplog):
-    import storage.repository as repository
+    import acis.knowledge.storage.repository as repository
 
     def _boom(*args, **kwargs):
         raise RuntimeError("sqlite is read-only")
@@ -110,7 +110,7 @@ def test_langgraph_failure_falls_back_to_rules():
     ],
 )
 def test_llm_judge_failure_falls_back_with_reason(monkeypatch, exc, expected_code):
-    from agents.judge_agent import JudgeAgent
+    from acis.agents.judge_agent import JudgeAgent
 
     def _boom(*args, **kwargs):
         raise exc
@@ -138,7 +138,7 @@ def test_decision_payload_exposes_trace_identity():
 
 
 def test_vision_agent_parses_diagnosis_block(tmp_path, monkeypatch):
-    import agents.vision as vision_module
+    import acis.agents.vision as vision_module
 
     image_path = tmp_path / "tomato_leaf.jpg"
     image_path.write_bytes(b"not-a-real-image")
@@ -163,7 +163,7 @@ def test_vision_agent_parses_diagnosis_block(tmp_path, monkeypatch):
 
 
 def test_vision_agent_reports_visual_error(monkeypatch):
-    import agents.vision as vision_module
+    import acis.agents.vision as vision_module
 
     monkeypatch.setattr(vision_module, "diagnose_image", lambda path: {"error": "模型不可用"})
     context = RequestContext(
@@ -206,7 +206,7 @@ def test_critic_rule_validation_contract():
 
 
 def test_storage_roundtrip_contract():
-    from storage.repository import get_decision, save_decision, set_feedback
+    from acis.knowledge.storage.repository import get_decision, save_decision, set_feedback
 
     decision = DecisionOutput(
         summary="test",
@@ -235,7 +235,7 @@ def test_storage_roundtrip_contract():
 def test_api_diagnose_contract(monkeypatch):
     from fastapi.testclient import TestClient
 
-    import gateway.app as gateway_module
+    import acis.api.app as gateway_module
 
     fake_decision = DecisionOutput(
         summary="fake",
@@ -295,7 +295,7 @@ def test_api_failure_logs_do_not_include_exception_details(
 ):
     from fastapi.testclient import TestClient
 
-    import gateway.app as gateway_module
+    import acis.api.app as gateway_module
 
     secret_marker = "credential=must-not-appear-in-logs"
 
@@ -330,7 +330,7 @@ def test_api_failure_logs_do_not_include_exception_details(
     monkeypatch.setenv("ACIS_API_KEY", "acis-test-key-0123456789abcdef0123456789")
     client = TestClient(gateway_module.app, raise_server_exceptions=False)
 
-    with caplog.at_level("ERROR", logger="gateway.app"):
+    with caplog.at_level("ERROR", logger="acis.api.app"):
         response = client.post(
             "/diagnose",
             json={"query": QUERY},
@@ -343,7 +343,7 @@ def test_api_failure_logs_do_not_include_exception_details(
 
 
 def test_api_key_comparison_rejects_non_ascii_without_raising():
-    import gateway.app as gateway_module
+    import acis.api.app as gateway_module
 
     assert gateway_module._api_key_matches(
         "é" * 32, "acis-test-key-0123456789abcdef0123456789"

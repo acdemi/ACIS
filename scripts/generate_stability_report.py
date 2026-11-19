@@ -32,13 +32,11 @@ from pathlib import Path
 from typing import Any
 
 ROOT = Path(__file__).resolve().parents[1]
-SRC = ROOT / "src"
-for _path in (ROOT, SRC):
-    if str(_path) not in sys.path:
-        sys.path.insert(0, str(_path))
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
 
-from decision_semantics import decision_correctness
-from openmetaphysics.evaluation.challenge_scorer import (
+from acis.core.decision import decision_correctness
+from acis.evaluation.openmetaphysics.evaluation.challenge_scorer import (
     calc_abstention_rate,
     calc_confidence_calibration,
     calc_factor_scores,

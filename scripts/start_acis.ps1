@@ -97,7 +97,7 @@ function Get-ProcessIdentity($Record) {
         $commandLine = ([string]$process.CommandLine).Replace('"', "")
         $appDirectoryPattern = "(?i)--app-dir\s+$([regex]::Escape($Root))(?:\s|$)"
         $portPattern = "(?i)--port\s+$([int]$Record.port)(?:\s|$)"
-        if ($commandLine -notmatch '(?i)-m\s+uvicorn\s+gateway\.app:app' -or
+        if ($commandLine -notmatch '(?i)-m\s+uvicorn\s+acis\.api\.app:app' -or
             $commandLine -notmatch '(?i)--host\s+127\.0\.0\.1' -or
             $commandLine -notmatch $portPattern -or
             $commandLine -notmatch $appDirectoryPattern) {
@@ -222,7 +222,7 @@ function Start-ACIS {
 
     Push-Location $Root
     try {
-        & $python -c "import gateway.app; print('ACIS backend imports: OK')"
+        & $python -c "import acis.api.app; print('ACIS backend imports: OK')"
         if ($LASTEXITCODE -ne 0) {
             throw "后端依赖导入失败。请在当前 Python 环境安装 requirements.txt，并检查启动日志。"
         }
@@ -262,7 +262,7 @@ function Start-ACIS {
     New-Item -ItemType Directory -Path $logsDirectory -Force | Out-Null
     $script:StdoutLog = Join-Path $logsDirectory "acis-local-$logId.out.log"
     $script:StderrLog = Join-Path $logsDirectory "acis-local-$logId.err.log"
-    $argumentLine = "-m uvicorn gateway.app:app --host 127.0.0.1 --port $selectedPort --app-dir `"$Root`""
+    $argumentLine = "-m uvicorn acis.api.app:app --host 127.0.0.1 --port $selectedPort --app-dir `"$Root`""
     $script:ServerProcess = Start-Process -FilePath $python -ArgumentList $argumentLine -WorkingDirectory $Root -WindowStyle Hidden -PassThru -RedirectStandardOutput $StdoutLog -RedirectStandardError $StderrLog
     $processDetails = Get-Process -Id $ServerProcess.Id -ErrorAction Stop
     $record = [ordered]@{

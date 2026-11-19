@@ -15,7 +15,7 @@ from __future__ import annotations
 import json
 from dataclasses import asdict, fields
 
-from agents.types import AgentOutput  # noqa: E402
+from acis.core.types import AgentOutput  # noqa: E402
 
 
 def test_counterfactual_observations_field_exists():

@@ -13,7 +13,7 @@ from pathlib import Path
 
 import pytest
 
-from benchmarks.capability_matrix import (
+from acis.evaluation.benchmarks.capability_matrix import (
     challenge_ablation_stats,
     load_all_datasets,
     render_capability_matrix_doc,
@@ -21,15 +21,15 @@ from benchmarks.capability_matrix import (
     write_challenge_ablation_stats,
     write_docs,
 )
-from benchmarks.loader import DATASETS_DIR, load_dataset
-from benchmarks.metadata import (
+from acis.evaluation.benchmarks.loader import DATASETS_DIR, load_dataset
+from acis.evaluation.benchmarks.metadata import (
     CHALLENGE_TYPES,
     BenchmarkMetadataError,
     challenge_counts,
     validate_enriched_case,
     validate_metadata,
 )
-from evals.config import load_dataset as load_runner_dataset
+from acis.evaluation.evals.config import load_dataset as load_runner_dataset
 
 ENRICHED_PATH = DATASETS_DIR / "enriched.json"
 

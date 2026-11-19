@@ -9,16 +9,16 @@ from __future__ import annotations
 
 import pytest
 
-from trace import Trace, TraceEvent
+from acis.observability.trace import Trace, TraceEvent
 
-from evals.capability_metrics import (
+from acis.evaluation.evals.capability_metrics import (
     CAPABILITY_SCORE_KEYS,
     compute_capability_scores,
     declared_capabilities,
     declared_capability_satisfaction,
 )
-from evals.config import EvalCase
-from evals.metrics import (
+from acis.evaluation.evals.config import EvalCase
+from acis.evaluation.evals.metrics import (
     CaseMetrics,
     aggregate_capability_scores,
     compute_trace_metrics,

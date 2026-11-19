@@ -4,7 +4,7 @@ from __future__ import annotations
 import io
 import sys
 
-import orchestrator
+import acis.core.orchestrator as orchestrator
 
 
 def _narrow_stdout(encoding: str):
@@ -40,7 +40,7 @@ def test_print_safe_keeps_text_on_utf8_console(monkeypatch):
 
 def test_format_decision_output_is_printable_on_narrow_console(monkeypatch):
     """A decision whose text carries unencodable symbols must still print."""
-    from agents.types import DebateResult, DecisionOutput
+    from acis.core.types import DebateResult, DecisionOutput
 
     debate = DebateResult(consensus=["规则路径一致"], conflicts=[], missing_evidence=[], risk_level="low")
     decision = DecisionOutput(

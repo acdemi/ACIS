@@ -6,8 +6,8 @@ builds requests and does not mutate the input plan.
 """
 from __future__ import annotations
 
-from planner.types import ExecutionPlan  # noqa: E402
-from tool_router import (  # noqa: E402
+from acis.reasoning.planner.types import ExecutionPlan  # noqa: E402
+from acis.reasoning.tool_router import (  # noqa: E402
     RetryPolicy,
     ToolDescriptor,
     ToolRequest,

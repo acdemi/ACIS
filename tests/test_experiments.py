@@ -13,15 +13,15 @@ from types import SimpleNamespace
 
 import pytest
 
-from evals.config import AblationConfig, EvalConfig
-from experiments import manager as exp_manager
-from experiments.archive import (
+from acis.evaluation.evals.config import AblationConfig, EvalConfig
+from acis.evaluation.experiments import manager as exp_manager
+from acis.evaluation.experiments.archive import (
     AblationSummary,
     RunSummary,
     build_manifest,
     write_manifest,
 )
-from experiments.catalog import (
+from acis.evaluation.experiments.catalog import (
     compare_experiments,
     filter_experiments,
     latest_experiment,
@@ -29,8 +29,8 @@ from experiments.catalog import (
     load_record,
     parse_filter_args,
 )
-from experiments.runner_adapter import ablation_spec_to_config, run_spec_to_eval_config
-from experiments.schema import (
+from acis.evaluation.experiments.runner_adapter import ablation_spec_to_config, run_spec_to_eval_config
+from acis.evaluation.experiments.schema import (
     AblationSpec,
     RunSpec,
     dump_definition,

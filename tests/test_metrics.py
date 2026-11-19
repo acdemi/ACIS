@@ -11,18 +11,18 @@ from __future__ import annotations
 import csv
 import json
 from pathlib import Path
-from trace import Trace, TraceEvent
+from acis.observability.trace import Trace, TraceEvent
 
 import pytest
 
-from evals.config import EvalConfig, load_dataset
-from evals.metrics import (
+from acis.evaluation.evals.config import EvalConfig, load_dataset
+from acis.evaluation.evals.metrics import (
     MEMORY_HIT_CONFIDENCE,
     CaseMetrics,
     aggregate_metrics,
     compute_trace_metrics,
 )
-from evals.report import (
+from acis.evaluation.evals.report import (
     AGGREGATE_CASE_ID,
     CSV_FIELDS,
     write_metrics_csv,

@@ -20,7 +20,7 @@ $py = '.\.venv\Scripts\python.exe'
 检查三件事：
 
 1. `.\.venv\Scripts\python.exe -V` → `Python 3.13.3`（使用仓库自己的 `.venv`，不要用系统 python）。
-2. `& $py orchestrator.py --rules-only --seed 7 --trace-out logs/trace_demo.json "温室A番茄叶片出现黄斑，叶背有灰色霉层，如何处理？"` → 能出 `病理判断首选：番茄叶霉病`，并生成 `logs/trace_demo.json`（冷启动约 8–9s）。
+2. `& $py -m acis --rules-only --seed 7 --trace-out logs/trace_demo.json "温室A番茄叶片出现黄斑，叶背有灰色霉层，如何处理？"` → 能出 `病理判断首选：番茄叶霉病`，并生成 `logs/trace_demo.json`（冷启动约 8–9s）。
 3. 开第二个终端预跑一遍演示命令，避免首次 import/模型预热占用演示时间。
 
 **可选（有 Key 才用）**：`$env:DEEPSEEK_API_KEY='sk-...'`，并在 TUI 中按 `[j]` 开 LLM Judge；**无 Key 时不要承诺 LLM 演示**，直接讲规则版（本脚本默认）。
@@ -31,7 +31,7 @@ $py = '.\.venv\Scripts\python.exe'
 
 ### 0:00–0:30 · 开场 + 启动
 ```powershell
-& $py -m ui.tui
+& $py -m acis tui
 ```
 讲：
 > "这是 ACIS 的 TUI 演示入口。主链是 感知 → 记忆 → 专家 → 辩论 → Critic → Judge，默认走离线规则裁决；右侧状态条显示 Neo4j / RAG / Judge 开关，没有外部服务时会自动降级。"
@@ -61,7 +61,7 @@ $py = '.\.venv\Scripts\python.exe'
 
 **方式 B（更有说服力，开第二个终端）**：
 ```powershell
-& $py orchestrator.py --rules-only --seed 7 --trace-out logs/trace_demo.json "温室A番茄叶片出现黄斑，叶背有灰色霉层，如何处理？"
+& $py -m acis --rules-only --seed 7 --trace-out logs/trace_demo.json "温室A番茄叶片出现黄斑，叶背有灰色霉层，如何处理？"
 & $py -c "import json; d=json.load(open('logs/trace_demo.json',encoding='utf-8')); print('trace_id=',d['trace_id']); print('stages=',[k for k in ('request','perception','memory','experts','debate','critic','judge','planner','tool_router','metrics') if k in d]); print('judge_runtime=',d['judge'][0]['judge_analysis']['judge_runtime'])"
 ```
 讲：
@@ -74,7 +74,7 @@ $env:AGRI_AI_JUDGE_API_KEY='sk-test'
 $env:AGRI_AI_JUDGE_BASE_URL='http://127.0.0.1:9'
 $env:AGRI_AI_JUDGE_TIMEOUT_SECONDS='10'
 $env:AGRI_AI_JUDGE_MAX_RETRIES='0'
-& $py orchestrator.py --rules-only --llm-judge --json "温室A番茄叶片出现黄斑，叶背有灰色霉层，如何处理？"
+& $py -m acis --rules-only --llm-judge --json "温室A番茄叶片出现黄斑，叶背有灰色霉层，如何处理？"
 ```
 讲，并指给观众看四样东西：
 1. **进程正常退出、仍有裁决** → `judge_mode=rules`（自动回退，服务不中断）；
@@ -95,7 +95,7 @@ $env:AGRI_AI_JUDGE_MAX_RETRIES='0'
 
 ```powershell
 # 方式二：走 API 契约，不起服务（与收尾的 /health 检查同一风格）
-& $py -c "import os; os.environ['ACIS_API_KEY']='local-test-key-0123456789abcdef0123456789'; from fastapi.testclient import TestClient; from gateway.app import app; c=TestClient(app); r=c.get('/decisions?limit=3', headers={'X-API-Key':os.environ['ACIS_API_KEY']}); print('status=',r.status_code); [print(x['id'], x['judge_mode'], x['confidence']) for x in r.json()]"
+& $py -c "import os; os.environ['ACIS_API_KEY']='local-test-key-0123456789abcdef0123456789'; from fastapi.testclient import TestClient; from acis.api.app import app; c=TestClient(app); r=c.get('/decisions?limit=3', headers={'X-API-Key':os.environ['ACIS_API_KEY']}); print('status=',r.status_code); [print(x['id'], x['judge_mode'], x['confidence']) for x in r.json()]"
 ```
 预期：`status= 200`，随后每行 `id judge_mode confidence`。该密钥仅用于本地 `TestClient` 示例；`GET /health` 可匿名访问，`GET /decisions`、`GET /decisions/{id}` 等数据接口需要 `X-API-Key`。
 
@@ -112,7 +112,7 @@ Remove-Item Env:\AGRI_AI_DB_PATH                  # 取消隔离（或直接新�
 ```
 
 ### 4:10–4:40 · 收尾（二选一）
-- 规则/API：`& $py -c "import os; os.environ['ACIS_API_KEY']='local-test-key-0123456789abcdef0123456789'; from fastapi.testclient import TestClient; from gateway.app import app; c=TestClient(app); print(c.get('/health').status_code, c.post('/diagnose', json={'query':'番茄叶片黄斑，叶背灰色霉层'}, headers={'X-API-Key':os.environ['ACIS_API_KEY']}).status_code)"` → `200 200`。
+- 规则/API：`& $py -c "import os; os.environ['ACIS_API_KEY']='local-test-key-0123456789abcdef0123456789'; from fastapi.testclient import TestClient; from acis.api.app import app; c=TestClient(app); print(c.get('/health').status_code, c.post('/diagnose', json={'query':'番茄叶片黄斑，叶背灰色霉层'}, headers={'X-API-Key':os.environ['ACIS_API_KEY']}).status_code)"` → `200 200`。
 - 或指 SQLite：`decision_id` 已落库，说明有审计记录。
 
 收尾话术：
@@ -134,7 +134,7 @@ Remove-Item Env:\AGRI_AI_DB_PATH                  # 取消隔离（或直接新�
 
 | 故障 | 处理 |
 |---|---|
-| TUI 起不来/终端不支持 | 改跑 `& $py orchestrator.py "温室A番茄叶片出现黄斑，叶背有灰色霉层，如何处理？"`（9s 出完整裁决，含 12 条 Agent Trace） |
+| TUI 起不来/终端不支持 | 改跑 `& $py -m acis "温室A番茄叶片出现黄斑，叶背有灰色霉层，如何处理？"`（9s 出完整裁决，含 12 条 Agent Trace） |
 | 没有 Neo4j | 正常演示；讲"KG 后端自动回退内置 DISEASE_DB，状态条会显示 backend" |
 | Qdrant 502 / RAG 降级 | 正常演示；讲"检索后端不可用时内存回退，不影响决策"。**先设 `NO_PROXY` 可避免** |
 | 没有 API Key | 全程规则版；不要按 `[j]/[c]`，直接讲离线降级设计 |
@@ -174,9 +174,9 @@ Remove-Item Env:\AGRI_AI_DB_PATH                  # 取消隔离（或直接新�
 ```powershell
 $env:AGRI_AI_RAG_BACKEND='memory'
 $env:AGRI_AI_KG_BACKEND='memory'
-& $py orchestrator.py --rules-only --seed 7 --json "玉米下部叶片出现长梭形灰绿色至灰褐色病斑，湿度高时病斑快速扩大，请诊断。"
-& $py orchestrator.py --rules-only --seed 7 --json "小麦叶片出现黄色粉状小疱，沿叶脉排列成条带；请与叶锈病鉴别。"
-& $py orchestrator.py --rules-only --seed 7 --json "玉米长势不好，叶片有点发黄，具体原因不清楚。"
+& $py -m acis --rules-only --seed 7 --json "玉米下部叶片出现长梭形灰绿色至灰褐色病斑，湿度高时病斑快速扩大，请诊断。"
+& $py -m acis --rules-only --seed 7 --json "小麦叶片出现黄色粉状小疱，沿叶脉排列成条带；请与叶锈病鉴别。"
+& $py -m acis --rules-only --seed 7 --json "玉米长势不好，叶片有点发黄，具体原因不清楚。"
 ```
 
 预期核对：玉米病例首选“玉米大斑病”；小麦病例首选“小麦条锈病”并保留替代诊断；信息不足病例必须报告“证据不足”、人工复核和补充问题，不给出针对病害的喷施处置。每次 JSON 输出包含报告、知识来源、Agent 执行状态与完整 Trace；`tests/test_delivery_cases_v1.py` 对实际输出及 SQLite Trace 关联做自动化断言。
@@ -191,7 +191,7 @@ $env:AGRI_AI_KG_BACKEND='memory'
 $env:ACIS_API_KEY='replace-with-a-private-key-of-at-least-32-characters'
 $env:AGRI_AI_RAG_BACKEND='memory'
 $env:AGRI_AI_KG_BACKEND='memory'
-uvicorn gateway.app:app --host 127.0.0.1 --port 8000
+uvicorn acis.api.app:app --host 127.0.0.1 --port 8000
 
 # 终端二（首次安装依赖后可省略 npm ci）
 npm ci --prefix web

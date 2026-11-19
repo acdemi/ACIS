@@ -2,9 +2,8 @@
 # ACIS — .gitignore
 #
 # Rule: ignore only what is (a) secret, (b) machine-local, or (c) regenerable.
-# Versioned knowledge stays tracked — docs/ context/ reports/ agents/
-# benchmarks/ evals/ experiments/ scripts/ src/ tests/ storage/ trace/.
-# Kept in sync with pytest.ini (norecursedirs) and .dockerignore.
+# Versioned knowledge stays tracked — docs/ reports/ acis/ tests/ scripts/ web/
+# Kept in sync with pyproject.toml (norecursedirs) and .dockerignore.
 # ==============================================================================
 
 # ------------------------------------------------------------------- secrets
@@ -37,7 +36,7 @@ coverage.xml
 htmlcov/
 .streamlit/
 # -------------------------------------------------- local data & run output
-# Host-only datasets and databases — see pytest.ini and .dockerignore
+# Host-only datasets and databases — see pyproject.toml and .dockerignore
 data/
 logs/
 results/

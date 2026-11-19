@@ -11,7 +11,7 @@ from pathlib import Path
 
 import pytest
 
-from evals.ablation import (
+from acis.evaluation.evals.ablation import (
     ABLATION_COMBOS,
     REQUIRED_COMBOS,
     combo_config,
@@ -19,9 +19,9 @@ from evals.ablation import (
     get_combo,
     run_ablation,
 )
-from evals.config import AblationConfig, EvalConfig
-from evals.metrics import CaseMetrics
-from evals.report import (
+from acis.evaluation.evals.config import AblationConfig, EvalConfig
+from acis.evaluation.evals.metrics import CaseMetrics
+from acis.evaluation.evals.report import (
     AblationResult,
     compute_ablation_metrics,
     contribution_deltas,

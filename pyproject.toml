@@ -1,0 +1,77 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "acis"
+description = "ACIS - agricultural collaborative intelligence system"
+readme = "README.md"
+requires-python = ">=3.11"
+license = { text = "MIT" }
+dynamic = ["version"]
+dependencies = [
+    "mcp>=1.0.0,<2.0.0",
+    "httpx>=0.27.0",
+    "pydantic>=2.0.0",
+    "openai>=1.0.0",
+    "langgraph>=0.2.0",
+    "fastapi>=0.111.0",
+    "uvicorn[standard]>=0.30.0",
+    "transformers>=4.40.0",
+    "torch>=2.2.0",
+    "pillow>=10.0.0",
+    "numpy>=1.26.0",
+    "scikit-learn>=1.4.0",
+    "qdrant-client>=1.9.0",
+    "neo4j>=5.0.0",
+    "rich>=13.0.0",
+]
+
+[project.scripts]
+acis = "acis.cli:main"
+
+[tool.setuptools.dynamic]
+version = { attr = "acis.__version__" }
+
+[tool.setuptools]
+py-modules = ["orchestrator"]
+
+[tool.setuptools.packages.find]
+include = ["acis*", "scripts*", "ui*"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+exclude = [
+    ".venv",
+    "data",
+    "logs",
+    "results",
+    "reports",
+    "web/node_modules",
+]
+
+[tool.ruff.lint]
+select = ["E", "F", "I"]
+ignore = ["E501"]
+
+[tool.pytest.ini_options]
+# Keep test collection inside tests/. The repository root contains local-only
+# artifacts (logs/, results/, data/, .venv, tool caches and pytest temp roots)
+# that must never be collected.
+testpaths = ["tests"]
+norecursedirs = [
+    ".git",
+    ".venv",
+    "__pycache__",
+    ".mypy_cache",
+    ".ruff_cache",
+    ".pytest_cache",
+    "logs",
+    "results",
+    "data",
+    "neo4j",
+    "pytest-of-*",
+    "torchinductor_*",
+]
+addopts = "-ra"

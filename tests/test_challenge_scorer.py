@@ -22,7 +22,7 @@ from pathlib import Path
 
 import pytest
 
-from openmetaphysics.evaluation.challenge_scorer import (
+from acis.evaluation.openmetaphysics.evaluation.challenge_scorer import (
     FACTOR_ALIASES,
     ChallengeScoringError,
     calc_abstention_rate,
@@ -31,7 +31,7 @@ from openmetaphysics.evaluation.challenge_scorer import (
     normalize_decision_label,
 )
 
-CHALLENGE_PATH = Path(__file__).resolve().parent.parent / "benchmarks" / (
+CHALLENGE_PATH = Path(__file__).resolve().parent.parent / "acis" / "evaluation" / "benchmarks" / (
     "challenge_set_v1.json"
 )
 
@@ -229,7 +229,7 @@ def test_coherence_llm_path_mapping(
         return {factor: factor != "leaf_dew" for factor in factors}
 
     monkeypatch.setattr(
-        "openmetaphysics.evaluation.challenge_scorer._llm_factor_coverage",
+        "acis.evaluation.openmetaphysics.evaluation.challenge_scorer._llm_factor_coverage",
         fake_llm,
     )
     factors = ["backside_mold", "angular_lesion", "leaf_dew", "differential"]
@@ -248,7 +248,7 @@ def test_coherence_llm_failure_falls_back_to_rules(
         raise RuntimeError("model unavailable")
 
     monkeypatch.setattr(
-        "openmetaphysics.evaluation.challenge_scorer._llm_factor_coverage",
+        "acis.evaluation.openmetaphysics.evaluation.challenge_scorer._llm_factor_coverage",
         broken_llm,
     )
     output = {
@@ -299,7 +299,7 @@ def test_action_plan_factor_uses_structured_action_plan_field() -> None:
         "reasoning_trace": "",
         "action_plan": ["清理病残体", "通风降湿"],
     }
-    from openmetaphysics.evaluation.challenge_scorer import calc_factor_coverage
+    from acis.evaluation.openmetaphysics.evaluation.challenge_scorer import calc_factor_coverage
     assert calc_factor_coverage(output, ["action_plan"], use_llm=False) == 1.0
 
 

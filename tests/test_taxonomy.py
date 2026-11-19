@@ -11,15 +11,15 @@ from pathlib import Path
 
 import pytest
 
-from benchmarks.loader import (
+from acis.evaluation.benchmarks.loader import (
     CAPABILITY_SUITES,
     DATASETS_DIR,
     load_all_suites,
     load_suite,
     suite_dataset_path,
 )
-from benchmarks.schema import BenchmarkValidationError
-from benchmarks.taxonomy import (
+from acis.evaluation.benchmarks.schema import BenchmarkValidationError
+from acis.evaluation.benchmarks.taxonomy import (
     CAPABILITY_COLUMNS,
     SUITE_MIN_CASES,
     SUITES,

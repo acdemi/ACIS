@@ -12,10 +12,10 @@ import json
 
 import pytest
 
-from agents.types import AgentOutput, DebateResult, DecisionOutput, RequestContext  # noqa: E402
-from planner.types import ExecutionPlan  # noqa: E402
-from tool_router import ToolRequest, ToolRoutingResult  # noqa: E402
-from trace import (  # noqa: E402
+from acis.core.types import AgentOutput, DebateResult, DecisionOutput, RequestContext  # noqa: E402
+from acis.reasoning.planner.types import ExecutionPlan  # noqa: E402
+from acis.reasoning.tool_router import ToolRequest, ToolRoutingResult  # noqa: E402
+from acis.observability.trace import (  # noqa: E402
     REQUIRED_STAGES,
     STAGE_ORDER,
     Trace,

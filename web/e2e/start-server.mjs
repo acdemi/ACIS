@@ -24,7 +24,7 @@ if (!Number.isInteger(port) || port < 1 || port > 65535) {
 
 const server = spawn(
   python,
-  ["-m", "uvicorn", "gateway.app:app", "--host", "127.0.0.1", "--port", String(port), "--app-dir", repositoryRoot],
+  ["-m", "uvicorn", "acis.api.app:app", "--host", "127.0.0.1", "--port", String(port), "--app-dir", repositoryRoot],
   { cwd: repositoryRoot, env: process.env, stdio: "inherit", windowsHide: true },
 );
 

@@ -17,7 +17,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT))
 
-from utils.confidence_calibration import combine_decision_score, compute_decision_signals
+from acis.utils.confidence_calibration import combine_decision_score, compute_decision_signals
 
 
 def load_run(run_dir: Path):

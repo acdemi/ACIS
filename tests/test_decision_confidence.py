@@ -6,10 +6,10 @@ import json
 
 import pytest
 
-from agents.judge_agent import JudgeAgent
-from agents.types import AgentOutput
-from decision_semantics import is_abstention
-from utils.confidence_calibration import (
+from acis.agents.judge_agent import JudgeAgent
+from acis.core.types import AgentOutput
+from acis.core.decision import is_abstention
+from acis.utils.confidence_calibration import (
     Calibrator,
     DecisionCalibrator,
     combine_decision_score,

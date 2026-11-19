@@ -114,7 +114,7 @@ def test_latency_percentile_uses_linear_interpolation(delivery_eval):
 def test_run_forces_and_restores_offline_configuration_and_sensor_state(
     delivery_eval, monkeypatch: pytest.MonkeyPatch, tmp_path: Path
 ):
-    import storage.db as database
+    import acis.knowledge.storage.db as database
 
     sentinel_db = tmp_path / "existing.sqlite3"
     sentinel_db.write_bytes(b"preserve this file")

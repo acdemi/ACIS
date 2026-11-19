@@ -8,7 +8,7 @@ from PIL import Image
 def test_frontend_shell_and_assets_are_public_but_api_remains_protected(
     monkeypatch, tmp_path
 ):
-    import gateway.app as gateway_module
+    import acis.api.app as gateway_module
 
     (tmp_path / "assets").mkdir()
     (tmp_path / "index.html").write_text(
@@ -26,7 +26,7 @@ def test_frontend_shell_and_assets_are_public_but_api_remains_protected(
 
 
 def test_missing_frontend_build_does_not_break_api_routes(monkeypatch, tmp_path):
-    import gateway.app as gateway_module
+    import acis.api.app as gateway_module
 
     monkeypatch.setattr(gateway_module, "WEB_DIST_DIR", tmp_path, raising=False)
     monkeypatch.setenv("ACIS_API_KEY", "test-key-" + "x" * 32)
@@ -39,7 +39,7 @@ def test_missing_frontend_build_does_not_break_api_routes(monkeypatch, tmp_path)
 def test_authenticated_image_upload_stages_image_and_diagnose_receives_path(
     monkeypatch, tmp_path
 ):
-    import gateway.app as gateway_module
+    import acis.api.app as gateway_module
 
     upload_dir = tmp_path / "uploads"
     monkeypatch.setenv("ACIS_IMAGE_UPLOAD_DIR", str(upload_dir))
@@ -92,7 +92,7 @@ def test_authenticated_image_upload_stages_image_and_diagnose_receives_path(
 
 
 def test_image_upload_rejects_unsupported_mime_and_invalid_content(monkeypatch, tmp_path):
-    import gateway.app as gateway_module
+    import acis.api.app as gateway_module
 
     monkeypatch.setenv("ACIS_IMAGE_UPLOAD_DIR", str(tmp_path / "uploads"))
     monkeypatch.setenv("ACIS_API_KEY", "test-key-" + "x" * 32)

@@ -12,21 +12,21 @@ from pathlib import Path
 
 import pytest
 
-from benchmarks.loader import (
+from acis.evaluation.benchmarks.loader import (
     BUILTIN_DATASETS,
     DATASETS_DIR,
     MODULE_PREFIX,
     resolve_dataset,
 )
-from benchmarks.loader import (
+from acis.evaluation.benchmarks.loader import (
     load_dataset as load_benchmark_dataset,
 )
-from benchmarks.schema import (
+from acis.evaluation.benchmarks.schema import (
     MIN_CASES_BY_DIFFICULTY,
     BenchmarkValidationError,
     validate_dataset,
 )
-from evals.config import EvalCase, EvalConfig, load_dataset
+from acis.evaluation.evals.config import EvalCase, EvalConfig, load_dataset
 
 
 def _cases(count: int, prefix: str = "case") -> list[dict]:

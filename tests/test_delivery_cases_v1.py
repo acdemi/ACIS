@@ -4,11 +4,11 @@ import random
 
 import pytest
 
-from agents.rag_memory_agent import RagMemoryAgent
-from agents.types import RequestContext
-from orchestrator import AgentOrchestrator, build_context
-from storage.repository import get_decision
-from ui.demo_cases import DEMO_CASES
+from acis.agents.rag_memory_agent import RagMemoryAgent
+from acis.core.types import RequestContext
+from acis.core.orchestrator import AgentOrchestrator, build_context
+from acis.knowledge.storage.repository import get_decision
+from acis.ui.demo_cases import DEMO_CASES
 
 
 MAIZE_QUERY, WHEAT_QUERY, INSUFFICIENT_QUERY = (case["query"] for case in DEMO_CASES)
@@ -17,7 +17,7 @@ TEST_API_KEY = "acis-test-key-0123456789abcdef0123456789"
 
 @pytest.fixture
 def isolated_database(monkeypatch: pytest.MonkeyPatch, tmp_path):
-    import storage.db as database
+    import acis.knowledge.storage.db as database
 
     monkeypatch.setattr(database, "_DB_PATH", tmp_path / "delivery.sqlite3")
     monkeypatch.setenv("AGRI_AI_KG_BACKEND", "memory")
@@ -74,7 +74,7 @@ def test_cereal_context_and_empty_input_validation():
 
 
 def test_rag_distinguishes_backend_failure_from_no_matching_knowledge(monkeypatch):
-    import agents.rag_memory_agent as rag_agent_module
+    import acis.agents.rag_memory_agent as rag_agent_module
 
     context = RequestContext(
         query="玉米叶斑病",
@@ -123,7 +123,7 @@ def test_agent_exception_is_recorded_as_failed_not_success(monkeypatch, isolated
 
 
 def test_memory_retriever_marks_empty_result_as_no_results(monkeypatch):
-    import rag.retriever as retriever
+    import acis.knowledge.rag.retriever as retriever
 
     monkeypatch.setattr(retriever, "_get_backend", lambda: "memory")
     monkeypatch.setattr(retriever, "_memory_hits", lambda *_args, **_kwargs: [])
@@ -139,8 +139,8 @@ def test_memory_retriever_marks_empty_result_as_no_results(monkeypatch):
 def test_vision_mock_and_inference_failure_are_not_reported_as_real_success(
     monkeypatch, tmp_path
 ):
-    import agents.vision as vision_module
-    from agents.vision_agent import VisionAgent
+    import acis.agents.vision as vision_module
+    from acis.agents.vision_agent import VisionAgent
 
     image_path = tmp_path / "leaf.jpg"
     image_path.write_bytes(b"image")
@@ -194,7 +194,7 @@ def test_langgraph_failure_is_visible_as_rules_fallback_in_trace(isolated_databa
 
 def test_api_returns_real_diagnosis_report_and_trace(monkeypatch, isolated_database):
     from fastapi.testclient import TestClient
-    import gateway.app as gateway_module
+    import acis.api.app as gateway_module
 
     class RulesOrchestrator(AgentOrchestrator):
         def __init__(self, **kwargs):
@@ -232,8 +232,8 @@ def test_builtin_case_patterns_are_not_claimed_as_confirmed_history(isolated_dat
 
 
 def test_critic_missing_credentials_records_rules_fallback(monkeypatch):
-    from debate.critic import CriticEngine
-    from agents.types import DebateResult
+    from acis.reasoning.debate.critic import CriticEngine
+    from acis.core.types import DebateResult
 
     monkeypatch.delenv("DEEPSEEK_API_KEY", raising=False)
     context = RequestContext(
@@ -258,7 +258,7 @@ def test_critic_missing_credentials_records_rules_fallback(monkeypatch):
 
 def test_api_key_protects_diagnosis_and_audit_routes(monkeypatch, isolated_database):
     from fastapi.testclient import TestClient
-    import gateway.app as gateway_module
+    import acis.api.app as gateway_module
 
     monkeypatch.delenv("ACIS_API_KEY", raising=False)
     client = TestClient(gateway_module.app)
@@ -292,7 +292,7 @@ def test_api_key_protects_diagnosis_and_audit_routes(monkeypatch, isolated_datab
 
 def test_api_rejects_unbounded_server_image_paths(monkeypatch, tmp_path):
     from fastapi.testclient import TestClient
-    import gateway.app as gateway_module
+    import acis.api.app as gateway_module
 
     monkeypatch.setenv("ACIS_API_KEY", TEST_API_KEY)
     image_path = tmp_path / "outside.png"
@@ -309,7 +309,7 @@ def test_api_rejects_unbounded_server_image_paths(monkeypatch, tmp_path):
 
 def test_api_accepts_staged_image_within_size_limit(monkeypatch, tmp_path):
     from io import BytesIO
-    import gateway.app as gateway_module
+    import acis.api.app as gateway_module
     from PIL import Image
 
     upload_dir = tmp_path / "uploads"
@@ -326,7 +326,7 @@ def test_api_accepts_staged_image_within_size_limit(monkeypatch, tmp_path):
 def test_api_rejects_image_content_that_does_not_match_extension(monkeypatch, tmp_path):
     from io import BytesIO
     from fastapi import HTTPException
-    import gateway.app as gateway_module
+    import acis.api.app as gateway_module
     from PIL import Image
 
     upload_dir = tmp_path / "uploads"
@@ -344,7 +344,7 @@ def test_api_rejects_image_content_that_does_not_match_extension(monkeypatch, tm
 
 def test_api_rejects_staged_image_over_size_limit(monkeypatch, tmp_path):
     from fastapi import HTTPException
-    import gateway.app as gateway_module
+    import acis.api.app as gateway_module
 
     upload_dir = tmp_path / "uploads"
     upload_dir.mkdir()
@@ -360,7 +360,7 @@ def test_api_rejects_staged_image_over_size_limit(monkeypatch, tmp_path):
 
 def test_api_rejects_blank_and_oversized_queries(monkeypatch):
     from fastapi.testclient import TestClient
-    import gateway.app as gateway_module
+    import acis.api.app as gateway_module
 
     monkeypatch.setenv("ACIS_API_KEY", TEST_API_KEY)
     headers = {"X-API-Key": TEST_API_KEY}
@@ -373,7 +373,7 @@ def test_api_rejects_blank_and_oversized_queries(monkeypatch):
 
 def test_api_validates_audit_query_and_feedback_parameters(monkeypatch):
     from fastapi.testclient import TestClient
-    import gateway.app as gateway_module
+    import acis.api.app as gateway_module
 
     monkeypatch.setenv("ACIS_API_KEY", TEST_API_KEY)
     client = TestClient(gateway_module.app)
@@ -410,7 +410,7 @@ def test_api_validates_audit_query_and_feedback_parameters(monkeypatch):
 
 
 def test_neo4j_driver_is_not_created_without_explicit_password(monkeypatch):
-    import kg_adapter
+    import acis.knowledge.kg.adapter as kg_adapter
 
     monkeypatch.setenv("NEO4J_PASSWORD", "")
     monkeypatch.setattr(kg_adapter, "_driver", None)

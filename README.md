@@ -42,12 +42,12 @@ ACIS 将问诊拆成可审计的多阶段流程，输出：
 
 ```mermaid
 flowchart TD
-  CLI["CLI: orchestrator.py"] --> ORCH["AgentOrchestrator.run"]
-  TUI["TUI: ui/tui.py"] --> ORCH
-  WEB["Vue 3 + TypeScript Web"] --> API["FastAPI: gateway/app.py"]
+  CLI["CLI: python -m acis"] --> ORCH["AgentOrchestrator.run"]
+  TUI["TUI: acis/ui/tui/"] --> ORCH
+  WEB["Vue 3 + TypeScript Web"] --> API["FastAPI: acis/api/app.py"]
   API --> ORCH
   ORCH --> LG{"LangGraph 可用?"}
-  LG -- "是" --> WF["workflow.py：context→perception→memory→experts→debate→critic→judge"]
+  LG -- "是" --> WF["acis/core/workflow.py：context→perception→memory→experts→debate→critic→judge"]
   LG -- "否 / 异常" --> RULES["run_rules 规则编排"]
   WF --> PER["感知：视觉(可选/跳过) + 传感器(模拟) + 天气(模拟)"]
   RULES --> PER
@@ -73,27 +73,27 @@ flowchart TD
 | 层 | 选型 |
 |---|---|
 | 语言 / 运行时 | Python 3.13（开发环境 3.13.3）；Windows 与 Linux 均可运行核心文本链路 |
-| 工作流编排 | LangGraph `StateGraph`（`workflow.py:37`），异常时自动回退自研规则编排（`orchestrator.py:172`） |
-| API | FastAPI + uvicorn + pydantic（`gateway/app.py:25`） |
+| 工作流编排 | LangGraph `StateGraph`（`acis/core/workflow.py`），异常时自动回退自研规则编排（`acis/core/orchestrator.py`） |
+| API | FastAPI + uvicorn + pydantic（`acis/api/app.py`） |
 | 模型接入 | OpenAI-compatible（`openai` SDK）；Judge/Critic 可选，无 key 自动回退规则 |
 | 检索 / 知识 | Qdrant 优先 + 内存回退；Neo4j 优先 + 内置 `DISEASE_DB` 回退 |
-| 持久化 | SQLite（标准库 `sqlite3`，`storage/db.py`） |
-| 终端 UI | Rich（`ui/tui.py`） |
+| 持久化 | SQLite（标准库 `sqlite3`，`acis/knowledge/storage/db.py`） |
+| 终端 UI | Rich（`acis/ui/tui/`） |
 | Web UI | Vue 3 + Vite + TypeScript；Vitest + vue-tsc |
-| 测试 | pytest（27 个测试文件、366 个收集项；见第 8 节实际结果） |
+| 测试 | pytest（33 个测试文件；见第 8 节实际结果） |
 | 可选 Python 依赖 | transformers/torch（视觉可选路径）、scikit-learn（异常检测基线）；不参与 Vue 构建 |
 
 ## 5. 核心工程实现
 
 本项目重点不是堆叠 Agent 名称，而是下面几处可核对的工程决策：
 
-1. **工作流编排与规则回退**：LangGraph 主图抛错或不可用时回退 `run_rules`（`orchestrator.py:172-178`），`--rules-only` 可强制跳过；两条路径共享同一输出契约，回退对调用方透明。
-2. **LLM 故障分类与留痕**：`agents/judge_agent.py:73` 记录 `fallback_reason_code`（连接失败 / 超时 / 非 JSON / 5xx 等），`:142` 在缺失证据里标注回退原因，`:146` 打印脱敏日志（不输出 key）；回退后 `judge_mode=rules`，不与真实模型结果混淆。
-3. **统一 10 阶段 Trace**：`trace/types.py:36-47` 定义固定阶段序列（request → … → metrics），`trace/exporter.py:37` 导出 JSON；CLI `--trace-out` 一条命令产出。
-4. **SQLite 决策审计**：`storage/db.py:16` 的 `decisions` 表记录裁决、置信度、风险、`judge_mode` 与 Trace；`GET /decisions`、`GET /decisions/{id}` 可直接查询。
+1. **工作流编排与规则回退**：LangGraph 主图抛错或不可用时回退 `run_rules`（`acis/core/orchestrator.py`），`--rules-only` 可强制跳过；两条路径共享同一输出契约，回退对调用方透明。
+2. **LLM 故障分类与留痕**：`acis/agents/judge_agent.py` 记录 `fallback_reason_code`（连接失败 / 超时 / 非 JSON / 5xx 等），`:142` 在缺失证据里标注回退原因，`:146` 打印脱敏日志（不输出 key）；回退后 `judge_mode=rules`，不与真实模型结果混淆。
+3. **统一 10 阶段 Trace**：`acis/observability/trace/types.py` 定义固定阶段序列（request → … → metrics），`acis/observability/trace/exporter.py` 导出 JSON；CLI `--trace-out` 一条命令产出。
+4. **SQLite 决策审计**：`acis/knowledge/storage/db.py` 的 `decisions` 表记录裁决、置信度、风险、`judge_mode` 与 Trace；`GET /decisions`、`GET /decisions/{id}` 可直接查询。
 5. **多入口同链路**：CLI、TUI 与 FastAPI 复用同一个 `AgentOrchestrator`；Vue Web 只调用受保护的 FastAPI API，不复制诊断逻辑。
 6. **离线测试与固定评测**：`tests/` 覆盖契约、回退、Trace 与 CLI 端到端；`scripts/run_delivery_eval.py` 以 12 例固定夹具做零 API 回归。
-7. **Windows 编码兼容**：窄编码控制台（GBK）下 `orchestrator.py` 的 `_print_safe` 降级输出，避免 `UnicodeEncodeError` 把诊断结果顶掉。
+7. **Windows 编码兼容**：窄编码控制台（GBK）下 `acis/cli.py` / `acis/core/orchestrator.py` 的 `_print_safe` 降级输出，避免 `UnicodeEncodeError` 把诊断结果顶掉。
 
 ## 6. 快速开始
 
@@ -105,14 +105,17 @@ python -m venv .venv
 .\.venv\Scripts\Activate.ps1
 pip install -r requirements.txt
 Copy-Item .env.example .env   # 可选；不填 key 时自动走规则
-$env:PYTHONIOENCODING='utf-8'; $env:PYTHONPATH='.'
-python orchestrator.py --rules-only --seed 7 "温室A番茄叶片出现黄斑，叶背有灰色霉层，如何处理？"
+$env:PYTHONIOENCODING='utf-8'
+python -m acis --rules-only --seed 7 "温室A番茄叶片出现黄斑，叶背有灰色霉层，如何处理？"
 ```
+
+> 兼容入口：`python orchestrator.py ...` 仍可用（薄 shim）；新脚本推荐 `python -m acis`。
+> 也可以 `pip install -e .` 后直接使用 `acis` 命令。
 
 - `--rules-only`：跳过 LangGraph，直接规则编排；`--seed` 固定模拟层随机部分；
 - `--trace-out logs/trace.json`：导出 10 阶段 Trace；`--json` 输出结构化结果；
-- TUI：`python -m ui.tui`（9 个场景，含 3 个固定案例）；
-- API：`uvicorn gateway.app:app --port 8000`，先设置 `ACIS_API_KEY`；`GET /health` 为公开健康检查，其余 API 路由需要 `X-API-Key`；
+- TUI：`python -m acis tui`（9 个场景，含 3 个固定案例）；
+- API：`uvicorn acis.api.app:app --port 8000`，先设置 `ACIS_API_KEY`；`GET /health` 为公开健康检查，其余 API 路由需要 `X-API-Key`；
 - LLM Judge/Critic：设置 `AGRI_AI_JUDGE_*`（或 `DEEPSEEK_API_KEY` 等兼容变量），
   无 key/网络失败自动回退规则，并在 `judge_runtime.fallback_reason_code` 记录原因。
 
@@ -124,7 +127,7 @@ python orchestrator.py --rules-only --seed 7 "温室A番茄叶片出现黄斑，
 ```powershell
 # 终端一：本地 API。将示例值替换为本机专用、至少 32 个 ASCII 字符的随机 Key
 $env:ACIS_API_KEY='replace-with-a-private-key-of-at-least-32-characters'
-uvicorn gateway.app:app --host 127.0.0.1 --port 8000
+uvicorn acis.api.app:app --host 127.0.0.1 --port 8000
 
 # 终端二：安装并启动 Vue 开发服务器
 npm ci --prefix web
@@ -245,8 +248,8 @@ KG参照疾病：番茄叶霉病、番茄早疫病；未触发KG硬约束否决�
 
 | 项目 | 结果 | 说明 |
 |---|---|---|
-| 测试套件 | 30 个测试文件 / **397 个收集项** | 本轮 `pytest -q` 实测；含 2 个显式 skip |
-| 全量 pytest（Windows + Python 3.13.3） | **395 passed / 2 skipped / 30 warnings**，311.94s，exit 0 | 两个 skip 因仓库外 Phase 4 harness 缺失；warning 为 1 条 Starlette 弃用提示与 29 条 Qdrant 服务版本探测告警 |
+| 测试套件 | 33 个测试文件 / **404 passed + 2 module-level skip** | 包化重构后 `pytest -q` 实测；含 2 个显式 skip |
+| 全量 pytest（Windows + Python 3.13.3） | **404 passed / 2 skipped / 30 warnings**，202.15s，exit 0 | 两个 skip 因仓库外 Phase 4 harness 缺失；warning 为 1 条 Starlette 弃用提示与 29 条 Qdrant 服务版本探测告警 |
 | 交付诊断测试 | **38 passed / 8 warnings** | `tests/test_delivery_cases_v1.py` + `tests/test_delivery_contract.py`；包含实际诊断输出与 Trace 断言 |
 | Vue 前端 | **9 passed**；Node.js 22.22.2 下 `npm run build` 通过 | Vitest；build 同时运行 Vue 与 Playwright E2E TypeScript 检查及 Vite production build |
 | Vue 浏览器 E2E | **11 passed / 0 failed / 0 skipped** | Chromium + FastAPI + Vue production build；诊断使用 rules Judge / memory RAG-KG，受控故障由浏览器 route 注入；截图和 JSON 在 `reports/web-e2e-20261119064633-515c7dd4-9781-413a-a028-2887c3e6c9d6/` |
@@ -280,7 +283,7 @@ KG参照疾病：番茄叶霉病、番茄早疫病；未触发KG硬约束否决�
 - Phase 6/Phase 4.2 实验为单 seed 或少量有效样本，不能外推为泛化能力；
 - 工具执行与 MCP 服务未纳入本轮验证；本轮 Vue 浏览器 E2E 使用 rules Judge 与 memory RAG/KG，真实外部知识语料和 LLM 推理未验证；Compose 仅以非密钥占位环境变量通过静态解析，Docker daemon 不可用，镜像构建/运行未验证；2026-10-24 的容器验收不代表当前 Vue 镜像；
 - 农业诊断准确率、Macro-F1、Top-3、人工因子覆盖、弃权质量、置信度校准、Recall@K、泛化 fallback rate 和本次 Token Cost 均未测量；固定夹具命中率不可替代这些指标；
-- 全量测试本次结果为 `pytest -q` → **395 passed, 2 skipped, 30 warnings**（311.94s）；两个 skip 因 Phase 4 评测 harness 不在本仓库中，由 `importorskip` 显式标记；
+- 全量测试本次结果为 `pytest -q` → **404 passed, 2 skipped, 30 warnings**（202.15s）；两个 skip 因 Phase 4 评测 harness 不在本仓库中，由 `importorskip` 显式标记；
 - 没有真实田间数据、用户规模或生产运维经验。
 
 ## 10. 文档导航

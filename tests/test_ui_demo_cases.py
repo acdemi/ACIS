@@ -2,9 +2,9 @@ from io import StringIO
 
 from rich.console import Console
 
-from trace.types import Trace, TraceEvent
-from ui.demo_cases import DEMO_CASES
-from ui import tui
+from acis.observability.trace.types import Trace, TraceEvent
+from acis.ui.demo_cases import DEMO_CASES
+from acis.ui import tui
 
 
 def test_tui_fixed_cases_use_the_shared_v1_inputs():
@@ -36,7 +36,7 @@ def test_tui_trace_view_renders_actual_trace_id_and_events(monkeypatch):
 
 
 def test_tui_history_shows_a_real_empty_state(monkeypatch):
-    import storage.repository as repository
+    import acis.knowledge.storage.repository as repository
 
     output = StringIO()
     monkeypatch.setattr(repository, "list_decisions", lambda _limit: [])

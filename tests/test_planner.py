@@ -7,8 +7,8 @@ falls back to rules on failure.
 """
 from __future__ import annotations
 
-from agents.types import AgentOutput, DebateResult, DecisionOutput  # noqa: E402
-from planner import ExecutionPlan, Planner, build_planner  # noqa: E402
+from acis.core.types import AgentOutput, DebateResult, DecisionOutput  # noqa: E402
+from acis.reasoning.planner import ExecutionPlan, Planner, build_planner  # noqa: E402
 
 
 def _trace(agent: str, claim: str, confidence: float = 0.7) -> AgentOutput:

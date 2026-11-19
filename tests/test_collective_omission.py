@@ -13,9 +13,9 @@ from dataclasses import fields as dataclass_fields
 
 import pytest
 
-from agents.judge_agent import JudgeAgent  # noqa: E402
-from agents.types import AgentOutput, DebateResult, DecisionOutput, RequestContext  # noqa: E402
-from utils.omission import (  # noqa: E402
+from acis.agents.judge_agent import JudgeAgent  # noqa: E402
+from acis.core.types import AgentOutput, DebateResult, DecisionOutput, RequestContext  # noqa: E402
+from acis.utils.omission import (  # noqa: E402
     CONFIDENCE_FLOOR,
     PENALTY_MAX,
     PENALTY_STEP,

@@ -8,8 +8,8 @@ from typing import ClassVar
 
 import pytest
 
-from agents.types import AgentOutput, DebateResult, RequestContext
-from utils.judge_runtime import (
+from acis.core.types import AgentOutput, DebateResult, RequestContext
+from acis.utils.judge_runtime import (
     classify_failure,
     redact_error_detail,
     resolve_judge_config,
@@ -99,7 +99,7 @@ def _run(
     import openai
 
     monkeypatch.setattr(openai, "OpenAI", client_type)
-    import agents.judge_agent as judge_module
+    import acis.agents.judge_agent as judge_module
 
     monkeypatch.setattr(
         judge_module,

@@ -11,7 +11,7 @@ import json
 from pathlib import Path
 from typing import Any
 
-from experiments.analysis import (
+from acis.evaluation.experiments.analysis import (
     analyze_experiment,
     bootstrap_mean_ci,
     format_analysis_markdown,

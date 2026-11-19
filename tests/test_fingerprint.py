@@ -6,7 +6,7 @@ import hashlib
 import json
 from pathlib import Path
 
-from experiments.fingerprint import (
+from acis.evaluation.experiments.fingerprint import (
     augment_manifest,
     compute_dataset_sha256,
     verify_experiment,

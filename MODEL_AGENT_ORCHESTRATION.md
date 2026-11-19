@@ -104,7 +104,7 @@ flowchart TD
 验证命令：
 
 ```powershell
-python orchestrator.py --llm-judge "温室A番茄叶片黄斑，叶背有灰色霉层，如何处理？"
+python -m acis --llm-judge "温室A番茄叶片黄斑，叶背有灰色霉层，如何处理？"
 python evals/smoke_eval.py
 ```
 
@@ -132,25 +132,25 @@ python -m rag.retriever --query "番茄叶背灰色霉层" --crop tomato
 
 Judge 不再直接相信单一专家，而是把农业知识图谱当作“教科书级常识”做一致性检查：
 
-1. `kg_adapter.query_kg(crop, query)` 为混合 KG：`AGRI_AI_KG_BACKEND=auto` 时优先查 Neo4j+AgriKG，不可用或空命中时回退内置 `DISEASE_DB` 合成；返回固定字段 `diseases/triples/triple_strings/rules/hard_constraints` 外加 `backend=neo4j|memory|fallback`。
+1. `acis.knowledge.kg.adapter.query_kg(crop, query)` 为混合 KG：`AGRI_AI_KG_BACKEND=auto` 时优先查 Neo4j+AgriKG，不可用或空命中时回退内置 `DISEASE_DB` 合成；返回固定字段 `diseases/triples/triple_strings/rules/hard_constraints` 外加 `backend=neo4j|memory|fallback`。
 2. 规则 Judge 执行第 3 步硬约束否决：例如某高湿病害要求湿度>85%，但传感器湿度明显偏低（<阈值×0.6）时，该病理诊断被否决、置信度封顶 0.6、触发人工复核。
 3. DeepSeek Judge（`--llm-judge`）使用 5 步裁决 Prompt：KG 一致性校验 → 专家交叉验证 → 硬约束否决 → 证据权重打分 → 置信度融合；严重冲突时置信度上限 0.7 并触发 `need_human_review`。
 4. `DecisionOutput` 新增 `need_human_review`、`reasoning_trace`、`judge_analysis`，CLI/API/UI 均可透出。
-5. `kg_adapter` 现已接入真实 AgriKG（Neo4j 优先、`DISEASE_DB` 兜底）。Neo4j 命中时把 AgriKG 的 `:Disease` 实体与 `:RELATION` 三元组合并进记忆基线（记忆疾病在前，保证病理诊断的 KG 匹配不被削弱）；硬约束仍以 `DISEASE_DB` 结构化阈值为准，保证否决逻辑确定性。Judge 契约不变。
+5. `acis.knowledge.kg.adapter` 现已接入真实 AgriKG（Neo4j 优先、`DISEASE_DB` 兜底）。Neo4j 命中时把 AgriKG 的 `:Disease` 实体与 `:RELATION` 三元组合并进记忆基线（记忆疾病在前，保证病理诊断的 KG 匹配不被削弱）；硬约束仍以 `DISEASE_DB` 结构化阈值为准，保证否决逻辑确定性。Judge 契约不变。
 
 KG 环境变量：
 
 - `AGRI_AI_KG_BACKEND`：默认 `auto`，可选 `auto|neo4j|memory`
 - `NEO4J_URI` / `NEO4J_USER` / `NEO4J_PASSWORD`：默认 `bolt://localhost:7687` / `neo4j` / `neo4j`
 
-> 真实图谱需先用 `agri-agent-mvp/scripts/import_agrikg.py` 导入 AgriKG；未导入时 `kg_adapter.py --status` 显示 `effective_backend=memory`，系统照常离线运行。
+> 真实图谱需先用 `agri-agent-mvp/scripts/import_agrikg.py` 导入 AgriKG；未导入时 `python -m acis.knowledge.kg.adapter --status` 显示 `effective_backend=memory`，系统照常离线运行。
 
 验证命令：
 
 ```powershell
-python kg_adapter.py --crop tomato --query "叶片黄斑，叶背灰色霉层"
-python orchestrator.py "温室A番茄叶片黄斑，叶背有灰色霉层，如何处理？"
-python orchestrator.py --json "温室A番茄叶片黄斑，叶背有灰色霉层，如何处理？"
+python -m acis.knowledge.kg.adapter --crop tomato --query "叶片黄斑，叶背灰色霉层"
+python -m acis "温室A番茄叶片黄斑，叶背有灰色霉层，如何处理？"
+python -m acis --json "温室A番茄叶片黄斑，叶背有灰色霉层，如何处理？"
 ```
 
 
@@ -174,7 +174,7 @@ python evals/fixture_eval.py    # 12 个确定性场景（crop/intent/病害 断
 
 ## 目录收编
 
-AgriKG 相关代码已收编进主项目：`kg/mcp_server.py`（MCP Server）、`scripts/import_agrikg.py`（导入脚本）、`scripts/AGRiKG_SETUP.md`（集成指南）。`kg_adapter.py` 为 Judge 提供混合 KG 检索（Neo4j 优先、DISEASE_DB 兜底）。
+AgriKG 相关代码已收编进主项目：`acis/knowledge/kg/mcp_server.py`（MCP Server）、`scripts/import_agrikg.py`（导入脚本）、`scripts/AGRiKG_SETUP.md`（集成指南）。`acis/knowledge/kg/adapter.py` 为 Judge 提供混合 KG 检索（Neo4j 优先、DISEASE_DB 兜底）。
 
 ## 支持作物
 

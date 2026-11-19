@@ -11,13 +11,13 @@ from pathlib import Path
 
 import pytest
 
-from benchmarks.capabilities import (
+from acis.evaluation.benchmarks.capabilities import (
     ALL_CAPABILITIES,
     Capability,
     capability_from_reasoning_feature,
     parse_capabilities,
 )
-from benchmarks.capability_matrix import (
+from acis.evaluation.benchmarks.capability_matrix import (
     CapabilityCoverageRow,
     build_annotation_suggestions,
     build_capability_coverage,
@@ -27,8 +27,8 @@ from benchmarks.capability_matrix import (
     scan_case_capabilities,
     write_capability_docs,
 )
-from benchmarks.loader import DATASETS_DIR
-from benchmarks.metadata import (
+from acis.evaluation.benchmarks.loader import DATASETS_DIR
+from acis.evaluation.benchmarks.metadata import (
     BenchmarkMetadataError,
     validate_enriched_case,
     validate_metadata,
@@ -155,7 +155,7 @@ def test_validate_metadata_rejects_evidence_not_in_capabilities() -> None:
 
 
 def test_validate_observable_evidence_format() -> None:
-    from benchmarks.metadata import validate_observable_evidence
+    from acis.evaluation.benchmarks.metadata import validate_observable_evidence
 
     evidence = validate_observable_evidence(
         {
@@ -179,7 +179,7 @@ def test_validate_metadata_lenient_for_legacy_scan() -> None:
 
 
 def test_legacy_enriched_cases_remain_valid() -> None:
-    from benchmarks.loader import load_dataset
+    from acis.evaluation.benchmarks.loader import load_dataset
 
     for case in load_dataset("benchmarks.datasets.enriched"):
         validate_enriched_case(case)  # must not raise (pending annotation)
@@ -198,7 +198,7 @@ def test_coverage_rows_cover_all_capabilities() -> None:
 
 
 def test_annotated_cases_are_consistent() -> None:
-    from benchmarks.capability_matrix import build_consistency_rows
+    from acis.evaluation.benchmarks.capability_matrix import build_consistency_rows
 
     rows = build_consistency_rows(load_all_datasets())
     annotated = [row for row in rows if row["status"] != "unannotated"]
@@ -305,7 +305,7 @@ def test_write_capability_docs(tmp_path: Path) -> None:
 
 
 def test_check_case_consistency_consistent() -> None:
-    from benchmarks.capability_matrix import check_case_consistency
+    from acis.evaluation.benchmarks.capability_matrix import check_case_consistency
 
     case = {
         "id": "x",
@@ -326,14 +326,14 @@ def test_check_case_consistency_consistent() -> None:
 
 
 def test_check_case_consistency_unannotated() -> None:
-    from benchmarks.capability_matrix import check_case_consistency
+    from acis.evaluation.benchmarks.capability_matrix import check_case_consistency
 
     check = check_case_consistency({"id": "x", "query": "q"})
     assert check["status"] == "unannotated"
 
 
 def test_check_case_consistency_inconsistent_missing_evidence() -> None:
-    from benchmarks.capability_matrix import check_case_consistency
+    from acis.evaluation.benchmarks.capability_matrix import check_case_consistency
 
     case = {
         "id": "x",
@@ -347,7 +347,7 @@ def test_check_case_consistency_inconsistent_missing_evidence() -> None:
 
 
 def test_check_case_consistency_inconsistent_intent() -> None:
-    from benchmarks.capability_matrix import check_case_consistency
+    from acis.evaluation.benchmarks.capability_matrix import check_case_consistency
 
     case = {
         "id": "x",
@@ -368,7 +368,7 @@ def test_check_case_consistency_inconsistent_intent() -> None:
 
 
 def test_render_consistency_report(tmp_path: Path) -> None:
-    from benchmarks.capability_matrix import (
+    from acis.evaluation.benchmarks.capability_matrix import (
         build_consistency_rows,
         render_consistency_report,
         write_consistency_report,
@@ -390,7 +390,7 @@ def test_render_consistency_report(tmp_path: Path) -> None:
 def test_capability_ablation_stats_groups_by_capability(tmp_path: Path) -> None:
     import csv
 
-    from benchmarks.capability_matrix import (
+    from acis.evaluation.benchmarks.capability_matrix import (
         capability_ablation_stats,
         write_capability_ablation_stats,
     )

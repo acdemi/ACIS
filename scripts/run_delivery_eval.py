@@ -84,11 +84,11 @@ def _offline_environment(db_path: Path) -> Iterator[None]:
 
 
 def _load_runtime():
-    from evals.fixtures import FIXTURES
-    import agents.weather as weather_module
-    from orchestrator import AgentOrchestrator, build_context
-    from rule_engine import sensor_anomaly
-    import storage.db as database
+    from acis.evaluation.evals.fixtures import FIXTURES
+    import acis.agents.weather as weather_module
+    from acis.core.orchestrator import AgentOrchestrator, build_context
+    from acis.reasoning.rule_engine import sensor_anomaly
+    import acis.knowledge.storage.db as database
 
     return (
         FIXTURES,
@@ -474,14 +474,14 @@ def write_reports(summary: dict, output_dir: Path) -> tuple[Path, Path]:
     return json_path, md_path
 
 
-def main() -> int:
+def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description="ACIS offline delivery evaluation")
     parser.add_argument(
         "--output-dir",
         default=str(ROOT / "reports" / "delivery_eval"),
         help="report output directory (default: reports/delivery_eval)",
     )
-    args = parser.parse_args()
+    args = parser.parse_args(argv)
 
     summary = run()
     json_path, md_path = write_reports(summary, Path(args.output_dir))

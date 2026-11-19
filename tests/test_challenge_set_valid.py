@@ -15,10 +15,10 @@ from pathlib import Path
 
 import pytest
 
-from benchmarks.loader import DATASETS_DIR, load_all_suites, load_dataset
-from openmetaphysics.evaluation.challenge_scorer import VALID_GROUPS
+from acis.evaluation.benchmarks.loader import DATASETS_DIR, load_all_suites, load_dataset
+from acis.evaluation.openmetaphysics.evaluation.challenge_scorer import VALID_GROUPS
 
-CHALLENGE_PATH = Path(__file__).resolve().parent.parent / "benchmarks" / (
+CHALLENGE_PATH = Path(__file__).resolve().parent.parent / "acis" / "evaluation" / "benchmarks" / (
     "challenge_set_v1.json"
 )
 MIN_CASES_PER_GROUP = 5
