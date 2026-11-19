@@ -6,7 +6,8 @@
 #   ./start.sh status     show service status
 #   ./start.sh logs       tail API logs
 #   ./start.sh stop       stop (keep data volumes)
-# Optional: export DEEPSEEK_API_KEY='sk-...' before start for LLM Judge/Critic
+# Docker Compose requires private ACIS_API_KEY and NEO4J_PASSWORD values in .env or the environment.
+# Optional: export DEEPSEEK_API_KEY before start for LLM Judge/Critic.
 
 set -euo pipefail
 
@@ -42,12 +43,14 @@ show_hints() {
   echo "============================================"
   echo "  ACIS is up"
   echo "  API:        http://localhost:8000   (GET /health, POST /diagnose)"
-  echo "  Neo4j console: http://localhost:17474 (neo4j / agriai2026)"
+  echo "  Neo4j console: http://localhost:17474"
   echo "  Qdrant:     http://localhost:6333"
   echo "============================================"
   echo ""
   echo "Tips:"
-  echo "  - Enable LLM Judge/Critic: export DEEPSEEK_API_KEY='sk-...' before start"
+  echo "  - Set ACIS_API_KEY and NEO4J_PASSWORD in .env; do not commit secrets"
+  echo "  - API is bound to localhost; send X-API-Key for diagnosis requests"
+  echo "  - Enable LLM Judge/Critic by setting DEEPSEEK_API_KEY before start"
   echo "  - Import real AgriKG graph:  ./start.sh import"
   echo "  - Stop:                      ./start.sh stop"
 }

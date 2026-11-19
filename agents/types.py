@@ -28,6 +28,7 @@ class AgentOutput:
     # rings, Alternaria would become the preferred diagnosis. Intended for
     # later Judge robustness analysis.
     counterfactual_observations: list[str] = field(default_factory=list)
+    execution: dict[str, Any] = field(default_factory=dict)
 
 
 @dataclass

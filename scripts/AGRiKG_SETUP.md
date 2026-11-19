@@ -33,12 +33,13 @@ pest.json / pesticide.json / relations.json` 这样的结构化文件——**这
 
 ### 1. 安装 Neo4j
 
-**方法 A：Neo4j Desktop（推荐）** — https://neo4j.com/download/ ，创建本地数据库（默认密码
-`neo4j`），启动并确认 7687 端口可用。
+**方法 A：Neo4j Desktop（推荐）** — https://neo4j.com/download/ ，创建本地数据库并设置唯一强密码，启动并确认 7687 端口可用。将密码仅保存在本地环境变量 `NEO4J_PASSWORD` 中。
 
 **方法 B：Docker**
 ```powershell
-docker run -d --name neo4j -p 7474:7474 -p 7687:7687 -e NEO4J_AUTH=neo4j/neo4j neo4j:5
+$env:NEO4J_PASSWORD = Read-Host "Enter a unique Neo4j password"
+docker run -d --name neo4j -p 127.0.0.1:7474:7474 -p 127.0.0.1:7687:7687 `
+  -e "NEO4J_AUTH=neo4j/$env:NEO4J_PASSWORD" neo4j:5.26-community
 ```
 
 ### 2. 安装 Python 依赖

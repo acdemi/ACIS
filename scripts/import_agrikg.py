@@ -22,7 +22,7 @@
     --yes            跳过交互确认
 
 环境变量：NEO4J_URI / NEO4J_USER / NEO4J_PASSWORD
-         （默认 bolt://localhost:7687 / neo4j / neo4j）
+         NEO4J_PASSWORD 必须显式配置；连接地址默认 bolt://localhost:7687 / neo4j
 """
 
 import argparse
@@ -34,7 +34,7 @@ from pathlib import Path
 
 NEO4J_URI = os.environ.get("NEO4J_URI", "bolt://localhost:7687")
 NEO4J_USER = os.environ.get("NEO4J_USER", "neo4j")
-NEO4J_PASSWORD = os.environ.get("NEO4J_PASSWORD", "neo4j")
+NEO4J_PASSWORD = os.environ.get("NEO4J_PASSWORD", "").strip()
 
 # 病害 / 虫害标题关键词（用于 --disease-only 过滤与 :Disease/:Pest 打标）
 DISEASE_KEYWORDS = [
@@ -47,6 +47,8 @@ PEST_KEYWORDS = [
 
 
 def get_driver():
+    if not NEO4J_PASSWORD:
+        raise RuntimeError("NEO4J_PASSWORD must be set before importing AgriKG")
     from neo4j import GraphDatabase  # 懒加载：未安装 neo4j 时 --help 仍可用
     return GraphDatabase.driver(NEO4J_URI, auth=(NEO4J_USER, NEO4J_PASSWORD))
 

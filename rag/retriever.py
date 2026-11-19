@@ -271,28 +271,56 @@ def retrieve_with_backend(query: str, crop: str = "", top_k: int | None = None) 
     """Retrieve hits and report which backend produced them."""
     backend = _get_backend()
     if backend == "memory":
-        return {"backend": "memory", "matches": _memory_hits(query, crop, top_k)}
+        matches = _memory_hits(query, crop, top_k)
+        return {
+            "backend": "memory",
+            "requested_backend": backend,
+            "retrieval_status": "success" if matches else "no_results",
+            "matches": matches,
+        }
 
     if backend in {"auto", "qdrant"} and (backend == "qdrant" or _QDRANT_AVAILABLE):
         try:
             hits = _qdrant_hits(query, crop, top_k)
             if hits or backend == "qdrant":
-                return {"backend": "qdrant", "matches": hits}
+                return {
+                    "backend": "qdrant",
+                    "requested_backend": backend,
+                    "retrieval_status": "success" if hits else "no_results",
+                    "matches": hits,
+                }
             return {
-                "backend": "fallback",
+                "backend": "memory",
+                "requested_backend": backend,
+                "retrieval_status": "fallback",
+                "fallback_reason": "qdrant_no_hits",
                 "matches": _memory_hits(query, crop, top_k),
-                "error": "Qdrant returned no hits",
             }
         except Exception as exc:
             if backend == "qdrant":
-                raise
+                return {
+                    "backend": "qdrant",
+                    "requested_backend": backend,
+                    "retrieval_status": "failed",
+                    "matches": [],
+                    "error": f"{type(exc).__name__}: {exc}",
+                }
             return {
-                "backend": "fallback",
+                "backend": "memory",
+                "requested_backend": backend,
+                "retrieval_status": "fallback",
+                "fallback_reason": "qdrant_error",
                 "matches": _memory_hits(query, crop, top_k),
                 "error": str(exc),
             }
 
-    return {"backend": "memory", "matches": _memory_hits(query, crop, top_k)}
+    return {
+        "backend": "memory",
+        "requested_backend": backend,
+        "retrieval_status": "fallback",
+        "fallback_reason": "qdrant_client_unavailable",
+        "matches": _memory_hits(query, crop, top_k),
+    }
 
 
 def main() -> None:

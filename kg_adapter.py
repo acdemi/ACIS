@@ -19,7 +19,7 @@ Env:
   AGRI_AI_KG_BACKEND=auto|neo4j|memory  (default auto)
   NEO4J_URI=bolt://localhost:7687
   NEO4J_USER=neo4j
-  NEO4J_PASSWORD=agriai2026
+  NEO4J_PASSWORD (required for Neo4j; unset uses the memory backend)
 """
 
 from __future__ import annotations
@@ -195,7 +195,7 @@ def _memory_kg(crop: str, query: str, top_k: int = 3) -> dict[str, Any]:
 
 NEO4J_URI = os.environ.get("NEO4J_URI", "bolt://localhost:7687")
 NEO4J_USER = os.environ.get("NEO4J_USER", "neo4j")
-NEO4J_PASSWORD = os.environ.get("NEO4J_PASSWORD", "agriai2026")
+NEO4J_PASSWORD = os.environ.get("NEO4J_PASSWORD", "").strip()
 
 _driver = None
 
@@ -225,10 +225,13 @@ def _get_driver():
     global _driver
     if _driver is not None:
         return _driver
+    password = os.environ.get("NEO4J_PASSWORD", NEO4J_PASSWORD).strip()
+    if not password:
+        return None
     try:
         from neo4j import GraphDatabase
 
-        _driver = GraphDatabase.driver(NEO4J_URI, auth=(NEO4J_USER, NEO4J_PASSWORD))
+        _driver = GraphDatabase.driver(NEO4J_URI, auth=(NEO4J_USER, password))
         return _driver
     except Exception:
         return None
