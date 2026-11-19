@@ -1,7 +1,8 @@
 """Tests for ADR-005 decision confidence, abstention policy and memory gate."""
 from __future__ import annotations
 
-import math
+import builtins
+import json
 
 import pytest
 
@@ -9,6 +10,7 @@ from agents.judge_agent import JudgeAgent
 from agents.types import AgentOutput
 from decision_semantics import is_abstention
 from utils.confidence_calibration import (
+    Calibrator,
     DecisionCalibrator,
     combine_decision_score,
     compute_decision_signals,
@@ -74,6 +76,27 @@ def test_calibrator_identity_without_data():
     calibrator = DecisionCalibrator(data_path="/nonexistent/path.json")
     assert calibrator.status()["model"] == "identity"
     assert calibrator.calibrate(0.42) == pytest.approx(0.42)
+
+
+def test_agent_calibrator_uses_platt_when_sklearn_is_unavailable(
+    monkeypatch, tmp_path
+):
+    data_path = tmp_path / "calibration.json"
+    data_path.write_text(
+        json.dumps({"pathology": [[0.1, 0], [0.9, 1]]}), encoding="utf-8"
+    )
+    original_import = builtins.__import__
+
+    def import_without_sklearn(name, *args, **kwargs):
+        if name.startswith("sklearn"):
+            raise ImportError("sklearn intentionally unavailable")
+        return original_import(name, *args, **kwargs)
+
+    monkeypatch.setattr(builtins, "__import__", import_without_sklearn)
+    calibrator = Calibrator(data_path=data_path, enabled=True)
+
+    assert calibrator.status()["agents"]["pathology"]["kind"] == "platt"
+    assert 0.1 <= calibrator.calibrate("pathology", 0.5) <= 0.95
 
 
 def test_memory_gate_drops_low_confidence_and_no_match(monkeypatch):

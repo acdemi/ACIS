@@ -12,17 +12,30 @@ class OutcomeAgent:
     name = "经验回放Agent"
 
     def run(self, context: RequestContext) -> AgentOutput:
+        error = None
         try:
             cases = search_outcome_cases(context.crop, context.query, limit=3)
-        except Exception:
+        except Exception as exc:
             cases = []
+            error = exc
         if not cases:
             return AgentOutput(
                 layer="记忆层", agent=self.name,
-                claim="无历史有效结果案例可回放",
-                confidence=0.3,
-                evidence={"cases": [], "backend": "sqlite"},
-                warnings=[], recommendations=[],
+                claim="经验回放查询失败" if error else "无历史有效结果案例可回放",
+                confidence=0.0 if error else 0.3,
+                evidence={
+                    "cases": [],
+                    "backend": "sqlite",
+                    "retrieval_status": "failed" if error else "no_results",
+                    "error_type": type(error).__name__ if error else None,
+                },
+                warnings=[f"SQLite 经验回放不可用：{type(error).__name__}"] if error else [],
+                recommendations=[],
+                execution={
+                    "status": "degraded" if error else "no_results",
+                    "mode": "sqlite",
+                    "error_type": type(error).__name__ if error else None,
+                },
             )
         actions: list[str] = []
         decisions: list[str] = []
@@ -39,4 +52,5 @@ class OutcomeAgent:
             evidence={"cases": cases, "backend": "sqlite", "historical_decisions": decisions},
             warnings=[],
             recommendations=actions[:3],
+            execution={"status": "success", "mode": "sqlite", "case_count": len(cases)},
         )

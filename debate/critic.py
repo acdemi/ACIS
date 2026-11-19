@@ -73,16 +73,44 @@ class CriticEngine:
         debate: Any,
     ) -> tuple[list[Any], Any]:
         if not debate.conflicts:
-            return outputs, debate  # 无冲突：空操作，行为不变
+            if self.use_llm:
+                return outputs, replace(
+                    debate,
+                    critic={"triggered": False, "mode": "skipped", "outcome": "skipped", "reason": "no_conflicts"},
+                )
+            return outputs, debate
 
         if self.use_llm:
             try:
                 result = self._llm_multi_round(context, outputs, debate)
                 if result is not None:
                     return result
-            except Exception as exc:  # LLM 失败 → 回退规则，并记录原因
                 refined, debate2 = self._rules_resolve(context, outputs, debate)
-                return refined, replace(debate2, critic={**debate2.critic, "llm_error": str(exc)})
+                return refined, replace(
+                    debate2,
+                    critic={
+                        **debate2.critic,
+                        "requested_mode": "llm",
+                        "outcome": "fallback",
+                        "fallback_reason_code": "missing_credentials",
+                    },
+                )
+            except Exception as exc:  # LLM 失败 → 回退规则，并记录原因
+                from utils.judge_runtime import classify_failure, redact_error_detail
+
+                refined, debate2 = self._rules_resolve(context, outputs, debate)
+                detail = redact_error_detail(exc, api_key=os.environ.get("DEEPSEEK_API_KEY", ""))
+                return refined, replace(
+                    debate2,
+                    critic={
+                        **debate2.critic,
+                        "requested_mode": "llm",
+                        "outcome": "fallback",
+                        "fallback_reason_code": classify_failure(exc),
+                        "error_type": type(exc).__name__,
+                        "llm_error": detail,
+                    },
+                )
 
         return self._rules_resolve(context, outputs, debate)
 
@@ -266,6 +294,7 @@ class CriticEngine:
             "triggered": True,
             "rounds": round_num,
             "mode": "llm",
+            "outcome": "success",
             "model": model,
             "conflict_type": "llm_rebuttal",
             "rounds_log": rounds_log,

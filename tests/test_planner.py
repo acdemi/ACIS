@@ -7,8 +7,6 @@ falls back to rules on failure.
 """
 from __future__ import annotations
 
-import os
-
 from agents.types import AgentOutput, DebateResult, DecisionOutput  # noqa: E402
 from planner import ExecutionPlan, Planner, build_planner  # noqa: E402
 
@@ -124,29 +122,20 @@ def test_no_tools_when_clean_low_risk_decision():
     assert plan.required_tools == []
 
 
-def test_planner_disabled_by_default():
-    os.environ.pop("ACIS_ENABLE_PLANNER", None)
+def test_planner_disabled_by_default(monkeypatch):
+    monkeypatch.delenv("ACIS_ENABLE_PLANNER", raising=False)
     assert build_planner() is None
 
 
-def test_planner_enabled_when_env_true():
-    os.environ["ACIS_ENABLE_PLANNER"] = "true"
-    try:
-        assert isinstance(build_planner(), Planner)
-    finally:
-        os.environ.pop("ACIS_ENABLE_PLANNER", None)
+def test_planner_enabled_when_env_true(monkeypatch):
+    monkeypatch.setenv("ACIS_ENABLE_PLANNER", "true")
+    assert isinstance(build_planner(), Planner)
 
 
-def test_planner_enable_env_variants():
+def test_planner_enable_env_variants(monkeypatch):
     for value in ("1", "TRUE", "yes"):
-        os.environ["ACIS_ENABLE_PLANNER"] = value
-        try:
-            assert build_planner() is not None, value
-        finally:
-            os.environ.pop("ACIS_ENABLE_PLANNER", None)
+        monkeypatch.setenv("ACIS_ENABLE_PLANNER", value)
+        assert build_planner() is not None, value
     for value in ("", "false", "0", "no"):
-        os.environ["ACIS_ENABLE_PLANNER"] = value
-        try:
-            assert build_planner() is None, value
-        finally:
-            os.environ.pop("ACIS_ENABLE_PLANNER", None)
+        monkeypatch.setenv("ACIS_ENABLE_PLANNER", value)
+        assert build_planner() is None, value

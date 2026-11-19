@@ -72,9 +72,9 @@ class AgricultureWorkflow:
         context = state["context"]
         orchestrator = self.orchestrator
         perception_outputs = [
-            orchestrator.vision_agent.run(context),
-            orchestrator.sensor_agent.run(context),
-            orchestrator.weather_agent.run(context),
+            orchestrator._run_agent(orchestrator.vision_agent, context, layer="感知层"),
+            orchestrator._run_agent(orchestrator.sensor_agent, context, layer="感知层"),
+            orchestrator._run_agent(orchestrator.weather_agent, context, layer="感知层"),
         ]
         return {**state, "perception_outputs": perception_outputs}
 
@@ -82,10 +82,10 @@ class AgricultureWorkflow:
         context = state["context"]
         orchestrator = self.orchestrator
         memory_outputs = [
-            orchestrator.rag_agent.run(context),
-            orchestrator.knowledge_graph_agent.run(context),
-            orchestrator.case_memory_agent.run(context),
-            orchestrator.outcome_agent.run(context),
+            orchestrator._run_agent(orchestrator.rag_agent, context, layer="记忆层"),
+            orchestrator._run_agent(orchestrator.knowledge_graph_agent, context, layer="记忆层"),
+            orchestrator._run_agent(orchestrator.case_memory_agent, context, layer="记忆层"),
+            orchestrator._run_agent(orchestrator.outcome_agent, context, layer="记忆层"),
         ]
         return {**state, "memory_outputs": memory_outputs}
 
@@ -96,14 +96,14 @@ class AgricultureWorkflow:
             output for output in state["perception_outputs"] if output.agent == "传感器Agent"
         )
         expert_outputs = [
-            orchestrator.pathology_agent.run(context, sensor_output),
-            orchestrator.meteorology_agent.run(context),
-            orchestrator.cultivation_agent.run(context, sensor_output),
+            orchestrator._run_agent(orchestrator.pathology_agent, context, sensor_output, layer="专家层"),
+            orchestrator._run_agent(orchestrator.meteorology_agent, context, layer="专家层"),
+            orchestrator._run_agent(orchestrator.cultivation_agent, context, sensor_output, layer="专家层"),
         ]
         # ACIS 2.0: 经济 & 生态 Agent 依据技术专家意见做成本/生态评估（可降级）
         if os.environ.get("AGRI_AI_EXTRA_EXPERTS", "1") not in {"0", "false", "False"}:
-            expert_outputs.append(orchestrator.economic_agent.run(context, expert_outputs[0], expert_outputs[2]))
-            expert_outputs.append(orchestrator.ecology_agent.run(context, expert_outputs))
+            expert_outputs.append(orchestrator._run_agent(orchestrator.economic_agent, context, expert_outputs[0], expert_outputs[2], layer="专家层"))
+            expert_outputs.append(orchestrator._run_agent(orchestrator.ecology_agent, context, expert_outputs, layer="专家层"))
         return {**state, "expert_outputs": expert_outputs}
 
     def debate_node(self, state: WorkflowState) -> WorkflowState:
@@ -140,9 +140,9 @@ class AgricultureWorkflow:
         )
         round2 = []
         for out in [
-            orchestrator.pathology_agent.run(context, sensor_output),
-            orchestrator.meteorology_agent.run(context),
-            orchestrator.cultivation_agent.run(context, sensor_output),
+            orchestrator._run_agent(orchestrator.pathology_agent, context, sensor_output, layer="专家层"),
+            orchestrator._run_agent(orchestrator.meteorology_agent, context, layer="专家层"),
+            orchestrator._run_agent(orchestrator.cultivation_agent, context, sensor_output, layer="专家层"),
         ]:
             tagged = replace(
                 out,

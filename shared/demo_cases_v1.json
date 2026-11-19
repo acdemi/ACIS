@@ -1,0 +1,29 @@
+[
+  {
+    "id": "maize-northern-leaf-blight",
+    "title": "玉米大斑病",
+    "crop_code": "maize",
+    "crop_name": "玉米",
+    "focus": "明确症状 · 正常诊断",
+    "query": "玉米下部叶片出现长梭形灰绿色至灰褐色病斑，湿度高时病斑快速扩大，请诊断。",
+    "expected_behavior": "呈现首选诊断、证据来源与完整执行 Trace。"
+  },
+  {
+    "id": "wheat-stripe-rust-differential",
+    "title": "小麦锈病鉴别",
+    "crop_code": "wheat",
+    "crop_name": "小麦",
+    "focus": "相似症状 · 鉴别分析",
+    "query": "小麦叶片出现黄色粉状小疱，沿叶脉排列成条带；请与叶锈病鉴别。",
+    "expected_behavior": "展示条锈病候选与叶锈病的鉴别依据。"
+  },
+  {
+    "id": "maize-insufficient-evidence",
+    "title": "玉米信息不足",
+    "crop_code": "maize",
+    "crop_name": "玉米",
+    "focus": "证据不足 · 风险控制",
+    "query": "玉米长势不好，叶片有点发黄，具体原因不清楚。",
+    "expected_behavior": "合理弃权并提出补充信息，不给出过度确定的处置。"
+  }
+]

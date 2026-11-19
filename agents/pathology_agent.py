@@ -26,10 +26,22 @@ class PathologyAgent:
             claim = f"病理判断首选：{top_name}"
             confidence = min(0.9, 0.45 + top.get("match_score", 0) * 0.08)
         else:
-            claim = "病理证据不足，不能确认具体病害"
-            confidence = 0.3
+            claim = "病理证据不足，暂不进行病害定性"
+            confidence = 0.2
         counterfactual = self._build_counterfactual(diseases)
-        return AgentOutput(layer="专家层", agent=self.name, claim=claim, confidence=confidence, evidence=diagnosis, warnings=diagnosis.get("environment_issues", []), recommendations=diagnosis.get("recommended_actions", []), counterfactual=counterfactual)
+        warnings = list(diagnosis.get("environment_issues", []))
+        if not diseases:
+            warnings.append("症状信息不足，当前结论为弃权")
+        return AgentOutput(
+            layer="专家层",
+            agent=self.name,
+            claim=claim,
+            confidence=confidence,
+            evidence=diagnosis,
+            warnings=warnings,
+            recommendations=diagnosis.get("recommended_actions", []),
+            counterfactual=counterfactual,
+        )
 
     @staticmethod
     def _build_counterfactual(diseases: list[dict]) -> dict[str, str]:

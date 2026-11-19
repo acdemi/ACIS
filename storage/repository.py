@@ -8,7 +8,7 @@ from datetime import datetime
 from agents.types import DecisionOutput, RequestContext
 from storage.db import get_connection
 
-_JSON_FIELDS = ("action_plan", "traces", "debate", "judge_analysis")
+_JSON_FIELDS = ("action_plan", "traces", "debate", "judge_analysis", "trace_json", "report_json")
 
 
 def save_decision(decision: DecisionOutput, context: RequestContext, query: str) -> int:
@@ -17,18 +17,20 @@ def save_decision(decision: DecisionOutput, context: RequestContext, query: str)
     debate_json = json.dumps(asdict(decision.debate), ensure_ascii=False, default=str)
     analysis_json = json.dumps(decision.judge_analysis, ensure_ascii=False, default=str)
     actions_json = json.dumps(decision.action_plan, ensure_ascii=False)
+    report_json = json.dumps(getattr(decision, "report", {}), ensure_ascii=False, default=str)
     conn = get_connection()
     cur = conn.execute(
         """INSERT INTO decisions
            (created_at, greenhouse_id, crop, intent, query, decision, confidence,
-            risk_level, judge_mode, need_human_review, action_plan, traces, debate, judge_analysis)
-           VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)""",
+             risk_level, judge_mode, need_human_review, action_plan, traces, debate,
+             judge_analysis, report_json)
+           VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)""",
         (
             datetime.now().isoformat(timespec="seconds"),
             context.greenhouse_id, context.crop, context.intent, query,
             decision.decision, decision.confidence, decision.risk_level,
             decision.judge_mode, int(decision.need_human_review),
-            actions_json, traces_json, debate_json, analysis_json,
+            actions_json, traces_json, debate_json, analysis_json, report_json,
         ),
     )
     conn.commit()
@@ -36,6 +38,23 @@ def save_decision(decision: DecisionOutput, context: RequestContext, query: str)
     conn.close()
     decision.decision_id = did
     return did
+
+
+def save_trace(decision_id: int, trace) -> None:
+    """Persist the complete unified Trace against its decision row."""
+    from trace.exporter import trace_to_dict
+
+    conn = get_connection()
+    conn.execute(
+        "UPDATE decisions SET trace_id=?, trace_json=? WHERE id=?",
+        (
+            trace.trace_id,
+            json.dumps(trace_to_dict(trace), ensure_ascii=False, default=str),
+            decision_id,
+        ),
+    )
+    conn.commit()
+    conn.close()
 
 
 def list_decisions(limit: int = 50) -> list[dict]:

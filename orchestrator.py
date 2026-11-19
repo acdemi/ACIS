@@ -21,6 +21,8 @@ import logging
 import os
 import random
 import sys
+from time import perf_counter
+from uuid import uuid4
 from pathlib import Path
 
 from _env import load_env
@@ -76,6 +78,10 @@ def _extract_greenhouse_id(query: str) -> str:
 
 
 def _extract_crop(query: str) -> str:
+    if "玉米" in query or "maize" in query.lower() or "corn" in query.lower():
+        return "maize"
+    if "小麦" in query or "wheat" in query.lower():
+        return "wheat"
     if "甜菜" in query:
         return "sugar_beet"
     if "棉花" in query:
@@ -84,7 +90,7 @@ def _extract_crop(query: str) -> str:
         return "cucumber"
     if "番茄" in query:
         return "tomato"
-    return "tomato"
+    return "unknown"
 
 
 def _extract_intent(query: str) -> str:
@@ -94,12 +100,19 @@ def _extract_intent(query: str) -> str:
         return "alert"
     if any(keyword in query for keyword in ["状态", "监测", "数据", "当前"]):
         return "monitor"
-    if any(keyword in query for keyword in ["病", "斑", "霉", "虫", "枯", "异常", "诊断"]):
+    if any(keyword in query for keyword in [
+        "病", "斑", "霉", "虫", "枯", "异常", "诊断", "发黄", "症状",
+        "长势不好", "怎么回事", "植株不适",
+    ]):
         return "diagnose"
     return "consult"
 
 
 def build_context(query: str, image_path: str | None = None) -> RequestContext:
+    if not isinstance(query, str) or not query.strip():
+        raise ValueError("query must contain non-whitespace text")
+    if len(query) > 4000:
+        raise ValueError("query must be at most 4000 characters")
     return RequestContext(
         query=query,
         greenhouse_id=_extract_greenhouse_id(query),
@@ -107,6 +120,102 @@ def build_context(query: str, image_path: str | None = None) -> RequestContext:
         image_path=image_path,
         intent=_extract_intent(query),
     )
+
+
+def build_diagnosis_report(
+    decision: DecisionOutput,
+    context: RequestContext,
+    *,
+    request_id: str,
+    duration_ms: float,
+) -> dict:
+    pathology = next((output for output in decision.traces if output.agent == "病理Agent"), None)
+    rag = next((output for output in decision.traces if output.agent == "RAG"), None)
+    sensor = next((output for output in decision.traces if output.agent == "传感器Agent"), None)
+    pathology_evidence = (pathology.evidence or {}) if pathology else {}
+    candidates = [
+        {
+            "name": candidate.get("name", ""),
+            "crop": candidate.get("crop", ""),
+            "match_score": candidate.get("match_score"),
+            "matched_symptoms": candidate.get("matched_symptoms", []),
+        }
+        for candidate in pathology_evidence.get("possible_diseases", [])
+    ]
+    rag_evidence = (rag.evidence or {}) if rag else {}
+    rag_sources = [
+        {
+            "id": match.get("id"),
+            "title": match.get("title"),
+            "source": match.get("source"),
+            "backend": rag_evidence.get("backend"),
+            "score": match.get("score"),
+            "text": match.get("text", ""),
+        }
+        for match in rag_evidence.get("matches", [])
+    ]
+    kg = decision.judge_analysis.get("kg", {})
+    follow_up = list(pathology_evidence.get("missing_information", []))
+    abstention = decision.judge_analysis.get("abstention", {})
+    if abstention:
+        follow_up = list(abstention.get("follow_up_questions", follow_up))
+    if not candidates and not follow_up:
+        follow_up = [
+            "请说明作物品种、生育期、症状开始时间及扩展速度",
+            "提供症状部位正反面照片和田间分布",
+            "补充近期温湿度、灌溉及施药记录",
+        ]
+    crop_labels = {
+        "tomato": "番茄", "cucumber": "黄瓜", "sugar_beet": "甜菜",
+        "cotton": "棉花", "maize": "玉米", "wheat": "小麦", "unknown": "未识别",
+    }
+    confidence_band = "较高" if decision.confidence >= 0.7 else "中等" if decision.confidence >= 0.5 else "偏低"
+    return {
+        "request_id": request_id,
+        "status": getattr(decision, "status", "success"),
+        "query": context.query,
+        "crop": {"code": context.crop, "label": crop_labels.get(context.crop, context.crop)},
+        "growth_stage": None,
+        "environment": (sensor.evidence or {}).get("reading", {}) if sensor else {},
+        "diagnosis": decision.decision,
+        "candidates": candidates,
+        "diagnostic_basis": [
+            {
+                "agent": output.agent,
+                "claim": output.claim,
+                "confidence": output.confidence,
+                "evidence": output.evidence,
+                "execution": output.execution,
+            }
+            for output in decision.traces
+        ],
+        "knowledge_sources": {
+            "rag": rag_sources,
+            "rag_status": rag_evidence.get("retrieval_status", "unavailable"),
+            "rag_match_status": rag_evidence.get("match_status", "unavailable"),
+            "kg": {
+                "backend": kg.get("backend", "unknown"),
+                "diseases": kg.get("diseases", []),
+                "triples": kg.get("triples", []),
+                "error": kg.get("error"),
+            },
+        },
+        "differential_analysis": pathology.counterfactual if pathology else {},
+        "confidence": {
+            "score": decision.confidence,
+            "band": confidence_band,
+            "meaning": "基于当前规则/模型证据融合的分数，不等同于经真实田间数据校准的发病概率。",
+        },
+        "recommendations": list(decision.action_plan),
+        "risk": decision.risk_level,
+        "need_human_review": decision.need_human_review,
+        "follow_up_questions": follow_up,
+        "judge_mode": decision.judge_mode,
+        "judge_runtime": decision.judge_analysis.get("judge_runtime", {}),
+        "orchestration_runtime": decision.judge_analysis.get("orchestration_runtime", {}),
+        "critic_runtime": dict(decision.debate.critic),
+        "duration_ms": round(duration_ms, 3),
+    }
 
 
 class AgentOrchestrator:
@@ -136,16 +245,95 @@ class AgentOrchestrator:
         self._compiled_graph = self._build_langgraph() if use_langgraph else None
 
     def run(self, query: str, image_path: str | None = None) -> DecisionOutput:
+        context = build_context(query, image_path)
+        started = perf_counter()
+        self.last_trace = None
+        self.last_execution_plan = None
+        self.last_tool_requests = None
         decision = self._run_core(query, image_path)
-        self._persist(decision, query, image_path)
+        if not hasattr(decision, "status"):
+            decision.status = "success"
         if self.planner is not None:
             self.last_execution_plan = self.planner.plan(decision)
             if self.tool_router is not None:
                 self.last_tool_requests = self.tool_router.route(self.last_execution_plan)
-        self.last_trace = self._build_trace(decision, query, image_path)
+        if any(
+            (output.execution or {}).get("status") in {"failed", "degraded"}
+            for output in decision.traces
+        ) or decision.judge_analysis.get("judge_runtime", {}).get("outcome") == "fallback" or decision.judge_analysis.get("orchestration_runtime", {}).get("status") == "degraded" or decision.debate.critic.get("outcome") == "fallback":
+            decision.status = "degraded"
+        duration_ms = (perf_counter() - started) * 1000
+        trace_id = uuid4().hex
+        decision.report = build_diagnosis_report(
+            decision, context, request_id=trace_id, duration_ms=duration_ms
+        )
+        self.last_trace = self._build_trace(
+            decision, query, image_path, trace_id=trace_id, duration_ms=duration_ms
+        )
+        self._persist(decision, query, image_path, self.last_trace)
         return decision
 
-    def _build_trace(self, decision: DecisionOutput, query: str, image_path: str | None) -> Trace:
+    def _run_agent(self, agent, *args, layer: str) -> AgentOutput:
+        started = perf_counter()
+        name = getattr(agent, "name", type(agent).__name__)
+        try:
+            output = agent.run(*args)
+            if not isinstance(output, AgentOutput):
+                raise TypeError(f"{name} returned {type(output).__name__}, expected AgentOutput")
+        except Exception as exc:
+            logger.error("Agent execution failed: agent=%s type=%s", name, type(exc).__name__)
+            from utils.judge_runtime import redact_error_detail
+
+            secret = os.environ.get("AGRI_AI_JUDGE_API_KEY", "") or os.environ.get("DEEPSEEK_API_KEY", "")
+            detail = redact_error_detail(exc, api_key=secret, limit=240)
+            return AgentOutput(
+                layer=layer,
+                agent=name,
+                claim=f"{name}诊断执行失败，未生成有效结果",
+                confidence=0.0,
+                evidence={"error_type": type(exc).__name__, "error": detail[:240]},
+                warnings=["该 Agent 执行失败；其输出不应视为诊断证据"],
+                execution={
+                    "status": "failed",
+                    "mode": "unknown",
+                    "duration_ms": round((perf_counter() - started) * 1000, 3),
+                    "error_type": type(exc).__name__,
+                },
+            )
+
+        execution = dict(output.execution or {})
+        mode = execution.get("mode")
+        if not mode:
+            if name in {"传感器Agent", "天气Agent"}:
+                mode = "simulated"
+            elif name == "视觉Agent":
+                note = str((output.evidence or {}).get("note", ""))
+                mode = "mock" if "模拟" in note or (output.evidence or {}).get("fallback") else "transformers"
+            elif name == "RAG":
+                mode = f"rag:{(output.evidence or {}).get('backend', 'unknown')}"
+            elif name == "知识图谱":
+                mode = f"kg:{(output.evidence or {}).get('backend', 'unknown')}"
+            elif name == "历史案例库":
+                mode = (output.evidence or {}).get("source", "heuristic")
+            elif name == "经验回放Agent":
+                mode = "sqlite"
+            else:
+                mode = "rules"
+        execution.setdefault("status", "success")
+        execution["mode"] = mode
+        execution["duration_ms"] = round((perf_counter() - started) * 1000, 3)
+        output.execution = execution
+        return output
+
+    def _build_trace(
+        self,
+        decision: DecisionOutput,
+        query: str,
+        image_path: str | None,
+        *,
+        trace_id: str,
+        duration_ms: float,
+    ) -> Trace:
         """Build the unified Trace for this run (single source of truth).
 
         Snapshots every pipeline stage from the run artifacts. Planner /
@@ -160,6 +348,8 @@ class AgentOrchestrator:
             decision=decision,
             plan=self.last_execution_plan,
             tool_result=self.last_tool_requests,
+            trace_id=trace_id,
+            duration_ms=duration_ms,
         )
 
     def _run_core(self, query: str, image_path: str | None = None) -> DecisionOutput:
@@ -168,20 +358,37 @@ class AgentOrchestrator:
                 final_state = self._compiled_graph.invoke({"query": query, "image_path": image_path})
                 return final_state["decision"]
             except Exception as exc:
+                from utils.judge_runtime import redact_error_detail
+
+                fallback_detail = redact_error_detail(exc)
                 logger.warning(
                     "LangGraph execution failed; falling back to rules: %s: %s",
                     type(exc).__name__,
-                    exc,
+                    fallback_detail,
                 )
                 fallback_decision = self.run_rules(query, image_path)
+                fallback_decision.status = "degraded"
+                fallback_decision.judge_analysis["orchestration_runtime"] = {
+                    "status": "degraded",
+                    "mode": "rules_fallback",
+                    "fallback_reason_code": "langgraph_execution_failed",
+                    "error_type": type(exc).__name__,
+                    "fallback_detail": fallback_detail,
+                }
                 fallback_decision.debate.missing_evidence.append(
-                    f"LangGraph 主图执行失败，已回退规则编排：{type(exc).__name__}: {exc}"
+                    f"LangGraph 主图执行失败，已回退规则编排：{type(exc).__name__}: {fallback_detail}"
                 )
                 return fallback_decision
 
         return self.run_rules(query, image_path)
 
-    def _persist(self, decision: DecisionOutput, query: str, image_path: str | None) -> None:
+    def _persist(
+        self,
+        decision: DecisionOutput,
+        query: str,
+        image_path: str | None,
+        trace: Trace,
+    ) -> None:
         """SQLite 持久化；失败不影响核心流程（AGRI_AI_PERSIST=0 可关闭）。"""
         if os.environ.get("AGRI_AI_PERSIST", "1") != "1":
             return
@@ -189,6 +396,10 @@ class AgentOrchestrator:
             from storage.repository import save_decision
             ctx = build_context(query, image_path)
             save_decision(decision, ctx, query)
+            if decision.decision_id is not None:
+                from storage.repository import save_trace
+
+                save_trace(decision.decision_id, trace)
         except Exception as exc:
             # Persistence is an audit-trail side effect: a failure must not
             # break the decision itself, but it must not be silent either.
@@ -202,28 +413,28 @@ class AgentOrchestrator:
         context = build_context(query, image_path)
 
         perception_outputs = [
-            self.vision_agent.run(context),
-            self.sensor_agent.run(context),
-            self.weather_agent.run(context),
+            self._run_agent(self.vision_agent, context, layer="感知层"),
+            self._run_agent(self.sensor_agent, context, layer="感知层"),
+            self._run_agent(self.weather_agent, context, layer="感知层"),
         ]
         sensor_output = next(output for output in perception_outputs if output.agent == "传感器Agent")
 
         memory_outputs = [
-            self.rag_agent.run(context),
-            self.knowledge_graph_agent.run(context),
-            self.case_memory_agent.run(context),
-            self.outcome_agent.run(context),
+            self._run_agent(self.rag_agent, context, layer="记忆层"),
+            self._run_agent(self.knowledge_graph_agent, context, layer="记忆层"),
+            self._run_agent(self.case_memory_agent, context, layer="记忆层"),
+            self._run_agent(self.outcome_agent, context, layer="记忆层"),
         ]
 
         expert_outputs = [
-            self.pathology_agent.run(context, sensor_output),
-            self.meteorology_agent.run(context),
-            self.cultivation_agent.run(context, sensor_output),
+            self._run_agent(self.pathology_agent, context, sensor_output, layer="专家层"),
+            self._run_agent(self.meteorology_agent, context, layer="专家层"),
+            self._run_agent(self.cultivation_agent, context, sensor_output, layer="专家层"),
         ]
         # ACIS 2.0: 经济 & 生态 Agent 依据技术专家意见做成本/生态评估（可降级）
         if os.environ.get("AGRI_AI_EXTRA_EXPERTS", "1") not in {"0", "false", "False"}:
-            expert_outputs.append(self.economic_agent.run(context, expert_outputs[0], expert_outputs[2]))
-            expert_outputs.append(self.ecology_agent.run(context, expert_outputs))
+            expert_outputs.append(self._run_agent(self.economic_agent, context, expert_outputs[0], expert_outputs[2], layer="专家层"))
+            expert_outputs.append(self._run_agent(self.ecology_agent, context, expert_outputs, layer="专家层"))
 
         outputs = perception_outputs + memory_outputs + expert_outputs
         debate = self.debate_engine.run(outputs, context)
@@ -299,9 +510,12 @@ def _decision_payload(decision: DecisionOutput, trace: Trace | None) -> dict:
     payload = json.loads(
         json.dumps(decision, ensure_ascii=False, default=lambda value: value.__dict__)
     )
+    payload.setdefault("status", getattr(decision, "status", "success"))
+    payload.setdefault("report", getattr(decision, "report", {}))
     if trace is not None:
         payload["trace_id"] = trace.trace_id
         payload["trace_stages"] = trace.stages_present
+        payload["trace"] = json.loads(export_trace_json(trace))
     return payload
 
 
